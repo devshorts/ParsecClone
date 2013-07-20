@@ -22,3 +22,4 @@ module FooSample =
 
     let manyFoo = many foo
     
+    let opts = fighter <|> foo

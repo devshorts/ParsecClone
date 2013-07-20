@@ -15,14 +15,23 @@ module Combinator =
         let p : Parser<'T> = fun stream -> (Some(value), stream)
         p
 
+    let getOptionReply (current:Parser<'B>) (parser:Parser<'A>) (input : State): Reply<'A> =
+        let match1 = current input
+        match match1 with 
+            | (None, state) when state = input -> parser input
+            | (Some(_), _) -> match1
+            | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
+
     let getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> =
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> 
                 let parser2 = next result
                 parser2 state                    
-            | (None, state) -> 
-                raise (Error("Error combining parser and underlying state was modified")) 
+            | (None, state) when state <> input -> 
+                raise (Error("No match found and underlying state was modified")) 
+
+            | (None, state) -> (None, state)
 
     let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
 
@@ -46,6 +55,8 @@ module Combinator =
     let (.>>.) parser1 parser2 : Parser<'a * 'b> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn (first, second)
 
+    let (<|>) parser1 parser2 : Parser<'T> = getOptionReply parser1 parser2        
+
     let matcher eval consumer target: Parser<'T> = 
         let p : Parser<'T> = 
             fun currentState -> 
@@ -64,7 +75,7 @@ module Combinator =
                             many' parser (m::found, nextState)
                         | _ -> 
                             if List.length found > 0 then
-                                (Some(found), currentState)          
+                                (Some(List.rev found), currentState)          
                             else
                                 (None, currentState)
                                   

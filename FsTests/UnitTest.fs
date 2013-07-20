@@ -9,7 +9,7 @@ open FooFighterMatcher.FooSample
 [<TestClass>]
 type UnitTest() = 
     [<TestMethod>]
-    member this.testCombinator () = 
+    member this.preturn () = 
         let target = "foofighters"
 
         let band = test target band
@@ -49,3 +49,16 @@ type UnitTest() =
 
         foo = "foo" |> Assert.IsTrue
         fighters = "fighter" |> Assert.IsTrue
+
+        
+    [<TestMethod>]
+    member this.options () = 
+        let target = "foofighters"
+        
+        test target opts = "foo" |> Assert.IsTrue
+
+    [<TestMethod>]
+    member this.manyOptions () = 
+        let target = "foofighters"
+        
+        test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
