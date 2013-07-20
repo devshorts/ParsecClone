@@ -32,10 +32,8 @@ module StringP =
         stringMatcher startsWith target
 
     let regexStr pattern =
-        stringMatcher regexMatch pattern
+        stringMatcher regexMatch pattern            
         
-    let anyOf comb = List.fold (fun acc str -> acc <|> comb str) pzero
-    
     let char = regexStr "[a-z]"
 
     let chars = regexStr "[a-z]+"

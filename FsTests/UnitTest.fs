@@ -58,11 +58,14 @@ type UnitTest() =
         
         test target opts = "foo" |> Assert.IsTrue
 
+        test target optsC = "foo" |> Assert.IsTrue
+
     [<TestMethod>]
     member this.manyOptions () = 
         let target = "foofighters"
         
         test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
+        test target (many optsC) = ["foo";"fighter"] |> Assert.IsTrue
 
     [<TestMethod>]
     member this.regex () = 

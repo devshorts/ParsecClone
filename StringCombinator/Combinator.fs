@@ -89,6 +89,11 @@ module Combinator =
 
         p
 
+    let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
+
+    let choice (parsers : Parser<'T> list) = 
+        parsers |> List.fold (fun acc value -> acc <|> value) pzero
+
     let test input (parser:Parser<'T>) = 
         match parser input with
             | (Some(m), _) -> m

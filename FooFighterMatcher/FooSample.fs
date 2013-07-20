@@ -32,3 +32,5 @@ module FooSample =
     let manyFoo = many foo
     
     let opts = fighter <|> foo
+
+    let optsC = choice[fighter;foo]
