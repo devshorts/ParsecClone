@@ -4,6 +4,7 @@ open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 open StringCombinator.Combinator
+open StringCombinator.StringP
 open FooFighterMatcher.FooSample
 
 [<TestClass>]
@@ -62,3 +63,40 @@ type UnitTest() =
         let target = "foofighters"
         
         test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
+
+    [<TestMethod>]
+    member this.regex () = 
+        let target = "foofighters"
+        
+        test target fRegex = "foof" |> Assert.IsTrue
+
+    [<TestMethod>]
+    member this.regexes () = 
+        let target = "      foofighters           foofighters"
+        
+        let result = test target fooFightersWithSpaces
+        
+        result |> List.length = 4 |> Assert.IsTrue
+
+    [<TestMethod>]
+    member this.anyOfChars () = 
+        let target = "      foofighters           foofighters"
+        
+        let result = test target allFooCharacters |> List.fold (+) ""
+        
+        result = target |> Assert.IsTrue
+
+    [<TestMethod>]
+    member this.newLine () = 
+        let fullNewline = "\r\n"        
+        let carriageReturn = "\r"        
+        let newLine = "\n"     
+        let newLine2 = @"
+"
+
+        test fullNewline newline = fullNewline |> Assert.IsTrue
+        test carriageReturn newline = carriageReturn |> Assert.IsTrue
+        test newLine newline = newLine |> Assert.IsTrue
+        test newLine2 newline = newLine2 |> Assert.IsTrue
+
+    

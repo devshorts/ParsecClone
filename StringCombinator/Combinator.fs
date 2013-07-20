@@ -15,11 +15,17 @@ module Combinator =
         let p : Parser<'T> = fun stream -> (Some(value), stream)
         p
 
+    let pzero : Parser<'T> = 
+        let p: Parser<'T> = fun stream -> (None, stream)
+        p
+
     let getOptionReply (current:Parser<'B>) (parser:Parser<'A>) (input : State): Reply<'A> =
         let match1 = current input
         match match1 with 
+            | (Some(m), _) -> 
+                System.Console.WriteLine("found1 {0}", m.ToString())
+                match1
             | (None, state) when state = input -> parser input
-            | (Some(_), _) -> match1
             | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
     let getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> =
@@ -57,13 +63,12 @@ module Combinator =
 
     let (<|>) parser1 parser2 : Parser<'T> = getOptionReply parser1 parser2        
 
-    let matcher eval consumer target: Parser<'T> = 
+    let matcher stateChange eval target: Parser<'T> = 
         let p : Parser<'T> = 
             fun currentState -> 
-                if eval target currentState then
-                    (Some(target), (consumer currentState target))
-                else 
-                    (None, currentState)
+                match eval target currentState with
+                    | Some(result) -> Some(result), (stateChange currentState result)
+                    | _ -> (None, currentState)
         p
 
     let many (parser : Parser<'T>) = 
@@ -71,7 +76,8 @@ module Combinator =
             fun state ->
                 let rec many' parser (found, currentState) =                    
                     match parser currentState with
-                        | (Some(m), nextState) -> 
+                        | (Some(m), nextState) ->        
+                            System.Console.WriteLine("found {0}", m.ToString())
                             many' parser (m::found, nextState)
                         | _ -> 
                             if List.length found > 0 then
@@ -83,8 +89,6 @@ module Combinator =
 
         p
 
-    let matchStr target = matcher (fun t i -> i.StartsWith t) (fun i t -> i.Remove(0, t.Length)) target
-    
     let test input (parser:Parser<'T>) = 
         match parser input with
             | (Some(m), _) -> m

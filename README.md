@@ -8,16 +8,20 @@ In general, Combinators are a way to express complex parsing and chained actions
 Included operators are
 
 - `>>=` - combiner with function callback
+
 - `>>=?` - combiner with function callback and backtracking
 - `>>.` - use result of second combinator
 - `.>>` - use result of first combinator
 - `preturn` - return a value as a combinator
+- `pzero` - defines a zero (for use with folds and other starting states)
 - `|>>` - pipe value into union or constructor
 - `|>>%` - pipe to zero argument discriminated union
 - `<|>` - first parser or second parser, as long as the or'd parsers don't modify the underlying state
 - `many` - repeats a parser
-- `matchStr` - matches a string if it starts with some text
 - `match` - generic match on predicate and executes state modifier to return result
+- `matchStr` - matches a string if it starts with some text (uses match)
+- `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
+- `anyOf` - takes a combinator and a list of strings and or's them all together with the `<|>` combinator
 
 As it stands, this is just a string parser combinator. You can see the types here
 
