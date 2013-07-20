@@ -40,11 +40,11 @@ Combinators, to be useful, need a way to be combined and chained. But before we 
 getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> 
 ```
 
-This function takes an initial parser, a function that accepts the result of the current parser and returns a new parser, and the current state.  The idea is that `getReply` will apply the current state to the current parser, to get a result from it. Then, if this result yields a match (so its a `Some('a)`), it executes the second parser with the new resulting state. This gives us the result of both parsers. 
+This function takes an initial parser, a function that accepts the result of the current parser and returns a new parser, as well as the current state.  The idea is that `getReply` will apply the current state to the current parser, to get a result from it. Then, if this result yields a match (so its a `Some('a)`), it executes the second parser with the new resulting state. This gives us the result from the combination of both parsers. 
 
-But, we need to be able to create new parsers.  Since a parser is a type of `State -> Reply<'T>` and we already have a function that can generate a `Reply<'T`> (above), then we need a way to create a function that takes a state and returns a `Reply<'T>`. However, we already happen to have that! If you curry the last argument off of `getReply` you now have a function that takes a `State` and returns a `Reply<'T>`.  Since its new signature is now `State -> Reply<'T>` that is equivalent to a combined parser!
+But, we need to be able to create new parsers.  Since a parser is a type of `State -> Reply<'T>` and we already have a function that can generate a `Reply<'T`> (above), then we need a way to create a function that takes a `State` and returns a `Reply<'T>`. Look closely though, we already happen to have that! If you curry the last argument off of `getReply` you now have a function that takes a `State` and returns a `Reply<'T>`.  Since its new signature is now `State -> Reply<'T>` that is equivalent to a combined parser!
  
-Now we can tie in shortcut  To chain a result you have to defer the call:
+Now we can tie in shortcut operators like FParsec has:
 
 ```fsharp
 let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
@@ -53,4 +53,4 @@ let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply
 The `>>=` function returns a function that wants a state.  Since its just a function that takes a state and returns a `Reply`, we've effectively chained the combinators together.   
   
 
-Once you can chain things, all the other functions are just wrappers and helpers leveraging the first combiner.
+Once you can chain things, all the other functions are just wrappers and helpers leveraging the first combiner. Neat!
