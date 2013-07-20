@@ -22,9 +22,7 @@ module Combinator =
     let getOptionReply (current:Parser<'B>) (parser:Parser<'A>) (input : State): Reply<'A> =
         let match1 = current input
         match match1 with 
-            | (Some(m), _) -> 
-                System.Console.WriteLine("found1 {0}", m.ToString())
-                match1
+            | (Some(m), _) -> match1
             | (None, state) when state = input -> parser input
             | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
@@ -36,7 +34,6 @@ module Combinator =
                 parser2 state                    
             | (None, state) when state <> input -> 
                 raise (Error("No match found and underlying state was modified")) 
-
             | (None, state) -> (None, state)
 
     let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
@@ -70,14 +67,13 @@ module Combinator =
                     | Some(result) -> Some(result), (stateChange currentState result)
                     | _ -> (None, currentState)
         p
-
+    
     let many (parser : Parser<'T>) = 
         let p : Parser<'T list> = 
             fun state ->
                 let rec many' parser (found, currentState) =                    
                     match parser currentState with
-                        | (Some(m), nextState) ->        
-                            System.Console.WriteLine("found {0}", m.ToString())
+                        | (Some(m), nextState) ->                                    
                             many' parser (m::found, nextState)
                         | _ -> 
                             if List.length found > 0 then
@@ -94,6 +90,17 @@ module Combinator =
     let choice (parsers : Parser<'T> list) = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
 
+    let attempt (parser : Parser<'T>) = 
+        let p : Parser<'T> = 
+            fun state ->
+                try
+                    let result = parser state 
+                    match result with
+                        | (Some(_), _) -> result
+                        | _ -> (None, state)
+                with
+                    | e -> (None, state)
+        p
     let test input (parser:Parser<'T>) = 
         match parser input with
             | (Some(m), _) -> m

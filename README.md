@@ -22,6 +22,8 @@ Included operators are
 - `matchStr` - matches a string if it starts with some text (uses match)
 - `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
 - `anyOf` - takes a combinator and a list of strings and or's them all together with the `<|>` combinator
+- `choice` - takes a list of parsers and or's them together with `<|>`
+- `attempt` - if no match occurs or an exception happens, backtracks to the beginning of the state of the parser
 
 As it stands, this is just a string parser combinator. You can see the types here
 

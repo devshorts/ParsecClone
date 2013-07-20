@@ -102,4 +102,10 @@ type UnitTest() =
         test newLine newline = newLine |> Assert.IsTrue
         test newLine2 newline = newLine2 |> Assert.IsTrue
 
-    
+    [<TestMethod>]
+    member this.attempt () = 
+        let target = "foofighters"
+        
+        match test target parseWithErrorAttempt with
+            | FooFighter -> Assert.IsTrue true
+        

@@ -29,6 +29,9 @@ module FooSample =
         fighter >>=? fun v -> 
                      foo
 
+    let errAttempt = matchStr "fo"
+
+    let parseWithErrorAttempt = choice[attempt (errAttempt >>. errAttempt) |>>% FooFighter;band]
     let manyFoo = many foo
     
     let opts = fighter <|> foo
