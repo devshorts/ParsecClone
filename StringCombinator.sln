@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StringCombinator", "StringCombinator\StringCombinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FooFighterMatcher", "FooFighterMatcher\FooFighterMatcher.fsproj", "{6C92BE9F-549A-4526-B52B-CDC70BB92501}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C92BE9F-549A-4526-B52B-CDC70BB92501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C92BE9F-549A-4526-B52B-CDC70BB92501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C92BE9F-549A-4526-B52B-CDC70BB92501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C92BE9F-549A-4526-B52B-CDC70BB92501}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

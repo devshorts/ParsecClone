@@ -1,0 +1,80 @@
+﻿namespace StringCombinator
+
+
+module Combinator =
+    
+    exception Error of string   
+    
+    type State = string
+
+    type Reply<'T> = 'T option * State
+
+    type Parser<'T> = State -> Reply<'T>  
+    
+    let preturn value : Parser<'T> = 
+        let p : Parser<'T> = fun stream -> (Some(value), stream)
+        p
+
+    let getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> =
+        let match1 = current input
+        match match1 with 
+            | (Some(result), state) -> 
+                let parser2 = next result
+                parser2 state                    
+            | (None, state) -> 
+                raise (Error("Error combining parser and underlying state was modified")) 
+
+    let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
+
+    let (>>=?) (current:Parser<'B>) (next:'B -> Parser<'A>) : Parser<'A> = 
+        fun state ->
+            try
+                getReply current next state
+            with
+                | e -> (None, state)
+        
+    let (|>>)  parser targetType : Parser<'T> = parser >>= fun value -> preturn (targetType value)
+
+    let (|>>%) parser targetType : Parser<'T> = parser >>= fun _ -> preturn targetType
+
+    let (>>.)  parser1 parser2 : Parser<'T> = 
+        parser1 >>= fun first -> parser2 >>= fun second -> preturn second
+
+    let (.>>)  parser1 parser2 : Parser<'T> = 
+        parser1 >>= fun first -> parser2 >>= fun second -> preturn first
+
+    let (.>>.) parser1 parser2 : Parser<'a * 'b> = 
+        parser1 >>= fun first -> parser2 >>= fun second -> preturn (first, second)
+
+    let matcher eval consumer target: Parser<'T> = 
+        let p : Parser<'T> = 
+            fun currentState -> 
+                if eval target currentState then
+                    (Some(target), (consumer currentState target))
+                else 
+                    (None, currentState)
+        p
+
+    let many (parser : Parser<'T>) = 
+        let p : Parser<'T list> = 
+            fun state ->
+                let rec many' parser (found, currentState) =                    
+                    match parser currentState with
+                        | (Some(m), nextState) -> 
+                            many' parser (m::found, nextState)
+                        | _ -> 
+                            if List.length found > 0 then
+                                (Some(found), currentState)          
+                            else
+                                (None, currentState)
+                                  
+                many' parser ([], state)
+
+        p
+
+    let matchStr target = matcher (fun t i -> i.StartsWith t) (fun i t -> i.Remove(0, t.Length)) target
+    
+    let test input (parser:Parser<'T>) = 
+        match parser input with
+            | (Some(m), _) -> m
+            | (None, _) -> raise (Error("No matches"))
