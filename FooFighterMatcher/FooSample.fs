@@ -1,7 +1,7 @@
 ﻿namespace FooFighterMatcher
 
-open StringCombinator.Combinator
-open StringCombinator.StringP
+open Combinator.Combinator
+open Combinator.StringP
 
 module FooSample = 
     
@@ -11,29 +11,29 @@ module FooSample =
     let foo = matchStr "foo"
     let fighter = matchStr "fighter"   
 
-    let fRegex = regexStr "fo{2}f"
+    let fRegex<'a> = regexStr "fo{2}f"
 
-    let fooFightersWithSpaces = many (whitespaces <|> chars)
+    let fooFightersWithSpaces<'a> = many (whitespaces <|> chars)
     
     let band = foo >>. fighter |>>% FooFighter
 
-    let fooString = foo .>> fighter 
-    let fighterString = foo >>. fighter 
-    let fighterTuples = foo .>>. fighter     
+    let fooString<'a> = foo .>> fighter 
+    let fighterString<'a> = foo >>. fighter 
+    let fighterTuples<'a> = foo .>>. fighter     
 
     let validFooChar = anyOf matchStr ["f";"o";"i";"g";"h";"t";"e";"r";"s";" "]
 
-    let allFooCharacters = many validFooChar
+    let allFooCharacters<'a> = many validFooChar
 
-    let err =         
+    let err<'a> =         
         fighter >>=? fun v -> 
                      foo
 
     let errAttempt = matchStr "fo"
 
-    let parseWithErrorAttempt = choice[attempt (errAttempt >>. errAttempt) |>>% FooFighter;band]
-    let manyFoo = many foo
+    let parseWithErrorAttempt<'a> = choice[attempt (errAttempt >>. errAttempt) |>>% FooFighter;band]
+    let manyFoo<'a> = many foo
     
-    let opts = fighter <|> foo
+    let opts<'a> = fighter <|> foo
 
-    let optsC = choice[fighter;foo]
+    let optsC<'a> = choice[fighter;foo]

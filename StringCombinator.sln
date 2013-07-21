@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Web
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StringCombinator", "StringCombinator\StringCombinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "StringCombinator\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
 EndProject

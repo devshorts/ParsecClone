@@ -1,32 +1,31 @@
-﻿namespace StringCombinator
-
+﻿namespace Combinator
 
 module Combinator =
     
-    exception Error of string   
-    
-    type State = string
+    exception Error of string          
 
-    type Reply<'T> = 'T option * State
+    type State<'Y> = IStreamP<'Y>
 
-    type Parser<'T> = State -> Reply<'T>  
+    type Reply<'T, 'Y> = 'T option * State<'Y>
+
+    type Parser<'T, 'Y> = State<'Y> -> Reply<'T, 'Y>  
     
-    let preturn value : Parser<'T> = 
-        let p : Parser<'T> = fun stream -> (Some(value), stream)
+    let preturn value : Parser<'T, 'Y> = 
+        let p : Parser<'T, 'Y> = fun stream -> (Some(value), stream)
         p
 
-    let pzero : Parser<'T> = 
-        let p: Parser<'T> = fun stream -> (None, stream)
+    let pzero : Parser<'T, 'Y> = 
+        let p: Parser<'T, 'Y> = fun stream -> (None, stream)
         p
 
-    let getOptionReply (current:Parser<'B>) (parser:Parser<'A>) (input : State): Reply<'A> =
+    let getOptionReply (current:Parser<'B, 'Y>) (parser:Parser<'A, 'Y>) (input : State<'Y>): Reply<'A, 'Y> =
         let match1 = current input
         match match1 with 
             | (Some(m), _) -> match1
             | (None, state) when state = input -> parser input
             | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
-    let getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> =
+    let getReply (current:Parser<'B, 'Y>) (next:'B -> Parser<'A, 'Y>)  (input : State<'Y>): Reply<'A, 'Y> =
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> 
@@ -36,40 +35,40 @@ module Combinator =
                 raise (Error("No match found and underlying state was modified")) 
             | (None, state) -> (None, state)
 
-    let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
+    let (>>=)  (current:Parser<'B, 'Y>) (next:'B -> Parser<'A, 'Y>)  : Parser<'A, 'Y> = getReply current next                                   
 
-    let (>>=?) (current:Parser<'B>) (next:'B -> Parser<'A>) : Parser<'A> = 
+    let (>>=?) (current:Parser<'B, 'Y>) (next:'B -> Parser<'A, 'Y>) : Parser<'A, 'Y> = 
         fun state ->
             try
                 getReply current next state
             with
                 | e -> (None, state)
         
-    let (|>>)  parser targetType : Parser<'T> = parser >>= fun value -> preturn (targetType value)
+    let (|>>)  parser targetType : Parser<'T, 'Y> = parser >>= fun value -> preturn (targetType value)
 
-    let (|>>%) parser targetType : Parser<'T> = parser >>= fun _ -> preturn targetType
+    let (|>>%) parser targetType : Parser<'T, 'Y> = parser >>= fun _ -> preturn targetType
 
-    let (>>.)  parser1 parser2 : Parser<'T> = 
+    let (>>.)  parser1 parser2 : Parser<'T, 'Y> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn second
 
-    let (.>>)  parser1 parser2 : Parser<'T> = 
+    let (.>>)  parser1 parser2 : Parser<'T, 'Y> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn first
 
-    let (.>>.) parser1 parser2 : Parser<'a * 'b> = 
+    let (.>>.) parser1 parser2 : Parser<'a * 'b, 'Y> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn (first, second)
 
-    let (<|>) parser1 parser2 : Parser<'T> = getOptionReply parser1 parser2        
+    let (<|>) parser1 parser2 : Parser<'T, 'Y> = getOptionReply parser1 parser2        
 
-    let matcher stateChange eval target: Parser<'T> = 
-        let p : Parser<'T> = 
+    let matcher eval target: Parser<'Y, 'Y> = 
+        let p : Parser<'Y, 'Y> = 
             fun currentState -> 
                 match eval target currentState with
-                    | Some(result) -> Some(result), (stateChange currentState result)
+                    | Some(result : 'Y) -> (Some(result), (currentState.consume result))
                     | _ -> (None, currentState)
         p
     
-    let many (parser : Parser<'T>) = 
-        let p : Parser<'T list> = 
+    let many (parser : Parser<'T, 'Y>) = 
+        let p : Parser<'T list, 'Y> = 
             fun state ->
                 let rec many' parser (found, currentState) =                    
                     match parser currentState with
@@ -87,11 +86,11 @@ module Combinator =
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
 
-    let choice (parsers : Parser<'T> list) = 
+    let choice (parsers : Parser<'T, 'Y> list) = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
 
-    let attempt (parser : Parser<'T>) = 
-        let p : Parser<'T> = 
+    let attempt (parser : Parser<'T, 'Y>) = 
+        let p : Parser<'T, 'Y> = 
             fun state ->
                 try
                     let result = parser state 
@@ -101,7 +100,7 @@ module Combinator =
                 with
                     | e -> (None, state)
         p
-    let test input (parser:Parser<'T>) = 
+    let test input (parser:Parser<'T, 'Y>) = 
         match parser input with
             | (Some(m), _) -> m
             | (None, _) -> raise (Error("No matches"))

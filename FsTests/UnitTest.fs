@@ -3,15 +3,16 @@
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
-open StringCombinator.Combinator
-open StringCombinator.StringP
+open Combinator.Combinator
+open Combinator.StringP
+open Combinator
 open FooFighterMatcher.FooSample
 
 [<TestClass>]
 type UnitTest() = 
     [<TestMethod>]
     member this.preturn () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
 
         let band = test target band
         
@@ -22,13 +23,13 @@ type UnitTest() =
     [<TestMethod>]
     member this.many () = 
         
-        let manyFooStr = test "foofoofoofoofob" manyFoo
+        let manyFooStr = test (new StringStreamP("foofoofoofoofob")) manyFoo
 
         Assert.IsTrue (List.length manyFooStr = 4)
 
     [<TestMethod>]
     member this.fooString () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
         
         let fString = test target fooString
 
@@ -36,7 +37,7 @@ type UnitTest() =
 
     [<TestMethod>]
     member this.fightString () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
 
         let fightString = test target fighterString
         
@@ -44,7 +45,7 @@ type UnitTest() =
 
     [<TestMethod>]
     member this.testTuples () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
 
         let (foo, fighters) = test target fighterTuples
 
@@ -54,7 +55,7 @@ type UnitTest() =
         
     [<TestMethod>]
     member this.options () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
         
         test target opts = "foo" |> Assert.IsTrue
 
@@ -62,20 +63,20 @@ type UnitTest() =
 
     [<TestMethod>]
     member this.manyOptions () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
         
         test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
         test target (many optsC) = ["foo";"fighter"] |> Assert.IsTrue
 
     [<TestMethod>]
     member this.regex () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
         
         test target fRegex = "foof" |> Assert.IsTrue
 
     [<TestMethod>]
     member this.regexes () = 
-        let target = "      foofighters           foofighters"
+        let target = new StringStreamP("      foofighters           foofighters")
         
         let result = test target fooFightersWithSpaces
         
@@ -83,28 +84,29 @@ type UnitTest() =
 
     [<TestMethod>]
     member this.anyOfChars () = 
-        let target = "      foofighters           foofighters"
+        let target = new StringStreamP("      foofighters           foofighters") :> IStreamP<string>
         
         let result = test target allFooCharacters |> List.fold (+) ""
         
-        result = target |> Assert.IsTrue
+        result = target.state |> Assert.IsTrue
 
     [<TestMethod>]
     member this.newLine () = 
-        let fullNewline = "\r\n"        
-        let carriageReturn = "\r"        
-        let newLine = "\n"     
-        let newLine2 = @"
+        let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string>       
+        let carriageReturn = new StringStreamP("\r") :> IStreamP<string>
+        let newLine = new StringStreamP("\n")  :> IStreamP<string>    
+        let nl = @"
 "
+        let newLine2 = new StringStreamP(nl) :> IStreamP<string>
 
-        test fullNewline newline = fullNewline |> Assert.IsTrue
-        test carriageReturn newline = carriageReturn |> Assert.IsTrue
-        test newLine newline = newLine |> Assert.IsTrue
-        test newLine2 newline = newLine2 |> Assert.IsTrue
+        test fullNewline newline = fullNewline.state |> Assert.IsTrue
+        test carriageReturn newline = carriageReturn.state |> Assert.IsTrue
+        test newLine newline = newLine.state |> Assert.IsTrue
+        test newLine2 newline = newLine2.state |> Assert.IsTrue
 
     [<TestMethod>]
     member this.attempt () = 
-        let target = "foofighters"
+        let target = new StringStreamP("foofighters")
         
         match test target parseWithErrorAttempt with
             | FooFighter -> Assert.IsTrue true

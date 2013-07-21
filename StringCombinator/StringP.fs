@@ -1,57 +1,53 @@
-﻿namespace StringCombinator
+﻿namespace Combinator
 
-open StringCombinator.Combinator
+open Combinator.Combinator
 open System.Text.RegularExpressions
 open System
 
 module StringP = 
 
-    let (|RegexStr|_|) (pattern:string) (input:string) =
-        if String.IsNullOrEmpty input then None
+    type ParseState = State<string>
+
+    let (|RegexStr|_|) (pattern:string) (input:ParseState) =
+        if String.IsNullOrEmpty input.state then None
         else
-            let m = Regex.Match(input, "^" + pattern)
+            let m = Regex.Match(input.state, "^" + pattern)
             if m.Success then 
                 Some ([ for g in m.Groups -> g.Value ]
                             |> List.filter (String.IsNullOrEmpty >> not)
                             |> List.head) 
             else 
                 None
+    
+    let private startsWith target (input:State<string>) = if input.state.StartsWith target then Some target else None
 
-    let private stateChanger (input:string) (target:string) = input.Remove(0, target.Length)
-
-    let private startsWith target (input:string) = if input.StartsWith target then Some target else None
-
-    let private regexMatch target (input:string) = 
+    let private regexMatch target (input:ParseState) = 
         match input with 
             | RegexStr target result -> Some(result)
             | _ -> None
+           
+    let matchStr str = matcher startsWith str
+
+    let regexStr pattern = matcher regexMatch pattern
         
-    let private stringMatcher = matcher stateChanger
+    let char<'a> = regexStr "[a-z]"
 
-    let matchStr target =                
-        stringMatcher startsWith target
+    let chars<'a> = regexStr "[a-z]+"
 
-    let regexStr pattern =
-        stringMatcher regexMatch pattern            
-        
-    let char = regexStr "[a-z]"
+    let digit<'a> = regexStr "[0-9]"
 
-    let chars = regexStr "[a-z]+"
-
-    let digit = regexStr "[0-9]"
-
-    let digits = regexStr "[0-9]+"
+    let digits<'a> = regexStr "[0-9]+"
    
-    let newline = regexStr "\r\n" <|> regexStr "\r" <|> regexStr "\n"
+    let newline<'a> = regexStr "\r\n" <|> regexStr "\r" <|> regexStr "\n"
 
-    let whitespace = regexStr "\s"
+    let whitespace<'a> = regexStr "\s"
 
-    let whitespaces = regexStr "\s+"
+    let whitespaces<'a> = regexStr "\s+"
     
-    let space = regexStr " "
+    let space<'a> = regexStr " "
 
-    let spaces = regexStr " +"
+    let spaces<'a> = regexStr " +"
 
-    let tab = regexStr "\t"
+    let tab<'a> = regexStr "\t"
 
-    let tabs = regexStr "\t+"
+    let tabs<'a> = regexStr "\t+"
