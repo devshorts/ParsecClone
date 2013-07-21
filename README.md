@@ -28,14 +28,18 @@ Included operators are
 As it stands, this is just a string parser combinator. You can see the types here
 
 ```fsharp
-type State = string
+type State<'Y> = IStreamP<'Y>
 
-type Reply<'T> = 'T option * State
+type Reply<'T, 'Y> = 'T option * State<'Y>
 
-type Parser<'T> = State -> Reply<'T>
+type Parser<'T, 'Y> = State<'Y> -> Reply<'T, 'Y>  
 ```
 
-I chose to pin the state type (string) since it made for a good experiment. Included is a set of visual studio unit tests (for vs2012) that demonstrates the combinators.
+The state is generalized so we can plug in different stream sources (strings, streams, whatever).  An unfortunate side effect of this is that I ran into a value restriction because of the generics, so every combinator needs to include a generic declaration like 
+
+`let chars<'a> = //..whatever"` 
+ 
+Included is a set of visual studio unit tests (for vs2012) that demonstrates the combinators.
 
 Explanation
 ---
@@ -43,7 +47,7 @@ Explanation
 Combinators, to be useful, need a way to be combined and chained. But before we look at how to combine them, look at how to evaluate two already combined parsers.
 
 ```fsharp
-getReply (current:Parser<'B>) (next:'B -> Parser<'A>)  (input : State): Reply<'A> 
+getReply (current:Parser<'B, 'Y>) (next:'B -> Parser<'A, 'Y>)  (input : State<'Y>): Reply<'A, 'Y>  
 ```
 
 This function takes an initial parser, a function that accepts the result of the current parser and returns a new parser, as well as the current state.  The idea is that `getReply` will apply the current state to the current parser, to get a result from it. Then, if this result yields a match (so its a `Some('a)`), it executes the second parser with the new resulting state. This gives us the result from the combination of both parsers. 
@@ -53,7 +57,7 @@ But, we need to be able to create new parsers.  Since a parser is a type of `Sta
 Now we can tie in shortcut operators like FParsec has:
 
 ```fsharp
-let (>>=)  (current:Parser<'B>) (next:'B -> Parser<'A>)  : Parser<'A> = getReply current next                                   
+let (>>=)  (current:Parser<'B, 'Y>) (next:'B -> Parser<'A, 'Y>)  : Parser<'A, 'Y> = getReply current next                                                                      
 ```
 
 The `>>=` function returns a function that wants a state.  Since its just a function that takes a state and returns a `Reply`, we've effectively chained the combinators together.   
