@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>709656e5-34b4-40ee-a3de-ebe4fcffbd90</ProjectGuid>
+    <ProjectGuid>8a9f8167-b54c-4c3e-92a9-98ddd3d1c935</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>StringCombinator</RootNamespace>
-    <AssemblyName>Combinator</AssemblyName>
+    <RootNamespace>StringCombinators</RootNamespace>
+    <AssemblyName>StringCombinators</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Combinator</Name>
+    <Name>StringCombinators</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\StringCombinator.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\StringCombinators.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,18 +29,11 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\StringCombinator.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\StringCombinators.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FsUnit.NUnit">
-      <HintPath>..\packages\FsUnit.1.2.1.0\Lib\Net40\FsUnit.NUnit.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -48,11 +41,16 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IStreamP.fs" />
-    <Compile Include="Combinator.fs" />
+    <Compile Include="StringStream.fs" />
+    <Compile Include="StringP.fs" />
     <None Include="Script.fsx" />
-    <None Include="packages.config" />
-    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StringCombinator\Combinator.fsproj">
+      <Name>Combinator</Name>
+      <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

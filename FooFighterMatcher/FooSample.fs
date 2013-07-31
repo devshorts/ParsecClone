@@ -1,7 +1,7 @@
 ﻿namespace FooFighterMatcher
 
 open Combinator.Combinator
-open Combinator.StringP
+open StringCombinators
 
 module FooSample = 
     

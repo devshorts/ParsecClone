@@ -100,6 +100,7 @@ module Combinator =
                 with
                     | e -> (None, state)
         p
+
     let test input (parser:Parser<'T, 'Y>) = 
         match parser input with
             | (Some(m), _) -> m

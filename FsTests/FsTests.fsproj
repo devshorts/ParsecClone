@@ -51,6 +51,11 @@
       <Project>{6c92be9f-549a-4526-b52b-cdc70bb92501}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\StringCombinators\StringCombinators.fsproj">
+      <Name>StringCombinators</Name>
+      <Project>{8a9f8167-b54c-4c3e-92a9-98ddd3d1c935}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\StringCombinator\Combinator.fsproj">
       <Name>Combinator</Name>
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>

@@ -1,8 +1,6 @@
-﻿namespace Combinator
+﻿namespace StringCombinators
 
-type IStreamP<'Y> =
-    abstract member consume : 'Y -> IStreamP<'Y>
-    abstract member state : 'Y
+open Combinator
 
 type StringStreamP (state:string) = 
     interface IStreamP<string> with

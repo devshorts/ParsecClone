@@ -1,9 +1,11 @@
-﻿namespace Combinator
+﻿namespace StringCombinators
 
 open Combinator.Combinator
+open StringCombinators
 open System.Text.RegularExpressions
 open System
 
+[<AutoOpen>]
 module StringP = 
 
     type ParseState = State<string>
