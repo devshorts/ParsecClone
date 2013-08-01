@@ -21,7 +21,7 @@ type BinStream (state:Stream) =
             
         
     member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 
-        if (int)state.state.Position + (int)count < (int)state.state.Length then
+        if (int)state.state.Position + (int)count <= (int)state.state.Length then
             Some(count)
         else 
             None

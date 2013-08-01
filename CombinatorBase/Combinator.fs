@@ -81,22 +81,42 @@ module Combinator =
                                   
             many' parser ([], state)
 
-        
+    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =        
+        fun state ->
+            let retTest found currentState = 
+                if List.length found > 0 then
+                    (Some(List.rev found), currentState)          
+                else
+                    (None, currentState)
 
+            let rec many' parser (found, currentState) =                    
+                match parser currentState with
+                    | (Some(m), (nextState:IStreamP<'A, 'B>)) ->
+                        if not (predicate m) then                                   
+                            many' parser (m::found, nextState)
+                        else 
+                            currentState.backtrack()
+                            retTest found currentState
+
+                    | _ ->  retTest found currentState
+                                  
+            many' parser ([], state)
+        
     let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =         
         fun state ->
-            let rec many' parser (found, currentState) num =                                        
+            let rec many' parser (found, currentState) num =   
+                let totalMatch = num                                     
                 match parser currentState with
                     | (Some(m), nextState) when num > 0 ->                                    
                         many' parser (m::found, nextState) (num - 1)
                     | _ -> 
                         if num <> 0 then 
-                            raise(Error("Error"))//(None, currentState) 
+                            raise(Error("Error, attempted to match " + totalMatch.ToString() + " but only got " + (totalMatch - num).ToString()))
+                        
+                        if List.length found > 0 then
+                            (Some(List.rev found), currentState)          
                         else
-                            if List.length found > 0 then
-                                (Some(List.rev found), currentState)          
-                            else
-                                (None, currentState)
+                            (None, currentState)
                                   
             many' parser ([], state) num
 

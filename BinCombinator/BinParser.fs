@@ -7,7 +7,7 @@ open MiscUtil.Conversion
 
 
 module BinParser = 
-
+    
     let private toInt16 v = System.BitConverter.ToInt16(v, 0)
     let private toInt32 v = System.BitConverter.ToInt32(v, 0)
     let private toInt64 v = System.BitConverter.ToInt64(v, 0)
