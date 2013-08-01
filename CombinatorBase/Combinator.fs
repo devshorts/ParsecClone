@@ -65,8 +65,7 @@ module Combinator =
             match eval (currentState:State<'StateType, 'ConsumeType>) target with
                 | Some(amount) -> currentState.consume currentState amount                        
                 | None         -> (None, currentState)
-        
-    
+            
     
     let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =        
         fun state ->
@@ -96,12 +95,11 @@ module Combinator =
         let closedCounter _ = count := 1 + !count
                               !count <= num
 
-        takeWhile closedCounter parser >>= fun r -> 
-                                           if r.Length <> num then
-                                                raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (r.Length).ToString())) 
-                                           preturn r                                               
+        takeWhile closedCounter parser >>= fun result -> 
+                                           if result.Length <> num then
+                                                raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (result.Length).ToString())) 
+                                           preturn result                                               
                                 
-
      
     let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun _ -> true) parser   
 

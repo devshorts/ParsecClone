@@ -87,6 +87,24 @@ let binaryWithBacktracker() =
     result |> should equal (50462976, byte(4))
 
 [<Test>]
+let ``test backtracker with attempt operator``() = 
+    let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
+
+    let stream = new MemoryStream(bytes)   
+
+    let parserStream = new BinStream(stream)   
+
+    let shouldFail = int32 >>= fun b1 -> 
+                               manyN 10 int32 >>= fun b2 -> 
+                               preturn b1
+
+    let consume1 = choice[attempt shouldFail; intB]
+
+    let result = test parserStream consume1
+    
+    result |> should equal 0
+
+[<Test>]
 let takeTillTest() = 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 
