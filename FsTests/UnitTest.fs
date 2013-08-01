@@ -1,17 +1,18 @@
 ﻿namespace UnitTestProject1
 
 open System
-open Microsoft.VisualStudio.TestTools.UnitTesting
+open NUnit.Framework
+open FsUnit
 
 open Combinator.Combinator
 open StringCombinators
 open Combinator
 open FooFighterMatcher.FooSample
 
-[<TestClass>]
-type UnitTest() = 
-    [<TestMethod>]
-    member this.preturn () = 
+
+module UnitTests = 
+    [<Test>]
+    let preturn () = 
         let target = new StringStreamP("foofighters")
 
         let band = test target band
@@ -20,31 +21,31 @@ type UnitTest() =
             | FooFighter -> Assert.IsTrue true
             | _ -> Assert.IsFalse true
 
-    [<TestMethod>]
-    member this.many () = 
+    [<Test>]
+    let manyTest () = 
         
         let manyFooStr = test (new StringStreamP("foofoofoofoofob")) manyFoo
 
         Assert.IsTrue (List.length manyFooStr = 4)
 
-    [<TestMethod>]
-    member this.fooString () = 
+    [<Test>]
+    let fooString () = 
         let target = new StringStreamP("foofighters")
         
         let fString = test target fooString
 
         fString = "foo" |> Assert.IsTrue 
 
-    [<TestMethod>]
-    member this.fightString () = 
+    [<Test>]
+    let fightString () = 
         let target = new StringStreamP("foofighters")
 
         let fightString = test target fighterString
         
         fightString = "fighter" |> Assert.IsTrue 
 
-    [<TestMethod>]
-    member this.testTuples () = 
+    [<Test>]
+    let testTuples () = 
         let target = new StringStreamP("foofighters")
 
         let (foo, fighters) = test target fighterTuples
@@ -53,48 +54,48 @@ type UnitTest() =
         fighters = "fighter" |> Assert.IsTrue
 
         
-    [<TestMethod>]
-    member this.options () = 
+    [<Test>]
+    let options () = 
         let target = new StringStreamP("foofighters")
         
         test target opts = "foo" |> Assert.IsTrue
 
         test target optsC = "foo" |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.manyOptions () = 
+    [<Test>]
+    let manyOptions () = 
         let target = new StringStreamP("foofighters")
         
         test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
         test target (many optsC) = ["foo";"fighter"] |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.regex () = 
+    [<Test>]
+    let regex () = 
         let target = new StringStreamP("foofighters")
         
         test target fRegex = "foof" |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.regexes () = 
+    [<Test>]
+    let regexes () = 
         let target = new StringStreamP("      foofighters           foofighters")
         
         let result = test target fooFightersWithSpaces
         
         result |> List.length = 4 |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.anyOfChars () = 
+    [<Test>]
+    let anyOfChars () = 
         let target = new StringStreamP("      foofighters           foofighters") :> IStreamP<string>
         
         let result = test target allFooCharacters |> List.fold (+) ""
         
         result = target.state |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.newLine () = 
-        let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string>       
+    [<Test>]
+    let newLine () = 
+        let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string>
         let carriageReturn = new StringStreamP("\r") :> IStreamP<string>
-        let newLine = new StringStreamP("\n")  :> IStreamP<string>    
+        let newLine = new StringStreamP("\n")  :> IStreamP<string>
         let nl = @"
 "
         let newLine2 = new StringStreamP(nl) :> IStreamP<string>
@@ -104,8 +105,8 @@ type UnitTest() =
         test newLine newline = newLine.state |> Assert.IsTrue
         test newLine2 newline = newLine2.state |> Assert.IsTrue
 
-    [<TestMethod>]
-    member this.attempt () = 
+    [<Test>]
+    let attempt () = 
         let target = new StringStreamP("foofighters")
         
         match test target parseWithErrorAttempt with

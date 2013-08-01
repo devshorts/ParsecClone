@@ -59,12 +59,13 @@ module Combinator =
 
     let (<|>) parser1 parser2 : Parser<'T, 'Y> = getOptionReply parser1 parser2        
 
-    let matcher eval target: Parser<'Y, 'Y> = 
-        let p : Parser<'Y, 'Y> = 
+    let matcher eval consume target: Parser<'T, 'Y> = 
+        let p : Parser<'T, 'Y> = 
             fun currentState -> 
                 match eval target currentState with
-                    | Some(result : 'Y) -> (Some(result), (currentState.consume result))
-                    | _ -> (None, currentState)
+                    | Some(value) -> consume currentState value
+                        //Some(result : 'Y) -> (Some(result), (currentState.consume result))
+                    | None -> (None, currentState)
         p
     
     let many (parser : Parser<'T, 'Y>) = 
@@ -81,6 +82,23 @@ module Combinator =
                                 (None, currentState)
                                   
                 many' parser ([], state)
+
+        p
+
+    let manyN num (parser : Parser<'T, 'Y>) = 
+        let p : Parser<'T list, 'Y> = 
+            fun state ->
+                let rec many' parser (found, currentState) num =                                        
+                    match parser currentState with
+                        | (Some(m), nextState) when num > 0 ->                                    
+                            many' parser (m::found, nextState) (num - 1)
+                        | _ -> 
+                            if List.length found > 0 then
+                                (Some(List.rev found), currentState)          
+                            else
+                                (None, currentState)
+                                  
+                many' parser ([], state) num
 
         p
 

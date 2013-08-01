@@ -1,6 +1,7 @@
 ﻿namespace StringCombinators
 
 open Combinator.Combinator
+open Combinator
 open StringCombinators
 open System.Text.RegularExpressions
 open System
@@ -28,9 +29,12 @@ module StringP =
             | RegexStr target result -> Some(result)
             | _ -> None
            
-    let matchStr str = matcher startsWith str
+    let consumer (state:ParseState) (result:string)  = 
+        (Some(result), new StringStreamP(state.state.Remove(0, result.Length)) :> IStreamP<string>)
 
-    let regexStr pattern = matcher regexMatch pattern
+    let matchStr str = matcher startsWith consumer str
+
+    let regexStr pattern = matcher regexMatch consumer pattern
         
     let char<'a> = regexStr "[a-z]"
 
