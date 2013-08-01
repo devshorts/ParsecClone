@@ -55,7 +55,7 @@ module Combinator =
     let (.>>)  parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn first
 
-    let (.>>.) parser1 parser2 : Parser<'Return * 'Return, 'StateType, 'ConsumeType> = 
+    let (.>>.) parser1 parser2 : Parser<_, 'StateType, 'ConsumeType> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn (first, second)
 
     let (<|>) parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = getOptionReply parser1 parser2        

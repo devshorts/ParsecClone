@@ -76,12 +76,14 @@ let binaryWithBacktracker() =
 
     let failureParse =  manyN 10 int32
 
-    let backtrackWithFail = int32 >>=? fun b1 -> failureParse >>= fun b2 -> preturn b1
+    let backtrackWithFail = int32 >>=? fun b1 -> 
+                            failureParse >>= fun b2 -> 
+                            preturn b1
 
-    let consume1 = backtrackWithFail >>. byte1
+    let consume1 = backtrackWithFail .>>. byte1
 
     let result = test parserStream consume1
     
-    result |> should equal (byte(4))
+    result |> should equal (50462976, byte(4))
 
 
