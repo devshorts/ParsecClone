@@ -92,13 +92,14 @@ module Combinator =
         
     let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =         
         let count = ref 0
-        let closedCounter _ = count := 1 + !count
-                              !count <= num
+        let countReached _ = count := 1 + !count
+                             !count > num
 
-        takeWhile closedCounter parser >>= fun result -> 
-                                           if result.Length <> num then
-                                                raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (result.Length).ToString())) 
-                                           preturn result                                               
+        takeWhile (countReached >> not) parser >>= 
+                                            fun result -> 
+                                               if result.Length <> num then
+                                                    raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (result.Length).ToString())) 
+                                               preturn result                                               
                                 
      
     let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun _ -> true) parser   
