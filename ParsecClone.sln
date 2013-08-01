@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "StringCombinator\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
-EndProject
+# Visual Studio 2010
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FooFighterMatcher", "FooFighterMatcher\FooFighterMatcher.fsproj", "{6C92BE9F-549A-4526-B52B-CDC70BB92501}"
@@ -13,9 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StringParsers", "StringPars
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7AB31D80-B8DE-418D-9B09-01600F0DEDB9}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BinParsers", "BinParsers\BinParsers.fsproj", "{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "CombinatorBase\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest", "CSharpTest\CSharpTest.csproj", "{F0E83EAE-49BD-48C7-92C9-553CDA445E9C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BinParsers", "BinCombinator\BinParsers.fsproj", "{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,21 +33,20 @@ Global
 		{8A9F8167-B54C-4C3E-92A9-98DDD3D1C935}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A9F8167-B54C-4C3E-92A9-98DDD3D1C935}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A9F8167-B54C-4C3E-92A9-98DDD3D1C935}.Release|Any CPU.Build.0 = Release|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5682DA9A-EEB4-4454-BABD-EFDAC0936B9C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0E83EAE-49BD-48C7-92C9-553CDA445E9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0E83EAE-49BD-48C7-92C9-553CDA445E9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0E83EAE-49BD-48C7-92C9-553CDA445E9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0E83EAE-49BD-48C7-92C9-553CDA445E9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714} = {7AB31D80-B8DE-418D-9B09-01600F0DEDB9}
-		{F0E83EAE-49BD-48C7-92C9-553CDA445E9C} = {7AB31D80-B8DE-418D-9B09-01600F0DEDB9}
 		{8A9F8167-B54C-4C3E-92A9-98DDD3D1C935} = {BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A}
 		{6C92BE9F-549A-4526-B52B-CDC70BB92501} = {BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A}
 	EndGlobalSection

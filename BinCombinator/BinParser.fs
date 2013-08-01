@@ -12,17 +12,13 @@ module BinParser =
     let private toInt32 v = System.BitConverter.ToInt32(v, 0)
     let private toInt64 v = System.BitConverter.ToInt64(v, 0)
     
-    type ParseState = State<Stream>
+    type ParseState = State<Stream, byte[]>
     
     let private getBinStream (state:ParseState) = (state :?> BinStream)
 
     let private streamCanBeConsumed (state:ParseState) count  = (state |> getBinStream).streamCanBeConsumed state count
 
-    let private consumeStream (state:ParseState) (count) =  (state |> getBinStream).consumeStream state count
-
-    let private binMatch (num:int) = 
-        let p : Parser<byte[], Stream> = matcher streamCanBeConsumed consumeStream num
-        p
+    let private binMatch (num:int) = matcher streamCanBeConsumed num        
 
     let byteN<'a> = binMatch 
 

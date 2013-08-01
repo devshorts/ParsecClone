@@ -14,7 +14,7 @@ let binTest1() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream) :> IStreamP<Stream>
+    let parserStream = new BinStream(stream)
 
     let parser = byte1
 
@@ -31,7 +31,7 @@ let binTest2() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream) :> IStreamP<Stream>
+    let parserStream = new BinStream(stream)
 
     let parser = manyN 4 byte1 
 
@@ -45,7 +45,7 @@ let binTest3() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream) :> IStreamP<Stream>
+    let parserStream = new BinStream(stream) 
 
     let parser = manyN 2 byte4
 
@@ -59,7 +59,7 @@ let binTest4() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream) :> IStreamP<Stream>    
+    let parserStream = new BinStream(stream)   
 
     let result = test parserStream int32 
     

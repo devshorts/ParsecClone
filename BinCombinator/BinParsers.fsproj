@@ -49,7 +49,7 @@
     <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StringCombinator\Combinator.fsproj">
+    <ProjectReference Include="..\CombinatorBase\Combinator.fsproj">
       <Name>Combinator</Name>
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
       <Private>True</Private>

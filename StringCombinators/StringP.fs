@@ -9,19 +9,17 @@ open System
 [<AutoOpen>]
 module StringP = 
 
-    type ParseState = State<string>
+    type ParseState = State<string, string>
 
     let private getStringStream (state:ParseState) = (state :?> StringStreamP)
 
     let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
 
     let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target       
-           
-    let private consumer (input:ParseState) (result:string)  = (input |> getStringStream).consumer input result         
+    
+    let matchStr str = matcher startsWith str
 
-    let matchStr str = matcher startsWith consumer str
-
-    let regexStr pattern = matcher regexMatch consumer pattern
+    let regexStr pattern = matcher regexMatch pattern
         
     let char<'a> = regexStr "[a-z]"
 

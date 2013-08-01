@@ -64,7 +64,7 @@ module UnitTests =
 
     [<Test>]
     let manyOptions () = 
-        let target = new StringStreamP("foofighters")
+        let target = new StringStreamP("foofighters") :> IStreamP<string, string>
         
         test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
         test target (many optsC) = ["foo";"fighter"] |> Assert.IsTrue
@@ -85,7 +85,7 @@ module UnitTests =
 
     [<Test>]
     let anyOfChars () = 
-        let target = new StringStreamP("      foofighters           foofighters") :> IStreamP<string>
+        let target = new StringStreamP("      foofighters           foofighters") :> IStreamP<string, string>
         
         let result = test target allFooCharacters |> List.fold (+) ""
         
@@ -93,12 +93,12 @@ module UnitTests =
 
     [<Test>]
     let newLine () = 
-        let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string>
-        let carriageReturn = new StringStreamP("\r") :> IStreamP<string>
-        let newLine = new StringStreamP("\n")  :> IStreamP<string>
+        let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string, string>
+        let carriageReturn = new StringStreamP("\r") :> IStreamP<string, string>
+        let newLine = new StringStreamP("\n")  :> IStreamP<string, string>
         let nl = @"
 "
-        let newLine2 = new StringStreamP(nl) :> IStreamP<string>
+        let newLine2 = new StringStreamP(nl) :> IStreamP<string, string>
 
         test fullNewline newline = fullNewline.state |> Assert.IsTrue
         test carriageReturn newline = carriageReturn.state |> Assert.IsTrue
