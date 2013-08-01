@@ -21,23 +21,29 @@ module Combinator =
             | (None, state) when state = input -> parser input
             | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
-    let getReply current next input =
+    let getBacktrackReply current next input =
+        let match1 = current input
+        match match1 with 
+            | (Some(result), (state:IStreamP<'A, 'B>)) -> 
+                try
+                    state |> next result                              
+                with
+                    | e -> 
+                        state.backtrack()
+                        match1
+            | (None, state) when state <> input -> raise (Error("No match found and underlying state was modified")) 
+            | (None, state) -> (None, state)      
+
+    let getReply current next input : Reply<'Return, 'StateType, 'ConsumeType> =
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> state |> next result                              
             | (None, state) when state <> input -> raise (Error("No match found and underlying state was modified")) 
             | (None, state) -> (None, state)
 
-    let (>>=)  (current) (next) = getReply current next                                   
+    let (>>=)  (current) (next)  : Parser<'Return, 'StateType, 'ConsumeType> = getReply current next                                   
 
-    let (>>=?) (current) (next) = 
-        fun (state:IStreamP<'T, 'Y>) ->
-            try
-                getReply current next state
-            with
-                | e -> 
-                    state.backtrack()
-                    (None, state)
+    let (>>=?) (current) (next) = getBacktrackReply current next       
         
     let (|>>)  parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = parser >>= fun value -> preturn (targetType value)
 
@@ -84,10 +90,13 @@ module Combinator =
                     | (Some(m), nextState) when num > 0 ->                                    
                         many' parser (m::found, nextState) (num - 1)
                     | _ -> 
-                        if List.length found > 0 then
-                            (Some(List.rev found), currentState)          
+                        if num <> 0 then 
+                            raise(Error("Error"))//(None, currentState) 
                         else
-                            (None, currentState)
+                            if List.length found > 0 then
+                                (Some(List.rev found), currentState)          
+                            else
+                                (None, currentState)
                                   
             many' parser ([], state) num
 

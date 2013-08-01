@@ -66,4 +66,22 @@ let binTest4() =
     result |> should equal 50462976
 
 
+[<Test>]
+let binaryWithBacktracker() = 
+    let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
+
+    let stream = new MemoryStream(bytes)   
+
+    let parserStream = new BinStream(stream)   
+
+    let failureParse =  manyN 10 int32
+
+    let backtrackWithFail = int32 >>=? fun b1 -> failureParse >>= fun b2 -> preturn b1
+
+    let consume1 = backtrackWithFail >>. byte1
+
+    let result = test parserStream consume1
+    
+    result |> should equal (byte(4))
+
 
