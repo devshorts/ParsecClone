@@ -53,4 +53,17 @@ let binTest3() =
     
     result |> should equal [[|0;1;2;3|];[|4;5;6;7|]]
 
+[<Test>]
+let binTest4() = 
+    let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
+
+    let stream = new MemoryStream(bytes)   
+
+    let parserStream = new BinStream(stream) :> IStreamP<Stream>    
+
+    let result = test parserStream int32 
+    
+    result |> should equal 50462976
+
+
 

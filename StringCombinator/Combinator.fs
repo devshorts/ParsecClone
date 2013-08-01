@@ -62,7 +62,7 @@ module Combinator =
     let matcher eval consume target: Parser<'T, 'Y> = 
         let p : Parser<'T, 'Y> = 
             fun currentState -> 
-                match eval target currentState with
+                match eval currentState target with
                     | Some(value) -> consume currentState value
                         //Some(result : 'Y) -> (Some(result), (currentState.consume result))
                     | None -> (None, currentState)

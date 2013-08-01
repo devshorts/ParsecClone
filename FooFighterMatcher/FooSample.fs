@@ -8,6 +8,8 @@ module FooSample =
     type Band = 
         | FooFighter
 
+    // foofighter
+
     let foo = matchStr "foo"
     let fighter = matchStr "fighter"   
 

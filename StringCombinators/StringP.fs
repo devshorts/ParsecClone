@@ -11,26 +11,13 @@ module StringP =
 
     type ParseState = State<string>
 
-    let (|RegexStr|_|) (pattern:string) (input:ParseState) =
-        if String.IsNullOrEmpty input.state then None
-        else
-            let m = Regex.Match(input.state, "^" + pattern)
-            if m.Success then 
-                Some ([ for g in m.Groups -> g.Value ]
-                            |> List.filter (String.IsNullOrEmpty >> not)
-                            |> List.head) 
-            else 
-                None
-    
-    let private startsWith target (input:State<string>) = if input.state.StartsWith target then Some target else None
+    let private getStringStream (state:ParseState) = (state :?> StringStreamP)
 
-    let private regexMatch target (input:ParseState) = 
-        match input with 
-            | RegexStr target result -> Some(result)
-            | _ -> None
+    let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
+
+    let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target       
            
-    let consumer (state:ParseState) (result:string)  = 
-        (Some(result), new StringStreamP(state.state.Remove(0, result.Length)) :> IStreamP<string>)
+    let private consumer (input:ParseState) (result:string)  = (input |> getStringStream).consumer input result         
 
     let matchStr str = matcher startsWith consumer str
 
