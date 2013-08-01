@@ -5,6 +5,8 @@ open System
 open System.Text.RegularExpressions
 
 type StringStreamP (state:string) = 
+    let initialState = state
+    let mutable currentState = state
 
     let (|RegexStr|_|) (pattern:string) (input:IStreamP<string, string>) =
         if String.IsNullOrEmpty input.state then None
@@ -19,14 +21,14 @@ type StringStreamP (state:string) =
 
 
     interface IStreamP<string, string> with
-        member x.state = state    
+        member x.state with get() = currentState    
 
         member x.consume inputStream count = 
             let result = inputStream.state.Substring(0, count);
             let newState = inputStream.state.Remove(0, count)
             (Some(result), new StringStreamP(newState) :> IStreamP<string, string>)
 
-        member x.backtrack () = ()
+        member x.backtrack () = currentState <- initialState
 
     member x.startsWith (inputStream:IStreamP<string, string>) target = 
         if inputStream.state.StartsWith target then 

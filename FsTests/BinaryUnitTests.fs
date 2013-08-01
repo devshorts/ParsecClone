@@ -115,3 +115,14 @@ let takeTillTest2() =
     result |> should equal ([|4;5;6;7;8|] |> Array.map byte)
 
 
+[<Test>]
+let takeWhileTest() = 
+    let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    let takeUpper = takeWhile (fun i -> i < byte(4)) byte1 >>. byteN 5    
+
+    let result = test parserStream takeUpper
+    
+    result |> should equal ([|4;5;6;7;8|] |> Array.map byte)

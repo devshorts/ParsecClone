@@ -67,20 +67,7 @@ module Combinator =
                 | None         -> (None, currentState)
         
     
-    let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =        
-        fun state ->
-            let rec many' parser (found, currentState) =                    
-                match parser currentState with
-                    | (Some(m), nextState) ->                                   
-                        many' parser (m::found, nextState)
-                    | _ -> 
-                        if List.length found > 0 then
-                            (Some(List.rev found), currentState)          
-                        else
-                            (None, currentState)
-                                  
-            many' parser ([], state)
-
+    
     let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =        
         fun state ->
             let retTest found currentState = 
@@ -91,7 +78,7 @@ module Combinator =
 
             let rec many' parser (found, currentState) =                    
                 match parser currentState with
-                    | (Some(m), (nextState:IStreamP<'A, 'B>)) ->
+                    | (Some(m), (nextState:IStreamP<'A, 'B>)) -> 
                         if not (predicate m) then                                   
                             many' parser (m::found, nextState)
                         else 
@@ -101,26 +88,22 @@ module Combinator =
                     | _ ->  retTest found currentState
                                   
             many' parser ([], state)
+
+    let takeWhile predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTill (predicate >> not) parser
         
     let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =         
-        fun state ->
-            let rec many' parser (found, currentState) num =   
-                let totalMatch = num                                     
-                match parser currentState with
-                    | (Some(m), nextState) when num > 0 ->                                    
-                        many' parser (m::found, nextState) (num - 1)
-                    | _ -> 
-                        if num <> 0 then 
-                            raise(Error("Error, attempted to match " + totalMatch.ToString() + " but only got " + (totalMatch - num).ToString()))
-                        
-                        if List.length found > 0 then
-                            (Some(List.rev found), currentState)          
-                        else
-                            (None, currentState)
-                                  
-            many' parser ([], state) num
+        let count = ref 0
+        let closedCounter _ = count := 1 + !count
+                              !count <= num
 
-        
+        takeWhile closedCounter parser >>= fun r -> 
+                                           if r.Length <> num then
+                                                raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (r.Length).ToString())) 
+                                           preturn r                                               
+                                
+
+     
+    let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun _ -> true) parser   
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
