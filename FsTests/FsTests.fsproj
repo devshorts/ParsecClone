@@ -50,14 +50,15 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTest.fs" />
+    <Compile Include="StringUnitTest.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <Compile Include="BinaryUnitTests.fs" />
+    <Compile Include="CsvSampleTests.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BinCombinator\BinParsers.fsproj">
-      <Name>BinParsers</Name>
+    <ProjectReference Include="..\BinaryCombinator\BinaryCombinator.fsproj">
+      <Name>BinaryCombinator</Name>
       <Project>{5682da9a-eeb4-4454-babd-efdac0936b9c}</Project>
       <Private>True</Private>
     </ProjectReference>
@@ -66,13 +67,13 @@
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FooFighterMatcher\FooFighterMatcher.fsproj">
-      <Name>FooFighterMatcher</Name>
+    <ProjectReference Include="..\FooFighterMatcher\StringMatchers.fsproj">
+      <Name>StringMatchers</Name>
       <Project>{6c92be9f-549a-4526-b52b-cdc70bb92501}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\StringCombinators\StringCombinators.fsproj">
-      <Name>StringCombinators</Name>
+    <ProjectReference Include="..\StringCombinator\StringCombinator.fsproj">
+      <Name>StringCombinator</Name>
       <Project>{8a9f8167-b54c-4c3e-92a9-98ddd3d1c935}</Project>
       <Private>True</Private>
     </ProjectReference>

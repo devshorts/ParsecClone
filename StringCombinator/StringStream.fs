@@ -1,4 +1,4 @@
-﻿namespace StringCombinators
+﻿namespace StringCombinator
 
 open Combinator
 open System
@@ -11,7 +11,7 @@ type StringStreamP (state:string) =
     let (|RegexStr|_|) (pattern:string) (input:IStreamP<string, string>) =
         if String.IsNullOrEmpty input.state then None
         else
-            let m = Regex.Match(input.state, "^" + pattern)
+            let m = Regex.Match(input.state, "^(" + pattern + ")")
             if m.Success then 
                 Some ([ for g in m.Groups -> g.Value ]
                             |> List.filter (String.IsNullOrEmpty >> not)
@@ -30,13 +30,24 @@ type StringStreamP (state:string) =
 
         member x.backtrack () = currentState <- initialState
 
+        member x.hasMore () = not (String.IsNullOrEmpty state)
+
     member x.startsWith (inputStream:IStreamP<string, string>) target = 
-        if inputStream.state.StartsWith target then 
+        if String.IsNullOrEmpty inputStream.state then None
+        else if inputStream.state.StartsWith target then 
             Some target.Length
         else None
 
     member x.regexMatch (input:IStreamP<string, string>) target = 
-        match input with 
-            | RegexStr target result -> Some(result.Length)
-            | _ -> None
+        if String.IsNullOrEmpty input.state then None
+        else 
+            match input with 
+                | RegexStr target result -> Some(result.Length)
+                | _ -> None
   
+     member x.invertRegexMatch (input:IStreamP<string, string>) target takeAmount = 
+        if String.IsNullOrEmpty input.state then None
+        else 
+            match input with 
+                | RegexStr target result -> None
+                | _ -> Some(takeAmount)

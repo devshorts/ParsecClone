@@ -1,8 +1,7 @@
-﻿namespace StringCombinators
+﻿namespace StringCombinator
 
-open Combinator.Combinator
 open Combinator
-open StringCombinators
+open StringCombinator
 open System.Text.RegularExpressions
 open System
 
@@ -15,15 +14,21 @@ module StringP =
 
     let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
 
-    let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target       
+    let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target 
+    
+    let private invertRegexMatch (input:ParseState) target takeAmount = (input |> getStringStream).invertRegexMatch input target takeAmount
     
     let matchStr str = matcher startsWith str
 
     let regexStr pattern = matcher regexMatch pattern
+
+    let invertRegex pattern takeAmount = matcher (fun input target  -> invertRegexMatch input target takeAmount) pattern 
         
+    let anyBut<'a> = invertRegex
+
     let char<'a> = regexStr "[a-z]"
 
-    let chars<'a> = regexStr "[a-z]+"
+    let chars<'a> = regexStr "[a-z]+"    
 
     let digit<'a> = regexStr "[0-9]"
 

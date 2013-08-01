@@ -10,7 +10,7 @@
     <RootNamespace>StringCombinators</RootNamespace>
     <AssemblyName>StringCombinators</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>StringCombinators</Name>
+    <Name>StringCombinator</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Include="StringStream.fs" />
     <Compile Include="StringP.fs" />
-    <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CombinatorBase\Combinator.fsproj">

@@ -1,11 +1,9 @@
-﻿namespace BinParsers 
+﻿namespace BinaryCombinator 
 
-open Combinator.Combinator
 open Combinator
 open System.IO
-open MiscUtil.Conversion
 
-
+[<AutoOpen>]
 module BinParser = 
     
     let private byteToInt (b:byte) = System.Convert.ToInt32(b)

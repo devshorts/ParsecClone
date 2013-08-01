@@ -4,13 +4,12 @@ open System
 open NUnit.Framework
 open FsUnit
 
-open Combinator.Combinator
-open StringCombinators
 open Combinator
-open FooFighterMatcher.FooSample
+open StringCombinator
+open StringMatchers.FooSample
 
 
-module UnitTests = 
+module FooStringUnitTests = 
     [<Test>]
     let preturn () = 
         let target = new StringStreamP("foofighters")
@@ -111,4 +110,4 @@ module UnitTests =
         
         match test target parseWithErrorAttempt with
             | FooFighter -> Assert.IsTrue true
-        
+

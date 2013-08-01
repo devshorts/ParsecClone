@@ -4,9 +4,7 @@ open NUnit.Framework
 open FsUnit
 open System.IO
 open Combinator
-open Combinator.Combinator
-open BinParsers.BinParser
-open BinParsers
+open BinaryCombinator
 
 [<Test>]
 let binTest1() = 

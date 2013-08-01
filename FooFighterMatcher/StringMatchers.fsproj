@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>5682da9a-eeb4-4454-babd-efdac0936b9c</ProjectGuid>
+    <ProjectGuid>6c92be9f-549a-4526-b52b-cdc70bb92501</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>BinParsers</RootNamespace>
-    <AssemblyName>BinParsers</AssemblyName>
+    <RootNamespace>FooFighterMatcher</RootNamespace>
+    <AssemblyName>FooFighterMatcher</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>BinParsers</Name>
+    <Name>StringMatchers</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\BinParsers.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FooFighterMatcher.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,12 +29,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\BinParsers.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FooFighterMatcher.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MiscUtil">
-      <HintPath>..\Resources\MiscUtil-r285.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -44,14 +41,18 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinStream.fs" />
-    <Compile Include="BinParser.fs" />
-    <None Include="Script.fsx" />
+    <Compile Include="FooSample.fs" />
+    <Compile Include="CsvSample.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CombinatorBase\Combinator.fsproj">
       <Name>Combinator</Name>
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\StringCombinator\StringCombinator.fsproj">
+      <Name>StringCombinator</Name>
+      <Project>{8a9f8167-b54c-4c3e-92a9-98ddd3d1c935}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

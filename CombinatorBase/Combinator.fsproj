@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="IStreamP.fs" />
     <Compile Include="Combinator.fs" />
-    <None Include="Script.fsx" />
     <None Include="packages.config" />
     <None Include="app.config" />
   </ItemGroup>

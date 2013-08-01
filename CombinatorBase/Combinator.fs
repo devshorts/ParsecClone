@@ -1,5 +1,6 @@
 ﻿namespace Combinator
 
+[<AutoOpen>]
 module Combinator =
     
     exception Error of string          
@@ -102,13 +103,13 @@ module Combinator =
                                                preturn result                                               
                                 
      
-    let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun _ -> true) parser   
+    let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun s -> true) parser   
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
     let choice parsers  : Parser<'Return, 'StateType, 'ConsumeType> = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
-
+    
     let attempt (parser) : Parser<'Return, 'StateType, 'ConsumeType> =         
         fun state ->
             let backtrack () = state.backtrack()
@@ -122,6 +123,8 @@ module Combinator =
             with
                 | e -> backtrack()
         
+
+    let sepBy p1 p2 = (attempt (p1 .>> p2) <|> p1)
 
     let test input (parser: Parser<'Return,_,_>) = 
         match parser input with

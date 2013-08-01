@@ -1,4 +1,4 @@
-﻿namespace BinParsers
+﻿namespace BinaryCombinator
 
 open System.IO
 open Combinator
@@ -18,6 +18,8 @@ type BinStream (state:Stream) =
             (Some(bytes), new BinStream(state.state) :> IStreamP<Stream, byte[]> )
 
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
+
+        member x.hasMore () = state.Position <> state.Length
             
         
     member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 
