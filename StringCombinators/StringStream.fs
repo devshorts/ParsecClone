@@ -26,6 +26,8 @@ type StringStreamP (state:string) =
             let newState = inputStream.state.Remove(0, count)
             (Some(result), new StringStreamP(newState) :> IStreamP<string, string>)
 
+        member x.backtrack () = ()
+
     member x.startsWith (inputStream:IStreamP<string, string>) target = 
         if inputStream.state.StartsWith target then 
             Some target.Length

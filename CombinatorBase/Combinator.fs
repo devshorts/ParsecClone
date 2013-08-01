@@ -24,21 +24,20 @@ module Combinator =
     let getReply current next input =
         let match1 = current input
         match match1 with 
-            | (Some(result), state) -> 
-                let parser2 = next result
-                parser2 state                    
-            | (None, state) when state <> input -> 
-                raise (Error("No match found and underlying state was modified")) 
+            | (Some(result), state) -> state |> next result                              
+            | (None, state) when state <> input -> raise (Error("No match found and underlying state was modified")) 
             | (None, state) -> (None, state)
 
     let (>>=)  (current) (next) = getReply current next                                   
 
     let (>>=?) (current) (next) = 
-        fun state ->
+        fun (state:IStreamP<'T, 'Y>) ->
             try
                 getReply current next state
             with
-                | e -> (None, state)
+                | e -> 
+                    state.backtrack()
+                    (None, state)
         
     let (|>>)  parser targetType = parser >>= fun value -> preturn (targetType value)
 
@@ -63,34 +62,34 @@ module Combinator =
         
     
     let many (parser) =        
-            fun state ->
-                let rec many' parser (found, currentState) =                    
-                    match parser currentState with
-                        | (Some(m), nextState) ->                                    
-                            many' parser (m::found, nextState)
-                        | _ -> 
-                            if List.length found > 0 then
-                                (Some(List.rev found), currentState)          
-                            else
-                                (None, currentState)
+        fun state ->
+            let rec many' parser (found, currentState) =                    
+                match parser currentState with
+                    | (Some(m), nextState) ->                                   
+                        many' parser (m::found, nextState)
+                    | _ -> 
+                        if List.length found > 0 then
+                            (Some(List.rev found), currentState)          
+                        else
+                            (None, currentState)
                                   
-                many' parser ([], state)
+            many' parser ([], state)
 
         
 
     let manyN num (parser) =         
-            fun state ->
-                let rec many' parser (found, currentState) num =                                        
-                    match parser currentState with
-                        | (Some(m), nextState) when num > 0 ->                                    
-                            many' parser (m::found, nextState) (num - 1)
-                        | _ -> 
-                            if List.length found > 0 then
-                                (Some(List.rev found), currentState)          
-                            else
-                                (None, currentState)
+        fun state ->
+            let rec many' parser (found, currentState) num =                                        
+                match parser currentState with
+                    | (Some(m), nextState) when num > 0 ->                                    
+                        many' parser (m::found, nextState) (num - 1)
+                    | _ -> 
+                        if List.length found > 0 then
+                            (Some(List.rev found), currentState)          
+                        else
+                            (None, currentState)
                                   
-                many' parser ([], state) num
+            many' parser ([], state) num
 
         
 
@@ -99,17 +98,19 @@ module Combinator =
     let choice parsers = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
 
-    let attempt (parser) = 
-        let p = 
-            fun state ->
-                try
-                    let result = parser state 
-                    match result with
-                        | (Some(_), _) -> result
-                        | _ -> (None, state)
-                with
-                    | e -> (None, state)
-        p
+    let attempt (parser) =         
+        fun (state:IStreamP<'T, 'Y>) ->
+            let backtrack () = state.backtrack()
+                               (None, state)
+
+            try
+                let result = parser state 
+                match result with
+                    | (Some(_), _) -> result
+                    | _ -> backtrack()
+            with
+                | e -> backtrack()
+        
 
     let test input parser = 
         match parser input with
