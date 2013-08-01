@@ -1,6 +1,6 @@
 ﻿namespace Combinator
 
-type IStreamP<'Y, 'A> =        
-    abstract member state : 'Y
-    abstract member consume : IStreamP<'Y, 'A> -> int -> 'A option * IStreamP<'Y, 'A>
+type IStreamP<'StateType, 'ConsumeType> =        
+    abstract member state : 'StateType
+    abstract member consume : IStreamP<'StateType, 'ConsumeType> -> int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
     abstract member backtrack : unit -> unit
