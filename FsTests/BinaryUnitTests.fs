@@ -47,10 +47,10 @@ let binTest3() =
 
     let parserStream = new BinStream(stream) :> IStreamP<Stream>
 
-    let parser = manyN 8 byte1 
+    let parser = manyN 2 byte4
 
     let result = test parserStream parser 
     
-    result |> should equal (bytes |> byteListToArr)
+    result |> should equal [[|0;1;2;3|];[|4;5;6;7|]]
 
 

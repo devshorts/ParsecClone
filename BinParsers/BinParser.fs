@@ -18,7 +18,7 @@ module BinParser =
     let consumeStream (state:ParseState) (count) =                 
         let mutable bytes = Array.init count (fun i -> byte(0))
         state.state.Read(bytes, 0, count) |> ignore
-        (Some(bytes), new BinStream(state.state) :> IStreamP<Stream>))
+        (Some(bytes), new BinStream(state.state) :> IStreamP<Stream>)
 
     let binMatch (num:int) = 
         let p : Parser<'T, 'Y> = matcher streamCanBeConsumed consumeStream num
@@ -26,5 +26,15 @@ module BinParser =
 
     let byte1<'a> = binMatch 1 >>= fun b1 -> preturn b1.[0]
 
-    let byte2<'a> = byte1 >>= fun b1 -> byte1 >>= fun b2 -> preturn [|b1;b2|]    
+    let byte2<'a> = byte1 >>= fun b1 -> 
+                    byte1 >>= fun b2 -> preturn [|b1;b2|]    
+    
+    let byte3<'a> = byte1 >>= fun b1 -> 
+                    byte1 >>= fun b2 -> 
+                    byte1 >>= fun b3 -> 
+                    preturn [|b1;b2;b3|] 
+
+
+    let byte4<'a> = byte2 >>= fun b1b2 -> 
+                    byte2 >>= fun b3b4 -> preturn ([|b1b2;b3b4|] |> Array.collect id)
 
