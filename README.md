@@ -5,6 +5,8 @@ This was an afternoon experiment (that ballooned a little) to see if I could, wi
 
 In general, Combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well. Since I wanted to do it strictly for learning I decided to mimic the fparsec combinator syntax.
 
+One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
+
 Included operators are
 
 - `>>=` - combiner with function callback
@@ -27,6 +29,10 @@ Included operators are
 - `takeTill` - takes a predicate and a parser and consumes until the predicate is true. Then backtracks one element
 - `takeWhile` - same as take till except inverted predicate
 - `manyN` - takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
+- `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
+- `manySatisfy` - alias for `takeWhile`
+- `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
+- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this. The `ws` parser uses this
 
 This is both a string parser, and a binary parser, which is extensible to any parsing type (either on streams or primitives).  I've encapsulated the parsing state into the `IStreamP` interface which takes both the underlying state type, and what to return when it does a raw state consume. For example, on a `Stream` you want to consume `byte[]`. But on a `string` you want to consume other `string` types. In general, F#'s type inference system hides this nastiness away.
 

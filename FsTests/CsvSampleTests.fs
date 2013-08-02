@@ -10,6 +10,22 @@ open StringMatchers.CsvSample
 
 
 [<Test>]
+let testEmptyWhiteSpace() = 
+    let csv = new StringStreamP("")
+
+    let result = test csv ws
+
+    result |> should equal ""
+
+[<Test>]
+let testWhiteSpace() = 
+    let csv = new StringStreamP(" ")
+
+    let result = test csv ws
+
+    result |> should equal " "
+
+[<Test>]
 let testElement() = 
     let csv = new StringStreamP("some text")
 
@@ -39,7 +55,7 @@ let testTwoElement() =
 
     let result = test csv elements
 
-    result |> should equal ["some text";" text two"]
+    result |> should equal ["some text";"text two"]
 
 [<Test>]
 let testTwoLines() = 
@@ -50,7 +66,7 @@ c, d"
 
     let result = test csv lines
 
-    result |> should equal [["a";" b"];["c";" d"]]
+    result |> should equal [["a";"b"];["c";"d"]]
 
 [<Test>]
 let testEscaped() = 
@@ -105,14 +121,14 @@ let testCsvWithQuotes1() =
 [<Test>]
 let testCsvWithQuotes2() = 
     let t = "a,\"b 1.\\\",\"cd,fg\"
-a,b,\"cd,fg\""
+a,b,\\\", \"cd,fg\""
 
     let csv = new StringStreamP(t)
 
     let result = test csv lines |> List.toArray
 
     result.[0] |> should equal ["a";"b 1.\\";"cd,fg"]
-    result.[1] |> should equal ["a";"b";"cd,fg"]
+    result.[1] |> should equal ["a";"b";"\"";"cd,fg"]
 
 
 [<Test>]

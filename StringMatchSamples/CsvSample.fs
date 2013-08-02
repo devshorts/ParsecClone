@@ -5,8 +5,6 @@ open StringCombinator
 
 module CsvSample = 
     
-    let foldChars = fun chars -> preturn (List.fold (+) "" chars)
-
     let comma<'a> = matchStr ","
 
     let quote  = matchStr "\""
@@ -31,7 +29,7 @@ module CsvSample =
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
 
-    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","] |>> unescape)
+    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\""] |>> unescape)
     
     let normal<'a> = satisfy validNormalChars any 
 
@@ -39,7 +37,7 @@ module CsvSample =
 
     let literal<'a> = between quote quoteStrings quote
 
-    let csvElement = literal <|> normalAndEscaped
+    let csvElement = ws >>. (literal <|> normalAndEscaped)
 
     let element<'a> = csvElement |> sepBy <| comma
 

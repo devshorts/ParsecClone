@@ -15,7 +15,14 @@ module Combinator =
         
     let pzero = fun stream -> (None, stream)
         
-    let getOptionReply (current) (parser : Parser<'Return, 'StateType, 'ConsumeType>) (input) =
+    let opt current =
+        fun s ->
+            let match1 = current s
+            match match1 with 
+                | (Some(result), state) -> (Some(Some(result)), state)
+                | (None, state) -> (Some(None), state)
+
+    let getAltReply (current) (parser : Parser<'Return, 'StateType, 'ConsumeType>) (input) =
         let match1 = current input
 
         // if the first one matches, stop
@@ -61,7 +68,7 @@ module Combinator =
     let (.>>.) parser1 parser2 : Parser<_, 'StateType, 'ConsumeType> = 
         parser1 >>= fun first -> parser2 >>= fun second -> preturn (first, second)
 
-    let (<|>) parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = getOptionReply parser1 parser2        
+    let (<|>) parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = getAltReply parser1 parser2        
 
     let matcher eval target =         
         fun currentState -> 
