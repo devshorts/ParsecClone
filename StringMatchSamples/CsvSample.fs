@@ -39,7 +39,7 @@ module CsvSample =
 
     let csvElement = ws >>. (literal <|> normalAndEscaped)
 
-    let element<'a> = csvElement |> sepBy <| comma
+    let element<'a> = choice[opt csvElement .>> comma ; csvElement |>> Some]
 
     let elements<'a> = many element
 

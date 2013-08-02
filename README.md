@@ -130,4 +130,76 @@ The `|>>%` operator will take the result of the applied parsers and return the r
   
 By leveraging F#'s currying, you can continue to build functions and functions and functions, until finally you seed the last function with the state you want to parse.  The rest, is just executing all the combined functions.
 
+A more complicated example
+---
+Now, lets actually use my parsec clone. Below is a grammar that will parse csv files
+
+```fsharp
+namespace StringMatchers
+
+open Combinator
+open StringCombinator
+
+module CsvSample = 
+    
+    let comma<'a> = matchStr ","
+
+    let quote  = matchStr "\""
+
+    let validNormalChars c = match c with
+                                | "\\"
+                                | "\""                                
+                                | "," -> false
+                                | rest -> not (isNewLine rest)
+
+    let inQuotesChars c = match c with                                 
+                            | "\"" -> false
+                            | _ -> true
+
+    let unescape c = match c with
+                     | "n" -> "\n"
+                     | "r" -> "\r"
+                     | "t" -> "\t"                     
+                     | c   -> c
+
+    let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
+
+    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\"";"n";"r";"t"] |>> unescape)
+    
+    let normal<'a> = satisfy validNormalChars any 
+
+    let normalAndEscaped = many (normal <|> escapedChar) >>= foldChars
+
+    let literal<'a> = between quote quoteStrings quote
+
+    let csvElement = ws >>. (literal <|> normalAndEscaped)
+
+    let element<'a> = csvElement |> sepBy <| comma
+
+    let elements<'a> = many element
+
+    let lines<'a> = many (elements |> sepBy <| newline)
+```
+
+If you've done the fparsec JSON tutorial this should look pretty similar.  The basic gist is that you want to allow both string literals within quotes, and regular escaped characters. So:
+
+```
+foo, bar, baz
+```
+
+Is a valid csv, but so is
+
+```
+foo\,,bar,baz\"
+```
+
+And so is
+
+```
+"foo,",bar,baz
+```
+
+Conclusion
+---
+
 Hopefully you can see now that once you can chain things, all the other functions are just wrappers and helpers leveraging the first combiner. Neat!

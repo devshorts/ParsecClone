@@ -28,8 +28,8 @@ module Combinator =
         // if the first one matches, stop
         match match1 with 
             | (Some(m), _) -> match1 
-            | (None, state) when state = input -> parser input
-            | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
+            | (None, state) -> parser input
+            //| (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
     let getBacktrackReply current next input =
         let match1 = current input
@@ -87,7 +87,7 @@ module Combinator =
 
             let rec many' parser (found, currentState) =                    
                 match parser currentState with
-                    | (Some(m), (nextState:IStreamP<'A, 'B>)) -> 
+                    | (Some(m), (nextState:IStreamP<'A, 'B>)) ->                         
                         if not (predicate m) then                                   
                             many' parser (m::found, nextState)
                         else 

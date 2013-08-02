@@ -39,7 +39,7 @@ let testElements() =
 
     let result = test csv element
 
-    result |> should equal "some text"
+    result |> should equal (Some("some text"))
 
 [<Test>]
 let testElement2() = 
@@ -47,7 +47,7 @@ let testElement2() =
 
     let result = test csv element
 
-    result |> should equal "some text"
+    result |> should equal (Some("some text"))
 
 [<Test>]
 let testTwoElement() = 
@@ -55,7 +55,7 @@ let testTwoElement() =
 
     let result = test csv elements
 
-    result |> should equal ["some text";"text two"]
+    result |> should equal (["some text";"text two"] |> List.map Some)
 
 [<Test>]
 let testTwoLines() = 
@@ -66,7 +66,8 @@ c, d"
 
     let result = test csv lines
 
-    result |> should equal [["a";"b"];["c";"d"]]
+    result |> should equal [["a";"b"] |> List.map Some;
+                            ["c";"d"] |> List.map Some]
 
 [<Test>]
 let testEscaped() = 
@@ -116,19 +117,29 @@ let testCsvWithQuotes1() =
 
     let result = test csv lines
 
-    result |> should equal [["cd,fg"]]
+    result |> should equal [["cd,fg"] |> List.map Some]
+
+[<Test>]
+let testEmpties() =
+    let t = ",,,"
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines
+
+    result |> should equal [[None;None;None]]
 
 [<Test>]
 let testCsvWithQuotes2() = 
     let t = "a,\"b 1.\\\",\"cd,fg\"
-a,b,\\\", \"cd,fg\""
+a,b,\\\", \"cd,fg\",,"
 
     let csv = new StringStreamP(t)
 
     let result = test csv lines |> List.toArray
 
-    result.[0] |> should equal ["a";"b 1.\\";"cd,fg"]
-    result.[1] |> should equal ["a";"b";"\"";"cd,fg"]
+    result.[0] |> should equal (["a";"b 1.\\";"cd,fg"] |> List.map Some)
+    result.[1] |> should equal ([Some("a");Some("b");Some("\"");Some("cd,fg");None])
 
 
 [<Test>]
@@ -160,7 +171,7 @@ let testCsvWithEscapedNewlines() =
 
     let result = test csv lines |> List.toArray
 
-    result.[0] |> should equal ["a\nb"]    
+    result.[0] |> should equal (["a\nb"] |> List.map Some)    
 
 [<Test>]
 let testCsvWithNewlinesInQuotes() = 
@@ -174,4 +185,4 @@ b"""
 
     result |> should equal [[@"a
     
-b"]]  
+b"] |> List.map Some]  
