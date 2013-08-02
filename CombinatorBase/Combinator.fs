@@ -111,7 +111,23 @@ module Combinator =
      
     let choice parsers  : Parser<'Return, 'StateType, 'ConsumeType> = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
-    
+
+    let between ``open`` parser close = ``open`` >>. parser .>> close
+
+    let manySatisfy = takeWhile 
+       
+    let satisfy predicate parser = 
+        fun (state : IStreamP<_,_>) ->  
+            let result = parser state                                 
+            match result with
+                | (Some(m), nextState) ->
+                    if predicate m then
+                        result
+                    else
+                        state.backtrack()
+                        (None, state)
+                | _ -> result       
+
     let attempt (parser) : Parser<'Return, 'StateType, 'ConsumeType> =         
         fun state ->
             let backtrack () = state.backtrack()

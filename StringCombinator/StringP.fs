@@ -10,6 +10,8 @@ module StringP =
 
     type ParseState = State<string, string>
 
+    let isMatch regex item = Regex.IsMatch(item, regex)
+
     let private getStringStream (state:ParseState) = (state :?> StringStreamP)
 
     let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
@@ -47,3 +49,17 @@ module StringP =
     let tab<'a> = regexStr "\t"
 
     let tabs<'a> = regexStr "\t+"
+
+    let isDigit = isMatch "[0-9]"
+
+    let isUpper = isMatch "[A-Z]"
+
+    let isLower = isMatch "[a-z]"  
+
+    let any<'a> = regexStr "."
+
+    let isChar = isMatch "[A-z]"
+
+    let isSpace = isMatch " "
+
+    let isNewLine i = isMatch "\r\n" i || isMatch "\r" i || isMatch "\n" i

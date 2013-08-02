@@ -36,7 +36,6 @@
       <HintPath>..\packages\FsUnit.1.2.1.0\Lib\Net40\FsUnit.NUnit.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -67,14 +66,14 @@
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FooFighterMatcher\StringMatchers.fsproj">
-      <Name>StringMatchers</Name>
-      <Project>{6c92be9f-549a-4526-b52b-cdc70bb92501}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\StringCombinator\StringCombinator.fsproj">
       <Name>StringCombinator</Name>
       <Project>{8a9f8167-b54c-4c3e-92a9-98ddd3d1c935}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\StringMatchSamples\StringMatchers.fsproj">
+      <Name>StringMatchers</Name>
+      <Project>{6c92be9f-549a-4526-b52b-cdc70bb92501}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
