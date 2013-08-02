@@ -1,4 +1,4 @@
-﻿namespace UnitTestProject1
+﻿module CsvtringUnitTests 
 
 open System
 open NUnit.Framework
@@ -9,46 +9,45 @@ open StringCombinator
 open StringMatchers.CsvSample
 
 
-module CsvtringUnitTests = 
-    [<Test>]
-    let testElement() = 
-        let csv = new StringStreamP("some text")
+[<Test>]
+let testElement() = 
+    let csv = new StringStreamP("some text")
 
-        let result = test csv csvElement
+    let result = test csv csvElement
 
-        result |> should equal "some text"
+    result |> should equal "some text"
     
-    [<Test>]
-    let testElements() = 
-        let csv = new StringStreamP("some text,")
+[<Test>]
+let testElements() = 
+    let csv = new StringStreamP("some text,")
 
-        let result = test csv element
+    let result = test csv element
 
-        result |> should equal "some text"
+    result |> should equal "some text"
 
-    [<Test>]
-    let testElement2() = 
-        let csv = new StringStreamP("some text")
+[<Test>]
+let testElement2() = 
+    let csv = new StringStreamP("some text")
 
-        let result = test csv element
+    let result = test csv element
 
-        result |> should equal "some text"
+    result |> should equal "some text"
 
-    [<Test>]
-    let testTwoElement() = 
-        let csv = new StringStreamP("some text, text two")
+[<Test>]
+let testTwoElement() = 
+    let csv = new StringStreamP("some text, text two")
 
-        let result = test csv elements
+    let result = test csv elements
 
-        result |> should equal ["some text";" text two"]
+    result |> should equal ["some text";" text two"]
 
-    [<Test>]
-    let testTwoLines() = 
-        let t = @"a, b
+[<Test>]
+let testTwoLines() = 
+    let t = @"a, b
 c, d"
 
-        let csv = new StringStreamP(t)
+    let csv = new StringStreamP(t)
 
-        let result = test csv lines
+    let result = test csv lines
 
-        result |> should equal [["a";" b"];["c";" d"]]
+    result |> should equal [["a";" b"];["c";" d"]]

@@ -16,13 +16,13 @@ module StringP =
 
     let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target 
     
-    let private invertRegexMatch (input:ParseState) target takeAmount = (input |> getStringStream).invertRegexMatch input target takeAmount
+    let private invertRegexMatch (input:ParseState) target = (input |> getStringStream).invertRegexMatch input target 1
     
     let matchStr str = matcher startsWith str
 
     let regexStr pattern = matcher regexMatch pattern
 
-    let invertRegex pattern takeAmount = matcher (fun input target  -> invertRegexMatch input target takeAmount) pattern 
+    let invertRegex pattern = matcher invertRegexMatch pattern 
         
     let anyBut<'a> = invertRegex
 

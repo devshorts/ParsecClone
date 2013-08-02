@@ -50,7 +50,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StringUnitTest.fs" />
+    <Compile Include="FooStringUnitTest.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <Compile Include="BinaryUnitTests.fs" />

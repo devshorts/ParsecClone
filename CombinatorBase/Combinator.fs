@@ -17,8 +17,10 @@ module Combinator =
         
     let getOptionReply (current) (parser : Parser<'Return, 'StateType, 'ConsumeType>) (input) =
         let match1 = current input
+
+        // if the first one matches, stop
         match match1 with 
-            | (Some(m), _) -> match1
+            | (Some(m), _) -> match1 
             | (None, state) when state = input -> parser input
             | (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
 
@@ -64,7 +66,7 @@ module Combinator =
     let matcher eval target =         
         fun currentState -> 
             match eval (currentState:State<'StateType, 'ConsumeType>) target with
-                | Some(amount) -> currentState.consume currentState amount                        
+                | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
             
     

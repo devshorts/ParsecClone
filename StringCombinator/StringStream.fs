@@ -23,9 +23,9 @@ type StringStreamP (state:string) =
     interface IStreamP<string, string> with
         member x.state with get() = currentState    
 
-        member x.consume inputStream count = 
-            let result = inputStream.state.Substring(0, count);
-            let newState = inputStream.state.Remove(0, count)
+        member x.consume count = 
+            let result = state.Substring(0, count);
+            let newState = state.Remove(0, count)
             (Some(result), new StringStreamP(newState) :> IStreamP<string, string>)
 
         member x.backtrack () = currentState <- initialState

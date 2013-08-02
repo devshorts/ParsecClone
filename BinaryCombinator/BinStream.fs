@@ -11,11 +11,11 @@ type BinStream (state:Stream) =
 
     interface IStreamP<Stream, byte[]>  with       
         member x.state = state     
-        member x.consume (state:IStreamP<Stream, byte[]> ) (count) = 
+        member x.consume (count) = 
             let mutable bytes = Array.init count (fun i -> byte(0))
-            state.state.Read(bytes, 0, count) |> ignore
+            state.Read(bytes, 0, count) |> ignore
             
-            (Some(bytes), new BinStream(state.state) :> IStreamP<Stream, byte[]> )
+            (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
 
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 

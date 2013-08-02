@@ -5,10 +5,9 @@ open StringCombinator
 
 module CsvSample = 
     
-
     let comma<'a> = matchStr ","
 
-    let csvElement = many (invertRegex ",|\r\n|\n|\r" 1) >>= fun chars -> preturn (List.fold (+) "" chars)
+    let csvElement = many (invertRegex ",|\r\n|\n|\r") >>= fun chars -> preturn (List.fold (+) "" chars)
 
     let csvWithComma<'a> = csvElement .>> comma
 
@@ -16,4 +15,4 @@ module CsvSample =
 
     let elements<'a> = many element
 
-    let lines<'a> = many (sepBy elements newline)
+    let lines<'a> = many (elements |> sepBy <| newline)
