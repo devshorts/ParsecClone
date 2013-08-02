@@ -150,3 +150,28 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
     let result = test csv lines
 
     List.length result |> should equal 11
+
+
+[<Test>]
+let testCsvWithEscapedNewlines() = 
+    let t = "a\\nb"
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines |> List.toArray
+
+    result.[0] |> should equal ["a\nb"]    
+
+[<Test>]
+let testCsvWithNewlinesInQuotes() = 
+    let t = @"""a
+    
+b"""
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines 
+
+    result |> should equal [[@"a
+    
+b"]]  

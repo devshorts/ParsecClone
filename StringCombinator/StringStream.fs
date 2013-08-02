@@ -11,7 +11,7 @@ type StringStreamP (state:string) =
     let (|RegexStr|_|) (pattern:string) (input:IStreamP<string, string>) =
         if String.IsNullOrEmpty input.state then None
         else
-            let m = Regex.Match(input.state, "^(" + pattern + ")")
+            let m = Regex.Match(input.state, "^(" + pattern + ")", RegexOptions.Singleline)
             if m.Success then 
                 Some ([ for g in m.Groups -> g.Value ]
                             |> List.filter (String.IsNullOrEmpty >> not)

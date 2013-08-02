@@ -9,15 +9,15 @@ module CsvSample =
 
     let quote  = matchStr "\""
 
-    let validNormalChars = function
+    let validNormalChars c = match c with
                                 | "\\"
-                                | "\""
+                                | "\""                                
                                 | "," -> false
                                 | rest -> not (isNewLine rest)
 
-    let inQuotesChars = function                                
-                                | "\"" -> false
-                                | _ -> true
+    let inQuotesChars c = match c with                                 
+                            | "\"" -> false
+                            | _ -> true
 
 
     let unescape c = match c with
@@ -29,7 +29,7 @@ module CsvSample =
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
 
-    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\""] |>> unescape)
+    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\"";"n";"r";"t"] |>> unescape)
     
     let normal<'a> = satisfy validNormalChars any 
 
