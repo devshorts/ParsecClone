@@ -5,15 +5,22 @@ open StringCombinator
 
 module CsvSample = 
     
-    let comma<'a> = matchStr ","
+    let delimType = ","
+
+    let(|DelimMatch|EscapedType|Other|) i = 
+        if i = "\\" || i ="\"" then EscapedType
+        else if i = delimType then DelimMatch
+        else Other
+
+    let delim<'a> = matchStr delimType
 
     let quote  = matchStr "\""
 
-    let validNormalChars c = match c with
-                                | "\\"
-                                | "\""                                
-                                | "," -> false
-                                | rest -> not (isNewLine rest)
+    let validNormalChars character = 
+                            match character with
+                                | EscapedType                                
+                                | DelimMatch -> false
+                                | Other -> not (isNewLine character)
 
     let inQuotesChars c = match c with                                 
                             | "\"" -> false
@@ -29,7 +36,7 @@ module CsvSample =
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
 
-    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\"";"n";"r";"t"] |>> unescape)
+    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
     
     let normal<'a> = satisfy validNormalChars any 
 
@@ -39,9 +46,9 @@ module CsvSample =
 
     let csvElement = ws >>. (literal <|> normalAndEscaped)
 
-    let listItem<'a> = comma >>. opt csvElement
+    let listItem<'a> = delim >>. opt csvElement
 
-    let elements<'a> = opt csvElement     >>= fun elem -> 
+    let elements<'a> = opt csvElement      >>= fun elem -> 
                        opt (many listItem) >>= 
                         function 
                         | Some(manyElem) -> preturn (elem::manyElem)
