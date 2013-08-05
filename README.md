@@ -142,19 +142,27 @@ open StringCombinator
 
 module CsvSample = 
     
-    let comma<'a> = matchStr ","
+    let delimType = ","
+
+    let(|DelimMatch|EscapedType|Other|) i = 
+        if i = "\\" || i ="\"" then EscapedType
+        else if i = delimType then DelimMatch
+        else Other
+
+    let delim<'a> = matchStr delimType
 
     let quote  = matchStr "\""
 
-    let validNormalChars c = match c with
-                                | "\\"
-                                | "\""                                
-                                | "," -> false
-                                | rest -> not (isNewLine rest)
+    let validNormalChars character = 
+                            match character with
+                                | EscapedType                                
+                                | DelimMatch -> false
+                                | Other -> not (isNewLine character)
 
     let inQuotesChars c = match c with                                 
                             | "\"" -> false
                             | _ -> true
+
 
     let unescape c = match c with
                      | "n" -> "\n"
@@ -162,9 +170,10 @@ module CsvSample =
                      | "t" -> "\t"                     
                      | c   -> c
 
+
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
 
-    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [","; "\"";"n";"r";"t"] |>> unescape)
+    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
     
     let normal<'a> = satisfy validNormalChars any 
 
@@ -174,11 +183,16 @@ module CsvSample =
 
     let csvElement = ws >>. (literal <|> normalAndEscaped)
 
-    let element<'a> = csvElement |> sepBy <| comma
+    let listItem<'a> = delim >>. opt csvElement
 
-    let elements<'a> = many element
+    let elements<'a> = opt csvElement      >>= fun elem -> 
+                       opt (many listItem) >>= 
+                        function 
+                        | Some(manyElem) -> preturn (elem::manyElem)
+                        | None -> preturn (elem::[])
+                        
 
-    let lines<'a> = many (elements |> sepBy <| newline)
+    let lines<'a> = many (elements |> sepBy <| newline) .>> eof
 ```
 
 If you've done the fparsec JSON tutorial this should look pretty similar.  The basic gist is that you want to allow both string literals within quotes, and regular escaped characters. So:
@@ -190,7 +204,7 @@ foo, bar, baz
 Is a valid csv, but so is
 
 ```
-foo\,,bar,baz\"
+foo\,,,bar,baz\"
 ```
 
 And so is
@@ -198,6 +212,7 @@ And so is
 ```
 "foo,",bar,baz
 ```
+CSV's are annoying!
 
 Conclusion
 ---

@@ -189,3 +189,24 @@ b"""
     result |> should equal [[@"a
     
 b"] |> List.map Some]  
+
+
+[<Test>]
+let testReadmeExample1 () = 
+    let t = "foo\,,,bar,baz\\\""
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines |> List.toArray
+
+    result.[0] |> should equal ([Some("foo,"); None; Some("bar"); Some("baz\"")])  
+
+[<Test>]
+let testReadmeExample2 () = 
+    let t = "\"foo,\",bar,baz"
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines |> List.toArray
+
+    result.[0] |> should equal ([Some("foo,"); Some("bar"); Some("baz")])  
