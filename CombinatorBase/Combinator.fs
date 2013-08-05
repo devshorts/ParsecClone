@@ -85,16 +85,21 @@ module Combinator =
                 else
                     (None, currentState)
 
-            let rec many' parser (found, currentState) =                    
-                match parser currentState with
-                    | (Some(m), (nextState:IStreamP<'A, 'B>)) ->                         
-                        if not (predicate m) then                                   
-                            many' parser (m::found, nextState)
-                        else 
-                            currentState.backtrack()
-                            retTest found currentState
+            let rec many' parser (found, currentState:IStreamP<'A, 'B>) =              
+                let returnValue() = retTest found currentState
 
-                    | _ ->  retTest found currentState
+                if not (currentState.hasMore()) then
+                    returnValue()
+                else
+                    match parser currentState with
+                        | (Some(m), (nextState:IStreamP<'A, 'B>)) ->                                                 
+                            if not (predicate m) then                                   
+                                many' parser (m::found, nextState)
+                            else 
+                                currentState.backtrack()
+                                returnValue()
+
+                        | _ ->  returnValue()
                                   
             many' parser ([], state)
 
@@ -112,6 +117,14 @@ module Combinator =
                                                preturn result                                               
                                 
      
+    
+    let eof = 
+        fun (state:IStreamP<_,_>) -> 
+            if state.hasMore() then
+                (None, state)
+            else 
+                (Some(()), state)
+
     let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun s -> true) parser   
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero

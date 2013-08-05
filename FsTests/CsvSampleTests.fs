@@ -37,17 +37,9 @@ let testElement() =
 let testElements() = 
     let csv = new StringStreamP("some text,")
 
-    let result = test csv element
+    let result = test csv csvElement
 
-    result |> should equal (Some("some text"))
-
-[<Test>]
-let testElement2() = 
-    let csv = new StringStreamP("some text")
-
-    let result = test csv element
-
-    result |> should equal (Some("some text"))
+    result |> should equal ("some text")
 
 [<Test>]
 let testTwoElement() = 
@@ -127,7 +119,7 @@ let testEmpties() =
 
     let result = test csv lines
 
-    result |> should equal [[None;None;None]]
+    result |> should equal [[None;None;None;None]]
 
 [<Test>]
 let testCsvWithQuotes2() = 
@@ -139,7 +131,18 @@ a,b,\\\", \"cd,fg\",,"
     let result = test csv lines |> List.toArray
 
     result.[0] |> should equal (["a";"b 1.\\";"cd,fg"] |> List.map Some)
-    result.[1] |> should equal ([Some("a");Some("b");Some("\"");Some("cd,fg");None])
+    result.[1] |> should equal ([Some("a");Some("b");Some("\"");Some("cd,fg");None;None])
+
+[<Test>]
+let testCsvWithOptionalElements() = 
+    let t = ",,"
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines |> List.toArray
+
+    result.[0] |> should equal ([None; None; None])    
+
 
 
 [<Test>]

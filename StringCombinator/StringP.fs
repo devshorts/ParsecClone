@@ -20,6 +20,8 @@ module StringP =
 
     let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
 
+    let private isEof (input:ParseState) target = not (input.hasMore())
+
     let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target 
     
     let private invertRegexMatch (input:ParseState) target = (input |> getStringStream).invertRegexMatch input target 1

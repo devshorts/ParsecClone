@@ -39,8 +39,13 @@ module CsvSample =
 
     let csvElement = ws >>. (literal <|> normalAndEscaped)
 
-    let element<'a> = choice[opt csvElement .>> comma ; csvElement |>> Some]
+    let listItem<'a> = comma >>. opt csvElement
 
-    let elements<'a> = many element
+    let elements<'a> = opt csvElement     >>= fun elem -> 
+                       opt (many listItem) >>= 
+                        function 
+                        | Some(manyElem) -> preturn (elem::manyElem)
+                        | None -> preturn (elem::[])
+                        
 
-    let lines<'a> = many (elements |> sepBy <| newline)
+    let lines<'a> = many (elements |> sepBy <| newline) .>> eof
