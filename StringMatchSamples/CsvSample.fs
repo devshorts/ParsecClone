@@ -26,7 +26,6 @@ module CsvSample =
                             | "\"" -> false
                             | _ -> true
 
-
     let unescape c = match c with
                      | "n" -> "\n"
                      | "r" -> "\r"

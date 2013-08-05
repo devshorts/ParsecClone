@@ -202,11 +202,14 @@ let testReadmeExample1 () =
     result.[0] |> should equal ([Some("foo,"); None; Some("bar"); Some("baz\"")])  
 
 [<Test>]
-let testReadmeExample2 () = 
+[<ExpectedException>]
+let testEofMissing () = 
     let t = "\"foo,\",bar,baz"
 
     let csv = new StringStreamP(t)
 
-    let result = test csv lines |> List.toArray
+    let r = test csv (csvElement .>> eof)
 
-    result.[0] |> should equal ([Some("foo,"); Some("bar"); Some("baz")])  
+    r |> should equal true
+
+    

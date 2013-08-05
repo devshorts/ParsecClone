@@ -121,7 +121,7 @@ module Combinator =
     let eof = 
         fun (state:IStreamP<_,_>) -> 
             if state.hasMore() then
-                (None, state)
+                raise(Error("EOF wasn't matched"))
             else 
                 (Some(()), state)
 
