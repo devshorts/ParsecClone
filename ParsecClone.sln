@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleMatchers", "SampleMatchers", "{BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A}"

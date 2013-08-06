@@ -193,7 +193,8 @@ b"] |> List.map Some]
 
 [<Test>]
 let testReadmeExample1 () = 
-    let t = "foo\,,,bar,baz\\\""
+    let t = "foo\,,,bar,baz\\\"
+faisal rules!"
 
     let csv = new StringStreamP(t)
 

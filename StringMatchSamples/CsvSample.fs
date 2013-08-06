@@ -16,22 +16,20 @@ module CsvSample =
 
     let quote  = matchStr "\""
 
-    let validNormalChars character = 
-                            match character with
-                                | EscapedType                                
-                                | DelimMatch -> false
-                                | Other -> not (isNewLine character)
+    let validNormalChars = function
+                            | EscapedType                                
+                            | DelimMatch -> false
+                            | rest -> not (isNewLine rest)
 
-    let inQuotesChars c = match c with                                 
+    let inQuotesChars  = function                                 
                             | "\"" -> false
                             | _ -> true
 
-    let unescape c = match c with
+    let unescape = function
                      | "n" -> "\n"
                      | "r" -> "\r"
                      | "t" -> "\t"                     
                      | c   -> c
-
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
 
@@ -47,11 +45,6 @@ module CsvSample =
 
     let listItem<'a> = delim >>. opt csvElement
 
-    let elements<'a> = opt csvElement      >>= fun elem -> 
-                       opt (many listItem) >>= 
-                        function 
-                        | Some(manyElem) -> preturn (elem::manyElem)
-                        | None -> preturn (elem::[])
-                        
+    let elements<'a> = csvElement .<?>. many listItem
 
     let lines<'a> = many (elements |> sepBy <| newline) .>> eof

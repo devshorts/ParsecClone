@@ -22,14 +22,14 @@ module Combinator =
                 | (Some(result), state) -> (Some(Some(result)), state)
                 | (None, state) -> (Some(None), state)
 
-    let getAltReply (current) (parser : Parser<'Return, 'StateType, 'ConsumeType>) (input) =
-        let match1 = current input
+    let getAltReply first second inputState  =
+        let match1 = first inputState
 
         // if the first one matches, stop
         match match1 with 
             | (Some(m), _) -> match1 
-            | (None, state) -> parser input
-            //| (None, state) -> raise (Error("No match found during OR and underlying state was modified")) 
+            | (None, state)  when state = inputState -> second inputState            
+            |_ ->  raise (Error("No match found and underlying state was modified"))  
 
     let getBacktrackReply current next input =
         let match1 = current input
@@ -44,7 +44,7 @@ module Combinator =
             | (None, state) when state <> input -> raise (Error("No match found and underlying state was modified")) 
             | (None, state) -> (None, state)      
 
-    let getReply current next input : Reply<'Return, 'StateType, 'ConsumeType> =
+    let getReply current next (input:IStreamP<_,_>) : Reply<'Return, 'StateType, 'ConsumeType> =       
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> state |> next result                              
@@ -136,6 +136,15 @@ module Combinator =
 
     let manySatisfy = takeWhile 
        
+    let optWith parser listParser =
+        parser >>= fun result1 ->
+        listParser >>= 
+        function 
+        | Some(results) -> preturn (result1::results)
+        | None -> preturn (result1::[])
+
+    let (.<?>.) parser listParser = optWith (opt parser) (opt listParser)
+
     let satisfy predicate parser = 
         fun (state : IStreamP<_,_>) ->  
             let result = parser state                                 
