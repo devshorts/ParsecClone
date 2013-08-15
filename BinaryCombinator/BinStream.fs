@@ -4,23 +4,19 @@ open System.IO
 open Combinator
 
 
-type BinStream (state:Stream, ?endianConverter : byte[] -> byte[]) =     
+type BinStream (state:Stream) =   
+    
     let startPos = state.Position
     
     interface IStreamP<Stream, byte[]>  with       
         member x.state = state     
 
         member x.consume (count) = 
-            let bytes = Array.init count (fun i -> byte(0))
+            let bytes = x.initBytes count
 
             state.Read(bytes, 0, count) |> ignore
             
-            let convertedBytes = 
-                match endianConverter with 
-                    | Some(f) -> f bytes
-                    | None -> bytes
-
-            (Some(convertedBytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
+            (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
 
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 
@@ -29,8 +25,30 @@ type BinStream (state:Stream, ?endianConverter : byte[] -> byte[]) =
         member x.equals istream = istream.state.Position = startPos
             
         
+    member x.initBytes size = Array.init size (fun i -> byte(0))
+
     member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 
         if (int)state.state.Position + (int)count <= (int)state.state.Length then
             Some(count)
         else 
             None
+
+    member x.streamStartsWith (input:IStreamP<Stream, byte[]> ) bytes =                 
+        if (int)input.state.Position + (Array.length bytes) > (int)input.state.Length then
+            None
+        else 
+            let start = input.state.Position
+
+            let count = Array.length bytes
+
+            let b = x.initBytes count
+
+            input.state.Read(b, 0, count) |> ignore
+
+            input.state.Seek(start, SeekOrigin.Begin) |> ignore
+
+            if b = bytes then
+                Some(count)
+            else 
+                None
+

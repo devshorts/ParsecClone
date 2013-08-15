@@ -6,6 +6,18 @@ open System.IO
 open Combinator
 open BinaryCombinator
 
+let bp = new BinParser(Array.rev)
+
+let byte1 = bp.byte1
+let byte2 = bp.byte2
+let byte3 = bp.byte3
+let byte4 = bp.byte4
+let byteN = bp.byteN
+let int32 = bp.int32
+let int16 = bp.int16
+let intB = bp.intB
+let uint16 = bp.uint16
+
 [<Test>]
 let binTest1() = 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
@@ -53,28 +65,32 @@ let binTest3() =
 
 [<Test>]
 let binTest4() = 
+    let p = new BinParser(id)
+
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 
     let stream = new MemoryStream(bytes)   
 
     let parserStream = new BinStream(stream)   
 
-    let result = test parserStream int32 
+    let result = test parserStream p.int32 
     
     result |> should equal 50462976
 
 
 [<Test>]
 let binaryWithBacktracker() = 
+    let p = new BinParser(id)
+
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 
     let stream = new MemoryStream(bytes)   
 
     let parserStream = new BinStream(stream)   
 
-    let failureParse =  manyN 10 int32
+    let failureParse =  manyN 10 p.int32
 
-    let backtrackWithFail = int32 >>=? fun b1 -> 
+    let backtrackWithFail = p.int32 >>=? fun b1 -> 
                             failureParse >>= fun b2 -> 
                             preturn b1
 
@@ -147,7 +163,7 @@ let takeWhileTest() =
 let endianessTest() = 
     let bytes = [|0x11;0x7B;0;0;0;0;0;0|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes), Array.rev)   
+    let parserStream = new BinStream(new MemoryStream(bytes))   
 
     let result = test parserStream uint16
     
@@ -158,7 +174,7 @@ let endianessTest() =
 let endianessTest2() = 
     let bytes = [|0xF1;0x7B;0;0;0;0;0;0|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes), Array.rev)   
+    let parserStream = new BinStream(new MemoryStream(bytes))   
 
     let result = test parserStream int16
     
