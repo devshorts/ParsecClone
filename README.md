@@ -7,6 +7,9 @@ In general, Combinators are a way to express complex parsing and chained actions
 
 One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
 
+Generic Operators
+----
+
 Included operators are
 
 - `>>=` - combiner with function callback
@@ -21,8 +24,6 @@ Included operators are
 - `<|>` - first parser or second parser, as long as the or'd parsers don't modify the underlying state
 - `many` - repeats a parser zero or more times
 - `match` - generic match on predicate and executes state modifier to return result
-- `matchStr` - matches a string if it starts with some text (uses match)
-- `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
 - `anyOf` - takes a combinator and a list of strings and or's them all together with the `<|>` combinator
 - `choice` - takes a list of parsers and or's them together with `<|>`
 - `attempt` - if no match occurs or an exception happens, backtracks to the beginning of the state of the parser
@@ -36,8 +37,48 @@ Included operators are
 - `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
 - `manySatisfy` - alias for `takeWhile`
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
-- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this. The `ws` parser uses this
+- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this. 
 
+String operators
+----
+String operators in the `StringP` module are:
+
+- `matchStr` - matches a string if it starts with some text (uses match)
+- `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
+- `anyBut` - takes a regular expression and returns a character that does not match the regex
+- `char` - [a-z] character
+- `chars` - [a-z]+ characters
+- `digit` - [0-9] 
+- `digits` - [0-9]+
+- `newline` - matches `\r\n` or `\n` or `\r`
+- `whitespace` - \s
+- `whitespaces` - \s+
+- `space` - " "
+- `spaces` - " "+
+- `tab` - \t
+- `tabs` - \t+
+- `ws` - optional whitespace parser
+
+Binary operators
+----
+Binary operators in the `BinaryParser` module are:
+
+- `byteN` - takes an integer N and consumes a byte array of that size
+- `byte1` - returns one byte
+- `byte2` - returns two bytes
+- `byte3` - returns three bytes
+- `byte4` - returns four bytes
+- `intB` - returns the byte value as a signed integer
+- `int16` - parses 2 bytes and returns a signed 16 bit integer
+- `int32` - parses 4 bytes and returns a signed 32 bit integer
+- `int64` - parses 6 bytes and returns a signed 64 bit integer
+- `uintB` - returns the byte value as an unsigned integer
+- `uint16` - parses 2 bytes and returns an unsigned 16 bit integer
+- `uint32` - parses 4 bytes and returns an unsigned 32 bit integer
+- `uint64` - parses 6 bytes and returns an unsigned 64 bit integer
+
+Overview
+---
 This is both a string parser, and a binary parser, which is extensible to any parsing type (either on streams or primitives).  I've encapsulated the parsing state into the `IStreamP` interface which takes both the underlying state type, and what to return when it does a raw state consume. For example, on a `Stream` you want to consume `byte[]`. But on a `string` you want to consume other `string` types. In general, F#'s type inference system hides this nastiness away.
 
 ```fsharp

@@ -11,6 +11,11 @@ module BinParser =
     let private toInt32 v = System.BitConverter.ToInt32(v, 0)
     let private toInt64 v = System.BitConverter.ToInt64(v, 0)
     
+    let private byteToUInt (b:byte) = System.Convert.ToUInt32(b)
+    let private toUInt16 v = System.BitConverter.ToUInt16(v, 0)
+    let private toUInt32 v = System.BitConverter.ToUInt32(v, 0)
+    let private toUInt64 v = System.BitConverter.ToUInt64(v, 0)
+
     type ParseState = State<Stream, byte[]>
     
     let private getBinStream (state:ParseState) = (state :?> BinStream)
@@ -35,5 +40,13 @@ module BinParser =
 
     let int64<'a> = byteN 8 |>> toInt64
 
+    let uint16<'a> = byte2 |>> toUInt16
+
+    let uint32<'a> = byte4 |>> toUInt32
+
+    let uint53<'a> = byteN 8 |>> toUInt64
+
     let intB<'a> = byte1 |>> byteToInt
+
+    let uintB<'a> = byte1 |>> byteToUInt
 

@@ -18,12 +18,8 @@ module StringP =
 
     let private getStringStream (state:ParseState) = (state :?> StringStreamP)
 
-    
-
     let private isEof (input:ParseState) target = not (input.hasMore())
 
-    
-    
     let private invertRegexMatch (input:ParseState) target = (input |> getStringStream).invertRegexMatch input target 1
     
     let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
