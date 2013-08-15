@@ -142,3 +142,24 @@ let takeWhileTest() =
     let result = test parserStream takeUpper
     
     result |> should equal ([|4;5;6;7;8|] |> Array.map byte)
+
+[<Test>]
+let endianessTest() = 
+    let bytes = [|0x11;0x7B;0;0;0;0;0;0|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes), Array.rev)   
+
+    let result = test parserStream uint16
+    
+    result |> should equal 4475
+
+
+[<Test>]
+let endianessTest2() = 
+    let bytes = [|0xF1;0x7B;0;0;0;0;0;0|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes), Array.rev)   
+
+    let result = test parserStream int16
+    
+    result |> should equal -3717

@@ -4,7 +4,7 @@ open System.IO
 open Combinator
 
 
-type BinStream (state:Stream) =     
+type BinStream (state:Stream, ?endianConverter : byte[] -> byte[]) =     
     let startPos = state.Position
     
     interface IStreamP<Stream, byte[]>  with       
@@ -15,7 +15,12 @@ type BinStream (state:Stream) =
 
             state.Read(bytes, 0, count) |> ignore
             
-            (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
+            let convertedBytes = 
+                match endianConverter with 
+                    | Some(f) -> f bytes
+                    | None -> bytes
+
+            (Some(convertedBytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
 
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 
