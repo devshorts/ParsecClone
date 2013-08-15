@@ -20,6 +20,8 @@ type BinStream (state:Stream) =
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 
         member x.hasMore () = state.Position <> state.Length
+
+        member x.equals istream = istream.state.Position = startPos
             
         
     member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 

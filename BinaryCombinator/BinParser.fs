@@ -16,7 +16,7 @@ module BinParser =
     let private getBinStream (state:ParseState) = (state :?> BinStream)
 
     let private streamCanBeConsumed (state:ParseState) count  = (state |> getBinStream).streamCanBeConsumed state count
-
+    
     let private binMatch (num:int) = matcher streamCanBeConsumed num        
 
     let byteN<'a> = binMatch 

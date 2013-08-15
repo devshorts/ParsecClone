@@ -32,6 +32,8 @@ type StringStreamP (state:string) =
 
         member x.hasMore () = not (String.IsNullOrEmpty state)
 
+        member x.equals istream = istream.state = state
+
     member x.startsWith (inputStream:IStreamP<string, string>) target = 
         if String.IsNullOrEmpty inputStream.state then None
         else if inputStream.state.StartsWith target then 

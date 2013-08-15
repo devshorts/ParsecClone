@@ -45,6 +45,6 @@ module CsvSample =
 
     let listItem<'a> = delim >>. opt csvElement
 
-    let elements<'a> = csvElement .<?>. many listItem
+    let elements<'a> = csvElement .<?>>. many listItem
 
     let lines<'a> = many (elements |> sepBy <| newline) .>> eof
