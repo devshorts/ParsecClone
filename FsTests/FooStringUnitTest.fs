@@ -10,7 +10,7 @@ open StringMatchers.FooSample
 
 
 [<Test>]
-let preturn () = 
+let preturnTest () = 
     let target = new StringStreamP("foofighters")
 
     let band = test target band
@@ -110,3 +110,67 @@ let attempt () =
     match test target parseWithErrorAttempt with
         | FooFighter -> Assert.IsTrue true
 
+[<Test>]
+let manyTillTest () =
+    let target = new StringStreamP("abc abc def abc")
+
+    let abc = matchStr "abc" .>> ws
+
+    let def = matchStr "def"
+
+    let line = (manyTill abc def .>> ws) .>>. abc .>> eof
+
+    let result = test target line
+
+    result |> should equal (["abc";"abc"],"abc")
+
+[<Test>]
+[<ExpectedException>]
+let manyTillOneOrMore () =
+    let target = new StringStreamP("x abc def abc")
+
+    let abc = matchStr "abc" .>> ws
+
+    let def = matchStr "def"
+
+    let line = (manyTill1 abc def .>> ws) .>>. abc .>> eof
+
+    let result = test target line
+
+    result |> should equal (["abc";"abc"],"abc")
+
+[<Test>]
+let lookaheadTest () =
+    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    
+    let abc = lookahead (matchStr "abc" .>> ws) >>= fun r -> 
+        if r = "abc" then preturn "found"
+        else preturn "not found"
+
+    match abc target with 
+        | Some(m), state -> 
+            m |> should equal "found"
+            state.state |> should equal target.state
+        | None, state -> 
+            false |> should equal true
+
+[<Test>]
+[<ExpectedException>]
+let many1TestFail () = 
+    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    
+    let foo = matchStr "foo"
+
+    let manyFoo = many1 foo
+
+    test target manyFoo |> should equal false
+
+[<Test>]
+let many1Test () = 
+    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    
+    let abc = ws >>. matchStr "abc"
+
+    let manyAbc = many1 abc
+
+    test target manyAbc |> should equal ["abc";"abc"]

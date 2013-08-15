@@ -14,7 +14,12 @@ module Combinator =
     let preturn value : Parser<'Return, 'StateType, 'ConsumeType> = fun stream -> (Some(value), stream)
         
     let pzero = fun stream -> (None, stream)
-        
+
+    let succeed parser state = 
+        match parser state with
+            | (None, _) -> (false, state)
+            | (_, newState) -> (true, newState)
+    
     let opt current =
         fun s ->
             let match1 = current s
@@ -29,7 +34,7 @@ module Combinator =
         match match1 with 
             | (Some(m), _) -> match1 
             | (None, state : IStreamP<_,_>)  when state.equals inputState -> second inputState            
-            |_ ->  raise (Error("No match found and underlying state was modified"))  
+            |_ ->  failwith "No match found and underlying state was modified"
 
     let getBacktrackReply current next input =
         let match1 = current input
@@ -41,14 +46,14 @@ module Combinator =
                     | e -> 
                         state.backtrack()
                         match1
-            | (None, state) when not (state.equals input) -> raise (Error("No match found and underlying state was modified")) 
+            | (None, state) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)      
 
     let getReply current next (input:IStreamP<_,_>) : Reply<'Return, 'StateType, 'ConsumeType> =       
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> state |> next result                              
-            | (None, state : IStreamP<_,_>) when not (state.equals input) -> raise (Error("No match found and underlying state was modified")) 
+            | (None, state : IStreamP<_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
     let (>>=)  (current) (next)  : Parser<'Return, 'StateType, 'ConsumeType> = getReply current next                                   
@@ -82,14 +87,18 @@ module Combinator =
                 | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
             
-    
-    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =        
+   
+     
+    let private takeTillB predicate parser minCount = 
         fun state ->
             let didFind found currentState = 
                 if List.length found > 0 then
                     (Some(List.rev found), currentState)          
                 else
-                    (None, currentState)
+                    if List.length found < minCount then 
+                        failwith ("Needed to consume at least " + minCount.ToString() + " element but did not")
+                    else                
+                        (None, currentState)
 
             let rec many' parser (returnList, currentState:IStreamP<'A, 'B>) =              
                 let returnValue() = didFind returnList currentState
@@ -109,17 +118,51 @@ module Combinator =
                                   
             many' parser ([], state)
 
+    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> = takeTillB predicate parser 0          
+
     let takeWhile predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTill (predicate >> not) parser
         
-    let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =         
-        let count = ref 0
-        let countReached _ = count := 1 + !count
-                             !count > num
+    let private manyTillB minCount (parser:Parser<_,_,_>) (parserEnd:Parser<_,_,_>) : Parser<_,_,_> = 
+        fun state ->
+            let rec take (currentState:IStreamP<_,_>) acc = 
+                if not (currentState.hasMore()) then
+                    (None, state)
+                else                    
+                    let result = parser currentState
 
+                    match result with 
+                        | Some(m), newState -> 
+                            let (suceeded, s) = succeed parserEnd newState
+
+                            if not suceeded then 
+                                take newState (m::acc)
+                            else 
+                                (Some(m::acc), s)
+
+                        | (None, newState) -> 
+                            if List.length acc < minCount then
+                                (None, newState)
+                            else
+                                failwith "Needed to match one more of parser, but found zero"
+
+            take state []
+
+    let manyTill p pEnd = manyTillB 0 p pEnd
+
+    let manyTill1 p pEnd = manyTillB 1 p pEnd
+        
+    let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =                      
+        let count = ref 0
+
+        let countReached _ = 
+            count := 1 + !count
+            !count > num
+
+            
         takeWhile (countReached >> not) parser >>= fun result -> 
             if result.Length <> num then
                 raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (result.Length).ToString())) 
-            preturn result                                                                                  
+            preturn result          
     
     let eof = 
         fun (state:IStreamP<_,_>) -> 
@@ -128,7 +171,17 @@ module Combinator =
             else 
                 (Some(()), state)
 
+    let lookahead p : Parser<_,_,_> = 
+        fun (state:IStreamP<_,_>) ->
+            let result = p state
+
+            state.backtrack()
+
+            (fst result, state)
+                                
     let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun s -> true) parser   
+
+    let many1 (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTillB (fun s -> false) parser 1  
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
@@ -188,5 +241,5 @@ module Combinator =
 
     let test input (parser: Parser<'Return,_,_>) = 
         match parser input with
-            | (Some(m), _) -> m
-            | (None, _) -> raise (Error("No matches"))
+            | (Some(m), s) -> m
+            | (None, _) -> failwith "No matches"

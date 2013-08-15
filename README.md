@@ -19,7 +19,7 @@ Included operators are
 - `|>>` - pipe value into union or constructor
 - `|>>%` - pipe to zero argument discriminated union
 - `<|>` - first parser or second parser, as long as the or'd parsers don't modify the underlying state
-- `many` - repeats a parser
+- `many` - repeats a parser zero or more times
 - `match` - generic match on predicate and executes state modifier to return result
 - `matchStr` - matches a string if it starts with some text (uses match)
 - `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
@@ -29,6 +29,10 @@ Included operators are
 - `takeTill` - takes a predicate and a parser and consumes until the predicate is true. Then backtracks one element
 - `takeWhile` - same as take till except inverted predicate
 - `manyN` - takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
+- `many1` - repeats a parser one or more times (fails if no match found)
+- `lookahead` - returns a result and a new parser, but backtracks the state 
+- `manyTill` - takes a parser and an end parser, and repeats the first parser zero or more times until the second parser succeeds
+- `manyTill1` same as manyTill except fails on zero matches, so expects at least one or more
 - `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
 - `manySatisfy` - alias for `takeWhile`
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
