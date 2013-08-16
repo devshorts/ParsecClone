@@ -235,7 +235,13 @@ module Combinator =
                     | _ -> backtrack()
             with
                 | e -> backtrack()
-        
+               
+    let choiceAttempts parsers = 
+        match List.rev parsers with 
+            | h::[] -> h
+            | h::t -> (List.fold (fun acc value -> acc <|> attempt value) pzero t) <|> h
+            | [] -> failwith "Can't attempt on empty parser list"
+
 
     let sepBy p1 p2 = (attempt (p1 .>> p2) <|> p1)
 
