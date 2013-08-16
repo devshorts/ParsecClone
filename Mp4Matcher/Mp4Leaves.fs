@@ -18,7 +18,7 @@ module Mp4Leaves =
                     MajorBrand = majorBrand;
                     MinorVersion = minorVersion;
                     Brands = foundBrands
-                }
+                } |>> FTYP
 
     let mvhd<'a> = 
         basicAtom "mvhd"            >>= fun id -> 
@@ -29,7 +29,7 @@ module Mp4Leaves =
         bp.uint32                   >>= fun duration ->
         bp.uint32                   >>= fun rate ->
         bp.uint16                   >>= fun volume ->
-        bp.byteN 70                 >>= fun _ -> 
+        bp.skip 70                  >>= fun _ -> 
         bp.uint32                   >>= fun nextTrackId ->
         preturn {
             Atom = id
@@ -79,11 +79,15 @@ module Mp4Leaves =
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id |>> VMHD
 
+    let smhd<'a> = 
+        basicAtom "smhd" >>= fun id ->
+        skipRemaining id.Size 8 >>= fun _ ->
+        preturn id |>> SMHD
+
     let dinf<'a> = 
         basicAtom "dinf" >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id |>> DINF
-        
     let mdhd<'a> = 
         basicAtom "mdhd" >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->

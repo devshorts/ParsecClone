@@ -20,6 +20,11 @@ type BinStream (state:Stream) =
 
             (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
 
+        member x.skip count = 
+            state.Seek((int64)count, SeekOrigin.Current) |> ignore
+
+            (Some(true),  new BinStream(state) :> IStreamP<Stream, byte[]> )
+
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 
         member x.hasMore () = state.Position <> state.Length
@@ -34,6 +39,8 @@ type BinStream (state:Stream) =
             Some(count)
         else 
             None
+
+    member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 
     member x.streamStartsWith (input:IStreamP<Stream, byte[]> ) bytes =                 
         if (int)input.state.Position + (Array.length bytes) > (int)input.state.Length then

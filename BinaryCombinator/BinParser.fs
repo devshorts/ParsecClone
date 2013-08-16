@@ -33,6 +33,14 @@ module BinParsers =
         member x.toUInt32 v = System.BitConverter.ToUInt32(endianNessConverter v, 0)
         member x.toUInt64 v = System.BitConverter.ToUInt64(endianNessConverter v, 0)
 
+        member x.skip num  = skipper streamCanBeConsumed num
+
+        member x.skipToEnd = 
+            fun (state:IStreamP<_,_>) ->
+                (state |> getBinStream).seekToEnd()
+
+                (Some(true),  new BinStream(state.state) :> IStreamP<Stream, byte[]> )
+
         member x.byteN = binMatch 
 
         member x.byte1 = x.byteN 1 >>= fun b1 -> preturn b1.[0]  

@@ -74,7 +74,7 @@ module Mp4StblElements =
     let chunkOffSet<'a> = bp.uint32 >>= fun i -> preturn { ChunkOffset = i }
 
     let stco<'a> = 
-        basicAtom "stco" >>= fun id ->
+        basicAtom "stco"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) chunkOffSet >>= fun offsets ->

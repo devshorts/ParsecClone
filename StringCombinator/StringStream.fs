@@ -28,6 +28,10 @@ type StringStreamP (state:string) =
             let newState = state.Remove(0, count)
             (Some(result), new StringStreamP(newState) :> IStreamP<string, string>)
 
+        member x.skip count = 
+            let (r, s) = (x:>IStreamP<_,_>).consume count
+            (Some(true), s)
+
         member x.backtrack () = currentState <- initialState
 
         member x.hasMore () = not (String.IsNullOrEmpty state)

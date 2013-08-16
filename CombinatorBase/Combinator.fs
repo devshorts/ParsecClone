@@ -89,7 +89,12 @@ module Combinator =
             match eval (currentState:State<'StateType, 'ConsumeType>) target with
                 | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
-            
+      
+    let skipper eval target =         
+        fun currentState -> 
+            match eval (currentState:State<'StateType, 'ConsumeType>) target with
+                | Some(amount) -> currentState.skip amount                        
+                | None         -> (None, currentState)      
    
      
     let private takeTillB predicate parser minCount = 

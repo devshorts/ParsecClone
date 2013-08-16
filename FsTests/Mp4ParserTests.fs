@@ -16,7 +16,7 @@ let moovFtypTest() =
 
     let result = test parserStream ftyp
     
-    result |> should equal (FTYP(Some({
+    result |> should equal (FTYP({
                                         MajorBrand = "mp42"           
                                         MinorVersion = (uint32)0x0
                                         Brands = Some([
@@ -24,7 +24,7 @@ let moovFtypTest() =
                                                             "isom";
                                                             "avc1"
                                                       ])
-                                })))
+                                }))
 
 
 

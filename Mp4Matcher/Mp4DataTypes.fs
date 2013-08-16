@@ -97,6 +97,7 @@ module Mp4DataTypes =
         | STSS of Stss
     type MinfTypes = 
         | VMHD of AtomBase
+        | SMHD of AtomBase
         | DINF of AtomBase
         | STBL of StblTypes list
     type MdiaTypes = 
@@ -111,7 +112,8 @@ module Mp4DataTypes =
         | IODS of AtomBase
         | TRAK of TrakTypes list
     type Atom = 
-        | FTYP of Ftyp option
+        | FTYP of Ftyp 
         | MOOV of MoovTypes list
+        | MDAT of AtomBase
                     
 
