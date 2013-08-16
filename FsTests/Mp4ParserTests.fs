@@ -16,15 +16,15 @@ let moovFtypTest() =
 
     let result = test parserStream ftyp
     
-    result |> should equal (FTYP({
-                                    MajorBrand = "mp42"           
-                                    MinorVersion = (uint32)0x0
-                                    Brands = Some([
-                                                        "mp42";
-                                                        "isom";
-                                                        "avc1"
-                                                  ])
-                                }))
+    result |> should equal (FTYP(Some({
+                                        MajorBrand = "mp42"           
+                                        MinorVersion = (uint32)0x0
+                                        Brands = Some([
+                                                            "mp42";
+                                                            "isom";
+                                                            "avc1"
+                                                      ])
+                                })))
 
 
 
@@ -47,6 +47,19 @@ let matchFtypAndMoov() =
 
     let parserStream = new BinStream(f)
 
-    let result = test parserStream (ftyp .>>. moov)
+    let result = test parserStream video
     
     result |> should equal None
+
+[<Test>]
+let matchOptFtypAndMoov() = 
+    
+    use f = new FileStream(@"Z:\Data\video\2013-07-18--12-38-10--QuickStart--R.0-C.1.m4v", FileMode.Open)
+
+    let parserStream = new BinStream(f)
+
+    let result = test parserStream video
+    
+    result |> should equal None
+
+

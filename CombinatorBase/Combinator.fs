@@ -74,6 +74,9 @@ module Combinator =
         parser2 >>= fun second -> 
         preturn first
 
+    let (>>..)  parser1 applier : Parser<'Return, 'StateType, 'ConsumeType> = 
+        parser1 >>= fun first -> applier first        
+
     let (.>>.) parser1 parser2 : Parser<_, 'StateType, 'ConsumeType> = 
         parser1 >>= fun first -> 
         parser2 >>= fun second -> 

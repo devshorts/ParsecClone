@@ -16,6 +16,8 @@ type BinStream (state:Stream) =
 
             state.Read(bytes, 0, count) |> ignore
             
+            System.Console.WriteLine(state.Position.ToString())
+
             (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
 
         member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore

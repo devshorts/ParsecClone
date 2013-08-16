@@ -51,11 +51,20 @@ module BinParsers =
 
         member x.uint16 = x.byte2 |>> x.toUInt16
 
+        member x.uint24 = x.byteN 3 |>> x.toInt24
+
         member x.uint32 = x.byte4 |>> x.toUInt32
 
-        member x.uint53 = x.byteN 8 |>> x.toUInt64
+        member x.uint64 = x.byteN 8 |>> x.toUInt64
 
         member x.intB = x.byte1 |>> x.byteToInt
 
         member x.uintB = x.byte1 |>> x.byteToUInt
+
+        member x.shiftL n = fun (b : uint32)  -> preturn (b <<< n)
+
+        member x.shiftR n = fun (b : uint32) -> preturn (b >>> n)
+
+        member x.floatP = x.byteN 4 >>= fun b -> 
+                          preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))
 
