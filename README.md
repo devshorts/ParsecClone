@@ -76,6 +76,12 @@ Binary operators in the `BinaryParser` module are:
 - `uint16` - parses 2 bytes and returns an unsigned 16 bit integer
 - `uint32` - parses 4 bytes and returns an unsigned 32 bit integer
 - `uint64` - parses 6 bytes and returns an unsigned 64 bit integer
+- `skip` - skips N bytes in the stream by seeking
+- `skiptoEnd` - skips to the end of the stream
+- `shiftL` - shifts left N bits
+- `shiftR` - shifts right N bits
+- `floatP` - parses a 4 byte float
+- `matchBytes` - consumes only if the stream begins with the exact byte array
 
 Overview
 ---
@@ -257,9 +263,110 @@ And so is
 ```
 "foo,",bar,baz
 ```
-CSV's are annoying!
 
-Conclusion
+All these cases work with the sample CSV parser
+
+Binary Parser Example
 ---
+As another example, this time of the binary parser, I wrote a small mp4 video file header parser.  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
 
-Hopefully you can see now that once you can chain things, all the other functions are just wrappers and helpers leveraging the first combiner. Neat!
+One limitation is there isn't a way to do bit level parsing, since the stream gives you things byte by byte. 
+
+The high level overview looks like this:
+
+```fsharp
+namespace Mp4Matcher
+
+open Combinator
+open BinaryCombinator
+open System.Text
+open System
+
+[<AutoOpen>]
+module Mp4P = 
+    
+    let stbl<'a> = 
+        basicAtom "stbl" >>= fun id ->        
+        many (stts <|> stsd <|> stsz <|> stsc <|> stco <|> stss) |>> STBL
+
+    let vOrSmhd<'a> = vmhd <|> smhd
+
+    let minf<'a> = 
+        basicAtom "minf" >>= fun id ->       
+        many (vOrSmhd <|> dinf <|> stbl) |>> MINF
+
+    let mdia<'a> = 
+        basicAtom "mdia" >>= fun id ->        
+        many (mdhd <|> hdlr <|> minf) |>> MDIA
+
+    let trak<'a> = 
+        basicAtom "trak" >>= fun id ->        
+        many (tkhd <|> mdia) |>> TRAK
+
+    let mdat<'a> = 
+        basicAtom "mdat" >>= fun id ->
+        if (int)id.Size = 0 then 
+            bp.skipToEnd  >>. preturn id |>> MDAT
+        else
+            bp.skip ((int)id.Size-8) >>= fun _ ->
+            preturn id |>> MDAT
+
+    let moov<'a> = basicAtom "moov" >>. many (mvhd <|> iods <|> trak) |>> MOOV
+    
+    let video<'a> = many (choice[attempt ftyp; moov; mdat]) .>> eof
+                        
+```
+
+Where leaf nodes look sometihng like this:
+
+```fsharp
+let mvhd<'a> = 
+    basicAtom "mvhd"            >>= fun id -> 
+    versionAndFlags             >>= fun vFlags ->
+    date                        >>= fun creationTime ->
+    date                        >>= fun modificationTime ->
+    bp.uint32                   >>= fun timeScale ->
+    bp.uint32                   >>= fun duration ->
+    bp.uint32                   >>= fun rate ->
+    bp.uint16                   >>= fun volume ->
+    bp.skip 70                  >>= fun _ -> 
+    bp.uint32                   >>= fun nextTrackId ->
+    preturn {
+        Atom = id
+        VersionAndFlags = vFlags
+        CreationTime = creationTime
+        ModificationTime = modificationTime
+        TimeScale = timeScale
+    } |>> MVHD
+
+
+let tkhd<'a> = 
+    basicAtom "tkhd" >>= fun id ->
+    versionAndFlags >>= fun vFlags ->
+    date >>= fun creationTime ->
+    date >>= fun modificationTime ->
+    bp.uint32 >>= fun trackId ->
+    bp.uint32 >>= fun reserved ->
+    bp.uint32 >>= fun duration ->        
+    bp.uint32 >>= fun layer ->
+    bp.uint16 >>= fun alteranteGroup ->
+    bp.uint16 >>= fun volume ->
+    bp.byteN 8 >>= fun reserved ->
+    manyN 9 bp.floatP >>= fun matrix ->
+    bp.uint32 >>.. bp.shiftR 16 >>= fun width ->
+    bp.uint32  >>.. bp.shiftR 16 >>= fun height ->
+    preturn {
+        Atom  = id
+        VersionAndFlags = vFlags
+        CreationTime  = creationTime
+        ModificationTime  = modificationTime
+        TrackId = trackId
+        Duration = duration
+        Layer = layer
+        AlternateGroup = alteranteGroup
+        Volume = volume
+        Height = width
+        Width = height
+    } |>> TKHD
+```
+
