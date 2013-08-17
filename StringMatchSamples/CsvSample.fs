@@ -38,12 +38,12 @@ module CsvSample =
     let normal<'a> = satisfy validNormalChars any 
 
     let normalAndEscaped = many (normal <|> escapedChar) >>= foldChars
-
+    
     let literal<'a> = between quote quoteStrings quote
 
-    let csvElement = ws >>. (literal <|> normalAndEscaped)
+    let csvElement = many (literal <|> normalAndEscaped) >>= foldStrings
 
-    let listItem<'a> = delim >>. opt csvElement
+    let listItem<'a> = delim >>. ws >>. opt csvElement
 
     let elements<'a> = csvElement .<?>>. many listItem
 

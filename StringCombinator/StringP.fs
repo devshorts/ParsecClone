@@ -14,6 +14,8 @@ module StringP =
 
     let foldChars = fun chars -> preturn (sumChars chars)
 
+    let foldStrings = fun (strings:string list) -> preturn (List.reduce (+) strings)
+
     let isMatch regex item = Regex.IsMatch(item, regex)
 
     let private getStringStream (state:ParseState) = (state :?> StringStreamP)

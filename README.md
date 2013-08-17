@@ -1,11 +1,10 @@
 ParsecClone
 ===========
 
-This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. I wanted to seperate out the combinator functionality from the stream. The project is reasonably complete, and I have a sample CSV parser included in the source.
+This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. I wanted to seperate out the combinator functionality from the stream. The project is reasonably complete, and I have a sample CSV parser and a sample MP4 header binary parser included in the source.
 
-In general, Combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well. Since I wanted to do it strictly for learning I decided to mimic the fparsec combinator syntax.
+In general, combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well.I decided to mimic the fparsec combinator syntax since I really liked that format.
 
-One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
 
 Generic Operators
 ----
@@ -41,6 +40,9 @@ Included operators are
 
 String operators
 ----
+
+One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
+
 String operators in the `StringP` module are:
 
 - `matchStr` - matches a string if it starts with some text (uses match)

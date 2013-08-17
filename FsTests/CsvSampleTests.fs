@@ -203,6 +203,16 @@ faisal rules!"
     result.[0] |> should equal ([Some("foo,"); None; Some("bar"); Some("baz\"")])  
 
 [<Test>]
+let testDoubleQuotes () = 
+    let t = "\"a\" b def \"foo\","
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines |> List.toArray
+
+    result |> should equal [[Some(@"a b def foo"); None]]
+
+[<Test>]
 [<ExpectedException>]
 let testEofMissing () = 
     let t = "\"foo,\",bar,baz"
