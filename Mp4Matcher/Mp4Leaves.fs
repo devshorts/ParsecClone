@@ -75,26 +75,57 @@ module Mp4Leaves =
         } |>> TKHD
     
     let vmhd<'a> = 
-        basicAtom "vmhd" >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
+        basicAtom "vmhd"    >>= fun id ->
+        versionAndFlags     >>= fun vFlags ->
+        bp.uint16           >>= fun graphicsMode ->
+        bp.uint16           >>= fun opcodeRed ->
+        bp.uint16           >>= fun opcodeGreen ->
+        bp.uint16           >>= fun opcodeBlue ->
         preturn id |>> VMHD
 
     let smhd<'a> = 
-        basicAtom "smhd" >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
+        basicAtom "smhd"    >>= fun id ->
+        versionAndFlags     >>= fun vFlags ->
+        bp.uint16           >>= fun balance ->
+        bp.skip 2           >>= fun _ ->
         preturn id |>> SMHD
 
+    let drefEntry<'a> = 
+        bp.uint32           >>= fun size ->
+        bp.byte4 |>> System.Text.Encoding.ASCII.GetString >>= fun ``type`` ->
+        versionAndFlags     >>= fun vFlags ->
+        preturn ()
+
+    let dref<'a> = 
+        basicAtom "dref"    >>= fun id ->
+        versionAndFlags     >>= fun vFlags ->
+        bp.uint32           >>= fun numEntries ->
+        manyN ((int)numEntries) drefEntry >>= fun entries ->
+        preturn id |>> DREF
+
     let dinf<'a> = 
-        basicAtom "dinf" >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
-        preturn id |>> DINF
+        basicAtom "dinf"    >>= fun id ->
+        dref |>> DINF
+
     let mdhd<'a> = 
-        basicAtom "mdhd" >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
+        basicAtom "mdhd"    >>= fun id ->
+        versionAndFlags     >>= fun vFlags ->
+        date                >>= fun creationTime ->
+        date                >>= fun modificationTime ->
+        bp.uint32           >>= fun timeScale ->
+        bp.uint32           >>= fun duration ->
+        bp.uint16           >>= fun language ->
+        bp.uint16           >>= fun quality ->
         preturn id |>> MDHD
 
     let hdlr<'a> = 
-        basicAtom "hdlr" >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
+        basicAtom "hdlr"    >>= fun id ->
+        versionAndFlags     >>= fun vFlags ->
+        bp.uint32           >>= fun componentType ->
+        bp.uint32           >>= fun componentSubType ->
+        bp.uint32           >>= fun componentManufacturer ->
+        bp.uint32           >>= fun flags ->
+        bp.uint32           >>= fun flagMask ->
+        bp.byteN ((int)id.Size - 32) |>> System.Text.Encoding.ASCII.GetString >>= fun componentName ->
         preturn id |>> HDLR
 

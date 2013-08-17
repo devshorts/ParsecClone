@@ -32,6 +32,15 @@ module Mp4ParserUtils =
                     }
         )
 
+    let unknown<'a> =
+        atomSize >>= fun size ->
+        stringId >>= fun name ->
+        preturn 
+            {
+                Size = size
+                Name = name
+            }
+
     let versionAndFlags<'a> = 
         bp.byte1 |>> bp.byteToUInt  >>= fun version ->
         bp.byte3 |>> bp.toUInt24    >>= fun flags ->

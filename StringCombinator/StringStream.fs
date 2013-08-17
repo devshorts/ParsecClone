@@ -30,6 +30,7 @@ type StringStreamP (state:string) =
 
         member x.skip count = 
             let (r, s) = (x:>IStreamP<_,_>).consume count
+
             (Some(true), s)
 
         member x.backtrack () = currentState <- initialState

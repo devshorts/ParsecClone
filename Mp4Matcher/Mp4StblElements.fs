@@ -30,8 +30,9 @@ module Mp4StblElements =
    
     let stsd<'a> = 
         basicAtom "stsd"    >>= fun id ->
-        skipRemaining id.Size 8 >>= fun _ ->
-        preturn id |>> STSD
+        versionAndFlags     >>= fun vFlags ->
+        bp.uint32           >>= fun numEntries ->
+        sampleDescription  |>> STSD
 
     let sampleSizeEntry<'a> = bp.uint32 >>= fun i -> preturn { SampleSize = i }
 

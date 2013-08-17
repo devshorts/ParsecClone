@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Mp4DataTypes.fs" />
     <Compile Include="Mp4ParserUtils.fs" />
+    <Compile Include="Mp4StsdElements.fs" />
     <Compile Include="Mp4StblElements.fs" />
     <Compile Include="Mp4Leaves.fs" />
     <Compile Include="Mp4Sample.fs" />

@@ -88,17 +88,22 @@ module Mp4DataTypes =
         SyncSamples: SyncSampleEntry list
     }
     
+    type StsdTypes = 
+        | STSD_AUDIO of unit
+        | STSD_VIDEO of unit
     type StblTypes = 
         | STTS of Stts
-        | STSD of AtomBase
+        | STSD of StsdTypes
         | STSZ of Stsz
         | STSC of Stsc
         | STCO of Stco
-        | STSS of Stss
+        | STSS of Stss     
+    type DinfTypes = 
+        | DREF of AtomBase   
     type MinfTypes = 
         | VMHD of AtomBase
         | SMHD of AtomBase
-        | DINF of AtomBase
+        | DINF of DinfTypes
         | STBL of StblTypes list
     type MdiaTypes = 
         | MDHD of AtomBase
