@@ -64,7 +64,14 @@ String operators in the `StringP` module are:
 
 Binary operators
 ----
-Binary operators in the `BinaryParser` module are:
+
+To use a binary parser, you need to instantiate the `BinParser` class, which is the container for these operators. They are not imported into the global space. The reason being that you can pass an endianess converter to it. The endianess converter is run against all number converters, but not anything else.   
+
+```fsharp
+let bp = new BinParser(Array.rev)
+```
+
+Binary operators of the `BinParser` class in the `BinaryParser` module are:
 
 - `byteN` - takes an integer N and consumes a byte array of that size
 - `byte1` - returns one byte
@@ -84,7 +91,18 @@ Binary operators in the `BinaryParser` module are:
 - `shiftL` - shifts left N bits
 - `shiftR` - shifts right N bits
 - `floatP` - parses a 4 byte float
-- `matchBytes` - consumes only if the stream begins with the exact byte array
+- `matchBytes` - parsers the exact byte sequence (as byte array)
+- `byteToUInt` - takes one byte, and converts to uint32
+- `toUInt16` - takes a 2 byte array, applies endianess converter, and converts to uint 16
+- `toUInt24` - takes a 3 byte array, applies endianess converter, and converts to uint 32
+- `toUInt32` - takes a 4 byte array, applies endianess converter, and converts to uint 32
+- `toUInt64` - takes a 8 byte array, applies endianess converter, and converts to uint 64
+- `byteToInt` - takes one byte and converts to int32
+- `toInt16` - takes a 2 byte array, applies endianess converter, and converts to int 16
+- `toInt24` - takes a 3 byte array, applies endianess converter, and converts to int 32
+- `toInt32` - takes a 4 byte array, applies endianess converter, and converts to int 32
+- `toInt64` - takes a 8 byte array, applies endianess converter, and converts to int 64
+  
 
 Overview
 ---
