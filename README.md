@@ -35,7 +35,7 @@ Included operators are
 - `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
 - `manySatisfy` - alias for `takeWhile`
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
-- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this.
+- `opt` - takes a parser, applies the the state, and returns a result option. Careful using this in the context of a `many` since it you can get into infinite loops since you always "succeed"
 - `createParserForwardedToRef` - returns a tuple of (parser, ref parser) to use for recursive calling parsers 
 
 String operators
