@@ -198,6 +198,8 @@ module Combinator =
 
     let between ``open`` parser close = ``open`` >>. parser .>> close
 
+    let between2 bookend parser = between bookend parser bookend
+
     let manySatisfy = takeWhile 
        
     let optWith parser listParser =

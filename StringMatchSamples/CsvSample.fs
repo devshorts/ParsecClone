@@ -39,7 +39,7 @@ module CsvSample =
 
     let normalAndEscaped = many (normal <|> escapedChar) >>= foldChars
     
-    let literal<'a> = between quote quoteStrings quote
+    let literal<'a> = quoteStrings |> between2 quote
 
     let csvElement = many (literal <|> normalAndEscaped) >>= foldStrings
 
