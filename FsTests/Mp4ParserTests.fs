@@ -10,7 +10,7 @@ open System.IO
 [<Test>]
 let moovFtypTest() = 
     
-    use f = new FileStream(@"Z:\Data\video\simcap1t_130724_1508_C102_4f383d432da44124bc649682e7c8b825.m4v", FileMode.Open)
+    use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
     let parserStream = new BinStream(f)
 
@@ -32,7 +32,7 @@ let moovFtypTest() =
 [<ExpectedException>]
 let expectedMatchOnName() = 
     
-    use f = new FileStream(@"Z:\Data\video\simcap1t_130724_1508_C102_4f383d432da44124bc649682e7c8b825.m4v", FileMode.Open)
+    use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
     let parserStream = new BinStream(f)
 
@@ -43,23 +43,23 @@ let expectedMatchOnName() =
 [<Test>]
 let matchFtypAndMoov() = 
     
-    use f = new FileStream(@"Z:\Data\video\simcap1t_130724_1508_C102_4f383d432da44124bc649682e7c8b825.m4v", FileMode.Open)
+    use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
     let parserStream = new BinStream(f)
 
     let result = test parserStream video
     
-    result |> should equal None
+    result.Length |> should equal 3
 
 [<Test>]
 let matchOptFtypAndMoov() = 
     
-    use f = new FileStream(@"Z:\Data\video\2013-07-18--12-38-10--QuickStart--R.0-C.1.m4v", FileMode.Open)
+    use f = new FileStream(@"NoFtyp.m4v", FileMode.Open)
 
     let parserStream = new BinStream(f)
 
     let result = test parserStream video
     
-    result |> should equal None
+    result.Length |> should equal 2
 
 

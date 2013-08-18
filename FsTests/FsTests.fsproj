@@ -55,6 +55,12 @@
     <Compile Include="BinaryUnitTests.fs" />
     <Compile Include="CsvSampleTests.fs" />
     <Compile Include="Mp4ParserTests.fs" />
+    <None Include="NoFtyp.m4v">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="WithFtyp.m4v">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BinaryCombinator\BinaryCombinator.fsproj">
