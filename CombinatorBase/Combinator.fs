@@ -34,7 +34,7 @@ module Combinator =
         match match1 with 
             | (Some(m), _) -> match1 
             | (None, state : IStreamP<_,_>)  when state.equals inputState -> second inputState            
-            |_ ->  failwith "No match found and underlying state was modified"
+            | (None, state) ->  failwith "No match found and underlying state was modified"
 
     let getBacktrackReply current next input =
         let match1 = current input
@@ -252,6 +252,15 @@ module Combinator =
 
 
     let sepBy p1 p2 = (attempt (p1 .>> p2) <|> p1)
+
+    let createParserForwardedToRef()= 
+        let refParser = ref (fun state -> failwith "Forwarded ref parser was never initialized")
+
+        let fwdParser : Parser<_,_,_>  = 
+            fun s -> 
+                !refParser s
+
+        (fwdParser, refParser)
 
     let test input (parser: Parser<'Return,_,_>) = 
         match parser input with

@@ -104,7 +104,7 @@ let newLine () =
     test newLine2 newline = newLine2.state |> Assert.IsTrue
 
 [<Test>]
-let attempt () = 
+let attemptTest () = 
     let target = new StringStreamP("foofighters")
         
     match test target parseWithErrorAttempt with
@@ -174,3 +174,37 @@ let many1Test () =
     let manyAbc = many1 abc
 
     test target manyAbc |> should equal ["abc";"abc"]
+
+[<Test>]
+let testForwardingRefP() = 
+    let target = new StringStreamP("{abc}") :> IStreamP<string, string> 
+
+    let abc = matchStr "abc"
+    
+    let impl, fwd = createParserForwardedToRef()
+
+    fwd := between (matchStr "{") abc (matchStr "}")
+
+    let result = test target impl
+
+    result |> should equal "abc"
+
+[<Test>]
+let testForwardingRefPRecursive() = 
+    let target = new StringStreamP("{a{a}}")
+
+    
+    let impl, fwd = createParserForwardedToRef()
+
+    let a  = matchStr "a"    
+    let lB = matchStr "{"
+    let rB = matchStr "}"
+
+    let brak = between lB (a .>> opt impl) rB
+
+    fwd := brak
+
+    let result = test target (impl .>> eof)
+
+    result |> should equal "a"
+

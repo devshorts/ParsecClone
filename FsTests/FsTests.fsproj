@@ -49,9 +49,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FooStringUnitTest.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="FooStringUnitTest.fs" />
     <Compile Include="BinaryUnitTests.fs" />
     <Compile Include="CsvSampleTests.fs" />
     <Compile Include="Mp4ParserTests.fs" />
