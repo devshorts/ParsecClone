@@ -33,6 +33,7 @@ Included operators are
 - `manyTill` - takes a parser and an end parser, and repeats the first parser zero or more times until the second parser succeeds
 - `manyTill1` same as manyTill except fails on zero matches, so expects at least one or more
 - `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
+- `between2` - takes a bookend parser and the target parser, and applies the bookend parser twice to `between`. Usage could be for `parser |> between2 quote`
 - `manySatisfy` - alias for `takeWhile`
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
 - `opt` - takes a parser, applies the the state, and returns a result option. Careful using this in the context of a `many` since it you can get into infinite loops since you always "succeed"
