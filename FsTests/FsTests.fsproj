@@ -61,6 +61,9 @@
     <None Include="WithFtyp.m4v">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ffmpegMade.m4v">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BinaryCombinator\BinaryCombinator.fsproj">

@@ -62,4 +62,15 @@ let matchOptFtypAndMoov() =
     
     result.Length |> should equal 2
 
+[<Test>]
+let madeByFfmpeg() = 
+    
+    use f = new FileStream(@"ffmpegMade.m4v", FileMode.Open)
+
+    let parserStream = new BinStream(f)
+
+    let result = test parserStream video
+    
+    result.Length |> should equal 5
+
 
