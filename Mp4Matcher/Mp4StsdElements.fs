@@ -8,17 +8,32 @@ open System
 module Mp4StsdElements = 
         
     let esds<'a> = 
-        basicAtom "esds"         >>= fun id ->
+        atom "esds"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id 
 
     let avcC<'a> = 
-        basicAtom "avcC"        >>= fun id ->
+        atom "avcC"        >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
     let btrt<'a> = 
-        basicAtom "btrt"        >>= fun id ->    
+        atom "btrt"        >>= fun id ->    
+        skipRemaining id.Size 8 >>= fun _ ->
+        preturn id 
+
+    let uuid<'a> = 
+        atom "uuid"        >>= fun id ->    
+        skipRemaining id.Size 8 >>= fun _ ->
+        preturn id 
+
+    let colr<'a> = 
+        atom "colr"        >>= fun id ->    
+        skipRemaining id.Size 8 >>= fun _ ->
+        preturn id 
+
+    let pasp<'a> = 
+        atom "pasp"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
@@ -63,7 +78,7 @@ module Mp4StsdElements =
     let videoStsd<'a> = 
         attempt(
                     videoDescription      >>= fun vDesc ->
-                    many1 (avcC <|> btrt) >>= fun inner ->
+                    many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid) >>= fun inner ->
                     preturn ()
                ) |>> STSD_VIDEO
 

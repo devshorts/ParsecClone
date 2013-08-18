@@ -21,7 +21,7 @@ module Mp4ParserUtils =
 
     let skipRemaining (start : uint32) consumed = bp.byteN ((int)start - consumed)
          
-    let basicAtom<'a> id =
+    let atom<'a> id =
         attempt (
             atomSize >>= fun size ->
             name id >>= fun name ->

@@ -7,9 +7,29 @@ open System
 [<AutoOpen>]
 module Mp4Leaves = 
    
-                            
+    let udta<'a> = 
+        atom "udta"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id  |>> UDTA
+
+    let free<'a> = 
+        atom "free"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id  |>> FREE
+        
+   
+    let edts<'a> = 
+        atom "edts"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id |>> EDTS
+        
+    let uuid<'a> = 
+        atom "uuid"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id                                      
+                           
     let ftyp<'a> = 
-        basicAtom "ftyp" >>= fun id -> 
+        atom "ftyp" >>= fun id -> 
         stringId         >>= fun majorBrand ->
         bp.uint32        >>= fun minorVersion ->
             let brands = ((int)id.Size - 16) / 4
@@ -21,7 +41,7 @@ module Mp4Leaves =
                 } |>> FTYP
 
     let mvhd<'a> = 
-        basicAtom "mvhd"            >>= fun id -> 
+        atom "mvhd"            >>= fun id -> 
         versionAndFlags             >>= fun vFlags ->
         date                        >>= fun creationTime ->
         date                        >>= fun modificationTime ->
@@ -41,12 +61,12 @@ module Mp4Leaves =
 
 
     let iods<'a> = 
-        basicAtom "iods" >>= fun id ->
+        atom "iods" >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id |>> IODS
 
     let tkhd<'a> = 
-        basicAtom "tkhd" >>= fun id ->
+        atom "tkhd" >>= fun id ->
         versionAndFlags >>= fun vFlags ->
         date >>= fun creationTime ->
         date >>= fun modificationTime ->
@@ -75,7 +95,7 @@ module Mp4Leaves =
         } |>> TKHD
     
     let vmhd<'a> = 
-        basicAtom "vmhd"    >>= fun id ->
+        atom "vmhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun graphicsMode ->
         bp.uint16           >>= fun opcodeRed ->
@@ -84,7 +104,7 @@ module Mp4Leaves =
         preturn id |>> VMHD
 
     let smhd<'a> = 
-        basicAtom "smhd"    >>= fun id ->
+        atom "smhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun balance ->
         bp.skip 2           >>= fun _ ->
@@ -97,18 +117,18 @@ module Mp4Leaves =
         preturn ()
 
     let dref<'a> = 
-        basicAtom "dref"    >>= fun id ->
+        atom "dref"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) drefEntry >>= fun entries ->
         preturn id |>> DREF
 
     let dinf<'a> = 
-        basicAtom "dinf"    >>= fun id ->
+        atom "dinf"    >>= fun id ->
         dref |>> DINF
 
     let mdhd<'a> = 
-        basicAtom "mdhd"    >>= fun id ->
+        atom "mdhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         date                >>= fun creationTime ->
         date                >>= fun modificationTime ->
@@ -119,7 +139,7 @@ module Mp4Leaves =
         preturn id |>> MDHD
 
     let hdlr<'a> = 
-        basicAtom "hdlr"    >>= fun id ->
+        atom "hdlr"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun componentType ->
         bp.uint32           >>= fun componentSubType ->

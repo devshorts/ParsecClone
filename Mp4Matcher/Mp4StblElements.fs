@@ -16,7 +16,7 @@ module Mp4StblElements =
         }
 
     let stts<'a> = 
-        basicAtom "stts" >>= fun id ->
+        atom "stts" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) timeToSample >>= fun samples ->
@@ -28,8 +28,14 @@ module Mp4StblElements =
         } |>> STTS
 
    
+   
+    let ctts<'a> = 
+        atom "ctts"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id  |>> CTTS
+
     let stsd<'a> = 
-        basicAtom "stsd"    >>= fun id ->
+        atom "stsd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         sampleDescription  |>> STSD
@@ -37,7 +43,7 @@ module Mp4StblElements =
     let sampleSizeEntry<'a> = bp.uint32 >>= fun i -> preturn { SampleSize = i }
 
     let stsz<'a> = 
-        basicAtom "stsz"    >>= fun id ->
+        atom "stsz"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun sampleSize ->
         bp.uint32           >>= fun numEntries ->
@@ -61,7 +67,7 @@ module Mp4StblElements =
         }
 
     let stsc<'a> = 
-        basicAtom "stsc" >>= fun id ->
+        atom "stsc" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) sampleToChunkEntry >>= fun samples ->
@@ -75,7 +81,7 @@ module Mp4StblElements =
     let chunkOffSet<'a> = bp.uint32 >>= fun i -> preturn { ChunkOffset = i }
 
     let stco<'a> = 
-        basicAtom "stco"    >>= fun id ->
+        atom "stco"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) chunkOffSet >>= fun offsets ->
@@ -89,7 +95,7 @@ module Mp4StblElements =
     let sampleNumber<'a> = bp.uint32 >>= fun i -> preturn { SampleNumber = i }
 
     let stss<'a> = 
-        basicAtom "stss" >>= fun id ->
+        atom "stss" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) sampleNumber >>= fun syncSamples ->

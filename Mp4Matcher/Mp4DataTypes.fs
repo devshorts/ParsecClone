@@ -97,7 +97,9 @@ module Mp4DataTypes =
         | STSZ of Stsz
         | STSC of Stsc
         | STCO of Stco
-        | STSS of Stss     
+        | STSS of Stss    
+        | CTTS of AtomBase 
+        | UNKNOWN of AtomBase
     type DinfTypes = 
         | DREF of AtomBase   
     type MinfTypes = 
@@ -111,14 +113,20 @@ module Mp4DataTypes =
         | MINF of MinfTypes list
     type TrakTypes = 
         | TKHD of Tkhd
+        | EDTS of AtomBase
         | MDIA of MdiaTypes list    
+        | UNKNOWN of AtomBase
     type MoovTypes = 
         | MVHD of Mvhd
         | IODS of AtomBase
         | TRAK of TrakTypes list
+        | UNKNOWN of AtomBase
     type Atom = 
         | FTYP of Ftyp 
         | MOOV of MoovTypes list
         | MDAT of AtomBase
+        | UDTA of AtomBase
+        | FREE of AtomBase
+        | UNKNOWN of AtomBase
                     
 
