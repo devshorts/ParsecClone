@@ -12,7 +12,6 @@ Generic Operators
 Included operators are
 
 - `>>=` - combiner with function callback
-
 - `>>=?` - combiner with function callback and backtracking
 - `>>.` - use result of second combinator
 - `.>>` - use result of first combinator
@@ -36,7 +35,8 @@ Included operators are
 - `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
 - `manySatisfy` - alias for `takeWhile`
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
-- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this. 
+- `opt` - takes a parser, applies the the state, if it returns a result returns a Some, otherwise returns a None. Up to you how you chain this.
+- `createParserForwardedToRef` - returns a tuple of (parser, ref parser) to use for recursive calling parsers 
 
 String operators
 ----
