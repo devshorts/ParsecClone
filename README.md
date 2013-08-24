@@ -247,13 +247,13 @@ module CsvSample =
                      | "t" -> "\t"                     
                      | c   -> c
 
-    let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldChars
+    let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldStrings
 
     let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
     
     let normal<'a> = satisfy validNormalChars any 
 
-    let normalAndEscaped = many (normal <|> escapedChar) >>= foldChars
+    let normalAndEscaped = many (normal <|> escapedChar) >>= foldStrings
     
     let literal<'a> = quoteStrings |> between2 quote
 
