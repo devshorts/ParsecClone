@@ -191,7 +191,7 @@ let testForwardingRefP() =
 
 [<Test>]
 let testForwardingRefPRecursive() = 
-    let target = new StringStreamP("{a{a}}")
+    let target = new StringStreamP("{a{a{a{a{a}}}}}")
 
     
     let impl, fwd = createParserForwardedToRef()
@@ -207,4 +207,3 @@ let testForwardingRefPRecursive() =
     let result = test target (impl .>> eof)
 
     result |> should equal "a"
-

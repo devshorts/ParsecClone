@@ -81,17 +81,17 @@ Binary operators of the `BinParser` class in the `BinaryParser` module are:
 - `intB` - returns the byte value as a signed integer
 - `int16` - parses 2 bytes and returns a signed 16 bit integer
 - `int32` - parses 4 bytes and returns a signed 32 bit integer
-- `int64` - parses 6 bytes and returns a signed 64 bit integer
+- `int64` - parses 8 bytes and returns a signed 64 bit integer
 - `uintB` - returns the byte value as an unsigned integer
 - `uint16` - parses 2 bytes and returns an unsigned 16 bit integer
 - `uint32` - parses 4 bytes and returns an unsigned 32 bit integer
-- `uint64` - parses 6 bytes and returns an unsigned 64 bit integer
+- `uint64` - parses 8 bytes and returns an unsigned 64 bit integer
 - `skip` - skips N bytes in the stream by seeking
 - `skiptoEnd` - skips to the end of the stream
 - `shiftL` - shifts left N bits
 - `shiftR` - shifts right N bits
 - `floatP` - parses a 4 byte float
-- `matchBytes` - parsers the exact byte sequence (as byte array)
+- `matchBytes` - parses the exact byte sequence (as byte array)
 - `byteToUInt` - takes one byte, and converts to uint32
 - `toUInt16` - takes a 2 byte array, applies endianess converter, and converts to uint 16
 - `toUInt24` - takes a 3 byte array, applies endianess converter, and converts to uint 32
@@ -121,8 +121,11 @@ The state is generalized so we can plug in different stream sources (strings, st
 ```fsharp
 type IStreamP<'StateType, 'ConsumeType> =        
     abstract member state : 'StateType
-    abstract member consume : IStreamP<'StateType, 'ConsumeType> -> int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
+    abstract member consume : int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
+    abstract member skip : int -> bool option * IStreamP<'StateType, 'ConsumeType>
     abstract member backtrack : unit -> unit
+    abstract member hasMore : unit -> bool
+    abstract member equals : IStreamP<'StateType, 'ConsumeType> -> bool
 ```
 
 An unfortunate side effect of this is that I ran into a value restriction because of the generics, so every combinator needs to include a generic declaration like 
