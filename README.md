@@ -20,6 +20,9 @@ Included operators are
 - `|>>` - pipe value into union or constructor
 - `|>>%` - pipe to zero argument discriminated union
 - `<|>` - first parser or second parser, as long as the or'd parsers don't modify the underlying state
+- `.<?>>.` - takes a parser of `T` and a parser of `T list` and applies both parers as options. if the first parser succeeds and the second parser fails, returns a list of the result of the first parser (`Some(T)::[]`), if the first parser succeeds and the second parser succeeds returns a cons list of both results (`Some(T)::Some(T) list`). This operator does not backtrack but will not fail if the first parser doesn't succeed (since its wrapped as an `opt`).
+- `.<<?>.` - basically the same as `.<?>>.` except with the arguments inverted. The list parser is first and the single parser is second. Returns a list of `T`.
+- `>>..` - takes a parser and a processor function.  Applies the processor function to the result of the the parser. Alias for `parser1 >>= fun first -> applier first `. The applier should use preturn. An example applier is used in the binary parser to shift bits: `shiftL n = fun (b : uint32)  -> preturn (b <<< n)`. See the mp4 example below to see how it can be used in conjunction with a regular parser.
 - `many` - repeats a parser zero or more times
 - `match` - generic match on predicate and executes state modifier to return result
 - `anyOf` - takes a combinator and a list of strings and or's them all together with the `<|>` combinator
