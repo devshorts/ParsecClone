@@ -10,11 +10,7 @@ module StringP =
 
     type ParseState = State<string, string>
     
-    let sumChars = List.fold (+) ""
-
-    let foldChars = fun chars -> preturn (sumChars chars)
-
-    let foldStrings = fun (strings:string list) -> preturn (List.reduce (+) strings)
+    let foldStrings = fun strings -> preturn (List.reduce (+) strings)
 
     let isMatch regex item = Regex.IsMatch(item, regex)
 
@@ -75,7 +71,7 @@ module StringP =
 
     let ws<'a> = opt (many (satisfy isSpace any))
                     >>= function
-                        | Some(i) -> preturn (sumChars i)
+                        | Some(i) -> preturn (List.reduce (+) i)
                         | None -> preturn ""
 
     let isNewLine i = isMatch "\r\n" i || isMatch "\r" i || isMatch "\n" i

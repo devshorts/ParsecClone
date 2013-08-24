@@ -64,6 +64,7 @@ String operators in the `StringP` module are:
 - `tab` - \t
 - `tabs` - \t+
 - `ws` - optional whitespace parser
+- `foldStrings` - takes a string list and preturns a concatenated version of those strings (`string list -> parser<string>`) 
 
 Binary operators
 ----
