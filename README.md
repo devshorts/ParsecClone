@@ -107,7 +107,30 @@ Binary operators of the `BinParser` class in the `BinaryParser` module are:
 - `toInt24` - takes a 3 byte array, applies endianess converter, and converts to int 32
 - `toInt32` - takes a 4 byte array, applies endianess converter, and converts to int 32
 - `toInt64` - takes a 8 byte array, applies endianess converter, and converts to int 64
+
+Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  Operators that make this possible include:
+
 - `makeBitP` - takes a seed parser (to provide the underlying byte array to use as the parser set) and a bit level parser and applies the bit level parser to the seed.  Bit parsers are complicated because the smallest thing you can read off the stream is a byte, so you have to work in memory on your byte stream.    
+- `bitsN` - takes an integer N and returns a list of `Bit` union types (`Zero` or `One`)
+- `bitsToInt` - takes a bit list and converts it to an `int`
+- `bitN` - takes an integer N and returns back the bit value at position N 
+- `bit1` - returns the value of the first bit (zero or one)
+- `bit2` - returns the value of the second bit (zero or one)
+- `bit3` - returns the value of the third bit (zero or one)
+- `bit4` - returns the value of the fourth bit (zero or one)
+- `bit5` - returns the value of the fifth bit (zero or one)
+- `bit6` - returns the value of the sixth bit (zero or one)
+- `bit7` - returns the value of the seventh bit (zero or one)
+- `bit8` - returns the value of the eight bit (zero or one)
+
+Bit parsing works left to right and doesn't get run through the endianness converter.  Here is the layout of what is meant by bit 1 through bit 8, 
+
+```
+0xF = 0b 1 1 1 1 1 1 1 1
+  bit#   1 2 3 4 5 6 7 8
+```
+
+If you need to extend the bit parsing, there is a `BitStream` class that handles the bit handling from a byte array
 
 Overview
 ---

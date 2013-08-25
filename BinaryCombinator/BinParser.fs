@@ -46,8 +46,7 @@ module BinParsers =
 
                 (Some(true),  new BinStream(state.state) :> IStreamP<Stream, byte[]> )
 
-        member x.byteN = binMatch 
-        member x.bitsN = bitMatch
+        member x.byteN = binMatch         
 
         member x.byte1 = x.byteN 1 >>= fun b1 -> preturn b1.[0]  
 
@@ -83,6 +82,8 @@ module BinParsers =
                           preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))
 
         (* Bit parsing *)
+
+        member x.bitsN = bitMatch
 
         member x.bitsToInt = bitsToUInt                       
 
