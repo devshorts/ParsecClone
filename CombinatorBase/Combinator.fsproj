@@ -47,6 +47,12 @@
   <ItemGroup>
     <Compile Include="IStreamP.fs" />
     <Compile Include="Combinator.fs" />
+    <Compile Include="StringStream.fs" />
+    <Compile Include="StringP.fs" />
+    <Compile Include="ByteUtils.fs" />
+    <Compile Include="BitStream.fs" />
+    <Compile Include="BinStream.fs" />
+    <Compile Include="BinParser.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -1,7 +1,6 @@
-﻿namespace StringCombinator
+﻿namespace ParsecClone.StringCombinator
 
-open Combinator
-open StringCombinator
+open ParsecClone.CombinatorBase
 open System.Text.RegularExpressions
 open System
 

@@ -3,8 +3,8 @@
 open FsUnit
 open NUnit.Framework
 open Mp4Matcher
-open BinaryCombinator
-open Combinator
+open ParsecClone.BinaryCombinator
+open ParsecClone.CombinatorBase
 open System.IO
 
 [<Test>]

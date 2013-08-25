@@ -50,11 +50,6 @@
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\StringCombinator\StringCombinator.fsproj">
-      <Name>StringCombinator</Name>
-      <Project>{8a9f8167-b54c-4c3e-92a9-98ddd3d1c935}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

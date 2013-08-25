@@ -1,4 +1,4 @@
-﻿namespace Combinator
+﻿namespace ParsecClone.CombinatorBase
 
 [<AutoOpen>]
 module Combinator =

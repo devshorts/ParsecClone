@@ -1,4 +1,4 @@
-﻿namespace Combinator
+﻿namespace ParsecClone.CombinatorBase
 
 type IStreamP<'StateType, 'ConsumeType> =        
     abstract member state : 'StateType

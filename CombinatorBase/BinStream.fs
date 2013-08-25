@@ -1,8 +1,7 @@
-﻿namespace BinaryCombinator
+﻿namespace ParsecClone.BinaryCombinator 
 
 open System.IO
-open Combinator
-
+open ParsecClone.CombinatorBase
 
 type BinStream (state:Stream) =   
     

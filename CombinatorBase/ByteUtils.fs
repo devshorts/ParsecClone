@@ -1,4 +1,4 @@
-﻿namespace BinaryCombinator
+﻿namespace ParsecClone.BinaryCombinator
 
 [<AutoOpen>]
 module ByteUtils = 

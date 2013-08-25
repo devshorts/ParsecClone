@@ -3,9 +3,8 @@
 open System
 open NUnit.Framework
 open FsUnit
-
-open Combinator
-open StringCombinator
+open ParsecClone.StringCombinator
+open ParsecClone.CombinatorBase
 open StringMatchers.FooSample
 
 

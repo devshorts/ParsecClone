@@ -1,6 +1,6 @@
-﻿namespace BinaryCombinator 
+﻿namespace ParsecClone.BinaryCombinator 
 
-open Combinator
+open ParsecClone.CombinatorBase
 open System.IO
 
 [<AutoOpen>]

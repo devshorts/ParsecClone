@@ -1,7 +1,7 @@
 ﻿namespace Mp4Matcher
 
-open Combinator
-open BinaryCombinator
+open ParsecClone.BinaryCombinator
+open ParsecClone.CombinatorBase
 open System
 
 [<AutoOpen>]

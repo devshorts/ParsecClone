@@ -3,8 +3,8 @@
 open NUnit.Framework
 open FsUnit
 open System.IO
-open Combinator
-open BinaryCombinator
+open ParsecClone.BinaryCombinator
+open ParsecClone.CombinatorBase
 
 let bp = new BinParser(Array.rev)
 
@@ -231,7 +231,6 @@ let testConsumingBits() =
     let bytes = [|0x01|] |> Array.map byte
 
     let parserStream = new BinStream(new MemoryStream(bytes))   
-
     
     let selectLastBit = bp.bit1 >>= fun one ->
                         bp.bit1 >>= fun two ->

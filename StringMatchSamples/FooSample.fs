@@ -1,7 +1,7 @@
 ﻿namespace StringMatchers
 
-open Combinator
-open StringCombinator
+open ParsecClone.StringCombinator
+open ParsecClone.CombinatorBase
 
 module FooSample = 
     
