@@ -186,10 +186,10 @@ let bitParserTest() =
 
     let parserStream = new BinStream(new MemoryStream(bytes))   
 
-    let bitToBool = bp.bitsN 4 >>= fun i -> if i = 15 then preturn true else preturn false
+    let bitToBool = bp.bitsN 4 
 
     let bitP = bp.makeBitP (byteN 1) bitToBool
 
     let result = test parserStream (bitP .>> bp.byte1 .>> eof)
     
-    result |> should equal true
+    result |> should equal 15

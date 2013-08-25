@@ -41,6 +41,7 @@ Included operators are
 - `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
 - `opt` - takes a parser, applies the the state, and returns a result option. Careful using this in the context of a `many` since it you can get into infinite loops since you always "succeed"
 - `createParserForwardedToRef` - returns a tuple of (parser, ref parser) to use for recursive calling parsers 
+- `reproc elevator seed parser` - This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   
 
 String operators
 ----
@@ -106,7 +107,7 @@ Binary operators of the `BinParser` class in the `BinaryParser` module are:
 - `toInt24` - takes a 3 byte array, applies endianess converter, and converts to int 32
 - `toInt32` - takes a 4 byte array, applies endianess converter, and converts to int 32
 - `toInt64` - takes a 8 byte array, applies endianess converter, and converts to int 64
-  
+- `makeBitP` - takes a seed parser (to provide the underlying byte array to use as the parser set) and a bit level parser and applies the bit level parser to the seed.  Bit parsers are complicated because the smallest thing you can read off the stream is a byte, so you have to work in memory on your byte stream.    
 
 Overview
 ---
@@ -390,3 +391,25 @@ let tkhd<'a> =
     } |>> TKHD
 ```
 
+Binary bit parsing
+----
+
+Bit parsing is new, and I don't have a big example yet, but here is a sample from a unit test:
+
+```fsharp
+[<Test>]
+let bitParserTest() = 
+    let bytes = [|0xF0;0x01|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    let bitToBool = bp.bitsN 4 
+
+    let bitP = bp.makeBitP (byteN 1) bitToBool
+
+    let result = test parserStream (bitP .>> bp.byte1 .>> eof)
+    
+    result |> should equal 15
+```
+
+We create a single byte seed to use for the bit parsing, and then read 4 bits from the read byte (the other 4 bits are ignored).  Then I check if the 4 bytes equals 15 (0b1111). The underlying source stream was advanced by 1 byte, so I read the next byte to discard it, and then check for eof for completeness.  
