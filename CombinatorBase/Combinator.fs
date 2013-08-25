@@ -60,9 +60,13 @@ module Combinator =
 
     let (>>=?) (current) (next) = getBacktrackReply current next       
         
-    let (|>>)  parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = parser >>= fun value -> preturn (targetType value)
+    let (|>>)  parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = 
+        parser >>= fun value -> 
+        preturn (targetType value)
 
-    let (|>>%) parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = parser >>= fun _ -> preturn targetType
+    let (|>>%) parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = 
+        parser >>= fun _ -> 
+        preturn targetType
 
     let (>>.)  parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = 
         parser1 >>= fun first -> 
@@ -263,6 +267,20 @@ module Combinator =
                 !refParser s
 
         (fwdParser, refParser)
+
+
+    let reproc (elevator : 'a -> IStreamP<_,_>) seed bitParser = 
+        fun stream ->
+            let result = seed stream
+            match result with
+                | Some(m), (postSeedState:IStreamP<_,_>) -> 
+                    let elevatedStream = elevator m
+                    
+                    let (bitParserResult, _) = bitParser elevatedStream
+
+                    (bitParserResult, postSeedState)                        
+                                        
+                | (None, consumed) -> (None, consumed)
 
     let test input (parser: Parser<'Return,_,_>) = 
         match parser input with

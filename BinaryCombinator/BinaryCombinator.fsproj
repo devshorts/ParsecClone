@@ -44,6 +44,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitStream.fs" />
     <Compile Include="BinStream.fs" />
     <Compile Include="BinParser.fs" />
   </ItemGroup>

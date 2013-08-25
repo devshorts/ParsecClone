@@ -16,8 +16,7 @@ let preturnTest () =
     let band = test target band
         
     match band with
-        | FooFighter -> Assert.IsTrue true
-        | _ -> Assert.IsFalse true
+        | FooFighter -> Assert.IsTrue true        
 
 [<Test>]
 let manyTest () = 
@@ -207,3 +206,21 @@ let testForwardingRefPRecursive() =
     let result = test target (impl .>> eof)
 
     result |> should equal "a"
+
+[<Test>]
+let reprocessTest() = 
+    let target = new StringStreamP("abc") :> IStreamP<string, string> 
+
+    let abc = matchStr "abc"
+
+    let a = matchStr "a" >>= fun a ->
+            matchStr "b" >>= fun b ->
+            matchStr "c" >>= fun c -> preturn (a + b + c + "foo")
+
+    let elevator = (fun i -> new StringStreamP(i) :> IStreamP<string, string>)
+        
+    let r = reproc elevator (abc .>> eof) a
+
+    let result = test target r
+
+    result |> should equal "abcfoo"

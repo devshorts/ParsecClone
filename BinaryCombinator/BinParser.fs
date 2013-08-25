@@ -6,16 +6,21 @@ open System.IO
 [<AutoOpen>]
 module BinParsers = 
     type ParseState = State<Stream, byte[]>
+    type BitState = State<byte[], int>
     
     type BinParser (endianNessConverter : byte[] -> byte[]) = 
                 
-        let getBinStream (state:ParseState) = (state :?> BinStream)
+        let getBinStream (state:ParseState) = state :?> BinStream
+        let getBitStream (state:BitState) = state :?> BitStream
 
-        let streamCanBeConsumed (state:ParseState) count  = (state |> getBinStream).streamCanBeConsumed state count
+        let streamCanBeConsumed (state : ParseState) count  = state.canConsume count
+        let bitStreamCanBeConsumed (state : BitState) count  = state.canConsume count
     
-        let streamStartsWith (state:ParseState) bytes  = (state |> getBinStream).streamStartsWith state bytes    
+        let streamStartsWith (state:ParseState) bytes  = (state |> getBinStream).streamStartsWith state bytes            
 
         let binMatch (num:int) = matcher streamCanBeConsumed num    
+
+        let bitMatch num = matcher bitStreamCanBeConsumed num
         
         let binMatchExact bytes = matcher streamStartsWith bytes    
 
@@ -42,6 +47,7 @@ module BinParsers =
                 (Some(true),  new BinStream(state.state) :> IStreamP<Stream, byte[]> )
 
         member x.byteN = binMatch 
+        member x.bitsN = bitMatch
 
         member x.byte1 = x.byteN 1 >>= fun b1 -> preturn b1.[0]  
 
@@ -73,6 +79,10 @@ module BinParsers =
 
         member x.shiftR n = fun (b : uint32) -> preturn (b >>> n)
 
+        member x.makeBitP seed parser = reproc (fun (b:byte[]) -> new BitStream(b, 0) :> IStreamP<byte[], int>) seed parser
+
         member x.floatP = x.byteN 4 >>= fun b -> 
                           preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))
+
+        
 

@@ -39,6 +39,8 @@ type StringStreamP (state:string) =
 
         member x.equals istream = istream.state = state
 
+        member x.canConsume count = if state.Length <= count then Some(count) else None
+
     member x.startsWith (inputStream:IStreamP<string, string>) target = 
         if String.IsNullOrEmpty inputStream.state then None
         else if inputStream.state.StartsWith target then 

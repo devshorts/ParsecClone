@@ -7,3 +7,4 @@ type IStreamP<'StateType, 'ConsumeType> =
     abstract member backtrack : unit -> unit
     abstract member hasMore : unit -> bool
     abstract member equals : IStreamP<'StateType, 'ConsumeType> -> bool
+    abstract member canConsume : int -> int option

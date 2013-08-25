@@ -10,7 +10,7 @@ module StringP =
 
     type ParseState = State<string, string>
     
-    let foldStrings = fun strings -> preturn (List.reduce (+) strings)
+    let foldStrings = fun (strings : string list) -> preturn (List.reduce (+) strings)
 
     let isMatch regex item = Regex.IsMatch(item, regex)
 

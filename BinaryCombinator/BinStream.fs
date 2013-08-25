@@ -30,15 +30,20 @@ type BinStream (state:Stream) =
         member x.hasMore () = state.Position <> state.Length
 
         member x.equals istream = istream.state.Position = startPos
+
+        member x.canConsume count = 
+            if (int)state.Position + (int)count <= (int)state.Length then Some(count)
+            else None
             
         
     member x.initBytes size = Array.init size (fun i -> byte(0))
 
+    (*
     member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 
         if (int)state.state.Position + (int)count <= (int)state.state.Length then
             Some(count)
         else 
-            None
+            None*)
 
     member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 

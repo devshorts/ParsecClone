@@ -179,3 +179,17 @@ let endianessTest2() =
     let result = test parserStream int16
     
     result |> should equal -3717
+
+[<Test>]
+let bitParserTest() = 
+    let bytes = [|0xF0;0x01|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    let bitToBool = bp.bitsN 4 >>= fun i -> if i = 15 then preturn true else preturn false
+
+    let bitP = bp.makeBitP (byteN 1) bitToBool
+
+    let result = test parserStream (bitP .>> bp.byte1 .>> eof)
+    
+    result |> should equal true
