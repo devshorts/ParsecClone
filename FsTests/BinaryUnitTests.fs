@@ -243,9 +243,9 @@ let testConsumingBits() =
                         bp.bit1 >>= fun eight ->
                         preturn [|one;two;three;four;five;six;seven;eight|]
                         
-    let bitP = bp.makeBitP (byteN 1) selectLastBit
+    let bitP = bp.makeBitP (byteN 1) (selectLastBit .>> eof) // the eof here is to make sure we read all the bits
 
-    let result = test parserStream (bitP .>> eof)
+    let result = test parserStream (bitP .>> eof) // make sure we read all the bytes
     
     result |> should equal <| bytesToBits [|byte(0x01)|]
 
