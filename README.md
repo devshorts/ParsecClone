@@ -5,6 +5,19 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 In general, combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well.I decided to mimic the fparsec combinator syntax since I really liked that format.
 
+Installation
+---
+Install ParsecClone via [NuGet](https://www.nuget.org/packages/ParsecClone/0.1.0)
+
+```
+Install-Package ParsecClone
+```
+
+The general operators are in `ParsecClone.CombinatorBase`.
+
+String handling is in `ParsecClone.StringCombinator`.
+
+Binary handling is in `ParsecClone.BinaryCombinator`.
 
 Generic Operators
 ----
