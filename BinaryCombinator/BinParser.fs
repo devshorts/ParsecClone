@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module BinParsers = 
     type ParseState = State<Stream, byte[]>
-    type BitState = State<byte[], int>
+    type BitState = State<byte[], Bit[]>
     
     type BinParser (endianNessConverter : byte[] -> byte[]) = 
                 
@@ -79,10 +79,27 @@ module BinParsers =
 
         member x.shiftR n = fun (b : uint32) -> preturn (b >>> n)
 
-        member x.makeBitP seed parser = reproc (fun (b:byte[]) -> new BitStream(b, 0) :> IStreamP<byte[], int>) seed parser
-
         member x.floatP = x.byteN 4 >>= fun b -> 
                           preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))
 
-        
+        (* Bit parsing *)
 
+        member x.bitsToInt = bitsToUInt                       
+
+        member x.makeBitP seed parser = reproc (fun (b:byte[]) -> new BitStream(b, 0) :> IStreamP<byte[], Bit[]>) seed parser
+
+        member x.bitN n = 
+                          let zeroBasedN = n - 1
+                          x.bitsN n >>= fun value -> 
+                          preturn value.[zeroBasedN]
+                          
+        member x.bit1 = x.bitN 1
+        member x.bit2 = x.bitN 2
+        member x.bit3 = x.bitN 3
+        member x.bit4 = x.bitN 4
+        member x.bit5 = x.bitN 5
+        member x.bit6 = x.bitN 6
+        member x.bit7 = x.bitN 7
+        member x.bit8 = x.bitN 8
+
+       

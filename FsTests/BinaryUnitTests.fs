@@ -186,10 +186,89 @@ let bitParserTest() =
 
     let parserStream = new BinStream(new MemoryStream(bytes))   
 
-    let bitToBool = bp.bitsN 4 
+    let bitToBool = bp.bitsN 4 |>> bp.bitsToInt
 
     let bitP = bp.makeBitP (byteN 1) bitToBool
 
     let result = test parserStream (bitP .>> bp.byte1 .>> eof)
     
     result |> should equal 15
+
+[<Test>]
+let selectBitTest() = 
+    let bytes = [|0xF0;0x01|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    let selectLastBit = bp.bitN 16 
+
+    let bitP = bp.makeBitP (byteN 2) selectLastBit
+
+    let result = test parserStream (bitP .>> eof)
+    
+    result |> should equal One
+
+[<Test>]
+[<ExpectedException>]
+let testConsumingBitsError() = 
+    let bytes = [|0xF0|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    // exception should happen since we consumed one bit
+    // then tried to consume 8 more, but the underlying byte array
+    // only had 8 total bits
+    let selectLastBit = bp.bit1 >>. bp.bit8
+
+    let bitP = bp.makeBitP (byteN 1) selectLastBit
+
+    let result = test parserStream (bitP .>> eof)
+    
+    result |> should equal Zero
+
+[<Test>]
+let testConsumingBits() = 
+    let bytes = [|0x01|] |> Array.map byte
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+
+    
+    let selectLastBit = bp.bit1 >>= fun one ->
+                        bp.bit1 >>= fun two ->
+                        bp.bit1 >>= fun three ->
+                        bp.bit1 >>= fun four ->
+                        bp.bit1 >>= fun five ->
+                        bp.bit1 >>= fun six ->
+                        bp.bit1 >>= fun seven ->
+                        bp.bit1 >>= fun eight ->
+                        preturn [|one;two;three;four;five;six;seven;eight|]
+                        
+    let bitP = bp.makeBitP (byteN 1) selectLastBit
+
+    let result = test parserStream (bitP .>> eof)
+    
+    result |> should equal <| bytesToBits [|byte(0x01)|]
+
+[<Test>]
+let testApplyManyBits() = 
+    let bytes = Array.init 10 (fun i -> byte(0x01))
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+    
+    let selectLastBit = bp.bit1 >>= fun one ->
+                        bp.bit1 >>= fun two ->
+                        bp.bit1 >>= fun three ->
+                        bp.bit1 >>= fun four ->
+                        bp.bit1 >>= fun five ->
+                        bp.bit1 >>= fun six ->
+                        bp.bit1 >>= fun seven ->
+                        bp.bit1 >>= fun eight ->
+                        preturn [|one;two;three;four;five;six;seven;eight|]
+                        
+    let bitP = bp.makeBitP (byteN 1) selectLastBit
+
+    let result = test parserStream (many bitP .>> eof)
+    
+    let target = [0..Array.length bytes - 1] |> List.map (fun _ -> bytesToBits <| bytes.[0..0]) 
+
+    result |> should equal target 

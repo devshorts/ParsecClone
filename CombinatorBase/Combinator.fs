@@ -52,7 +52,7 @@ module Combinator =
     let getReply current next (input:IStreamP<_,_>) : Reply<'Return, 'StateType, 'ConsumeType> =       
         let match1 = current input
         match match1 with 
-            | (Some(result), state) -> state |> next result                              
+            | (Some(result), state) -> next result state
             | (None, state : IStreamP<_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
