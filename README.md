@@ -175,78 +175,7 @@ An unfortunate side effect of this is that I ran into a value restriction becaus
  
 Included is a set of nunit tests that demonstrates the combinators (both string and binary).
 
-Explanation
----
-
-Combinators, to be useful, need a way to be combined and chained. But before we look at how to combine them, look at how to evaluate two already combined parsers.
-
-```fsharp
-getReply (current:Parser<'A, 'Y>) (next:'A -> Parser<'B, 'Y>)  (input : State<'Y>): Reply<'B, 'Y>  
-```
-
-This function takes an initial parser, a function that accepts the result of the current parser and returns a new parser, as well as the current state.  The idea is that `getReply` will apply the current state to the current parser, to get a result from it. Then, if this result yields a match (so its a `Some('a)`), it executes the second parser with the new resulting state. This gives us the result from the combination of both parsers. 
-
-But, we need to be able to create new parsers.  Since a parser is a type of `State -> Reply<'T>` and we already have a function that can generate a `Reply<'T`> (above), then we need a way to create a function that takes a `State` and returns a `Reply<'T>`. Look closely though, we already happen to have that! If you curry the last argument off of `getReply` you now have a function that takes a `State` and returns a `Reply<'T>`.  Since its new signature is now `State -> Reply<'T>` that is equivalent to a combined parser!
- 
-Now we can tie in shortcut operators like FParsec has:
-
-```fsharp
-let (>>=)  (current:Parser<'A, 'Y>) (next:'A -> Parser<'B, 'Y>)  : Parser<'B, 'Y> = getReply current next                                                                      
-```
-
-The `>>=` function returns a function that wants a state.  Since its just a function that takes a state and returns a `Reply`, we've effectively chained the combinators together.   
-
-Simple Example
----
-
-Lets run through an example.  Let's make a parser:
-
-```fsharp
-let matchesName = matchStr "name"
-```
-
-Here, `matchStr` is a function that wants a state. We could explicity call it like this:
-
-```fsharp
-let state = "name is bob"
-let result = matchStr "name" state
-```
-
-Here, result is a `Result option * State`, because the parser internally will have returned whether we found what we wanted or not, AND it returned the new state. The new state would be ` is bob` since `name` was consumed. 
-
-Ok, fine, but what if we want to first match on name, and if that succeeds, then match on `is bob`?  Let's do this:
-
-```fsharp
-type Names =
-	| Bob
-	| Martin
-	| Angela
-
-let state = "name is bob"
-let matchesName = matchStr "name"
-let matchesIsBob = matchStr " is bob"
-let combined = matchesName >>. matchesIsBob |>>% Bob
-let result = combined state
-```
-
-If `matchesName` is a function that wants a state and returns a reply, and `matchesIsBob` is also a function that wants a state and returns a reply, what we need now is a combiner to take the first function and (if it succeeds) take its result and the new state and give it to the second function:
-
-```fsharp
-let (>>=)  firstParser secondParser  : Parser<'ReturnType, 'StateType> = 
-	fun inputState ->
-		let resultOfFirst = firstParser input
-		    match resultOfFirst with 
-		        | (Some(result), state) -> secondParser result state        
-		        | (None, state) -> (None, state)                
-```
-
-So, see how `>>=` returns a new function which takes the first parser and the second parser, and returns a new function that applies the output of the first to the input of the second.  
-
-The `|>>%` operator will take the result of the applied parsers and return the resulting union as a parser. When I say parser, just imagine a function that takes a state that returns a reply.  The reply type now is going to be `Names`. So we've lifted the type from just string into the union. Now we can build more complex structures and have things be strongly typed.
-  
-By leveraging F#'s currying, you can continue to build functions and functions and functions, until finally you seed the last function with the state you want to parse.  The rest, is just executing all the combined functions.
-
-A more complicated example
+A CSV Parser
 ---
 Now, lets actually use my parsec clone. Below is a grammar that will parse csv files
 
@@ -322,6 +251,30 @@ And so is
 ```
 
 All these cases work with the sample CSV parser
+
+Here is an example of how to use the csv parser
+
+```fsharp
+[<Test>]
+let testAll() = 
+    let t = @"This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"""
+
+    let csv = new StringStreamP(t)
+
+    let result = test csv lines
+
+    List.length result |> should equal 11
+```
 
 Binary Parser Example
 ---
@@ -449,3 +402,31 @@ let bitParserTest() =
 ```
 
 We create a single byte seed to use for the bit parsing, and then read 4 bits from the read byte (the other 4 bits are ignored).  Then I check if the 4 bytes equals 15 (0b1111). The underlying source stream was advanced by 1 byte, so I read the next byte to discard it, and then check for eof for completeness.  
+
+Here is another example that applies the combinator `many` to the bitParser.  This example parses each bit and returns the bit value for a byte, and is applied to an array of 10 bytes
+
+```fsharp
+[<Test>]
+let testApplyManyBits() = 
+    let bytes = Array.init 10 (fun i -> byte(0x01))
+
+    let parserStream = new BinStream(new MemoryStream(bytes))   
+    
+    let selectAllBits = bp.bit1 >>= fun one ->
+                        bp.bit1 >>= fun two ->
+                        bp.bit1 >>= fun three ->
+                        bp.bit1 >>= fun four ->
+                        bp.bit1 >>= fun five ->
+                        bp.bit1 >>= fun six ->
+                        bp.bit1 >>= fun seven ->
+                        bp.bit1 >>= fun eight ->
+                        preturn [|one;two;three;four;five;six;seven;eight|]
+                        
+    let bitP = bp.makeBitP (byteN 1) selectAllBits
+
+    let result = test parserStream (many bitP .>> eof)
+    
+    let target = [0..Array.length bytes - 1] |> List.map (fun _ -> bytesToBits <| bytes.[0..0]) 
+
+    result |> should equal target 
+```
