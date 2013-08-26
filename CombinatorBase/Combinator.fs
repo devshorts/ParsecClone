@@ -104,7 +104,7 @@ module Combinator =
     (* 
         Take parser till predicate is true and validate the mininum number of elements was found
     *)
-    let private takeTillB predicate parser minCount = 
+    let private takeTillWithCount minCount predicate parser = 
 
         let didFind found currentState = 
                 match List.length found with 
@@ -127,11 +127,11 @@ module Combinator =
                                   
             many' parser ([], state)
 
-    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> = takeTillB predicate parser 0          
+    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> = takeTillWithCount 0 predicate parser           
 
     let takeWhile predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTill (predicate >> not) parser
         
-    let private manyTillB minCount (parser:Parser<_,_,_>) (parserEnd:Parser<_,_,_>) : Parser<_,_,_> = 
+    let private manyTillWithCount minCount parser endParser = 
         fun state ->
             let ifHasMore apply (state:IStreamP<_,_>) acc = 
                 match state.hasMore() with 
@@ -143,7 +143,7 @@ module Combinator =
             and takeParser currentState acc = 
                 match parser currentState with 
                     | Some(m), consumedParserState ->                                                                             
-                        match succeed parserEnd consumedParserState with 
+                        match succeed endParser consumedParserState with 
                             | false, _ -> testStream consumedParserState (m::acc)
                             | true, consumedEndParserState -> (Some(m::acc), consumedEndParserState)
 
@@ -155,9 +155,9 @@ module Combinator =
             
             testStream state []
 
-    let manyTill p pEnd = manyTillB 0 p pEnd
+    let manyTill p pEnd = manyTillWithCount 0 p pEnd
 
-    let manyTill1 p pEnd = manyTillB 1 p pEnd
+    let manyTill1 p pEnd = manyTillWithCount 1 p pEnd
         
     let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =                      
         let count = ref 0
@@ -189,7 +189,7 @@ module Combinator =
                                 
     let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun s -> true) parser   
 
-    let many1 (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTillB (fun s -> false) parser 1  
+    let many1 (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTillWithCount 1 (fun s -> false) parser  
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
