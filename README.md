@@ -19,6 +19,18 @@ String handling is in `ParsecClone.StringCombinator`.
 
 Binary handling is in `ParsecClone.BinaryCombinator`.
 
+When to use and known limitations
+---
+ParseClone doesn't work on string streams. One of the reasons is that to use regular expressions you need to have unlimited lookahead to your stream. With a stream you'd end up having to read the whole stream in anyways!  Since FParsec works on streams, I chose to not duplicate that functionality. 
+
+If you have strings you can buffer into memory, ParsecClone will work great (so smaller files that you can read all in one go). 
+
+ParsecClone is better suited for its binary capabilities which does work on stream sources (memory streams, file streams, etc). 
+
+More importantly, ParsecClone is great for adding new stream sources to extend its capabilities. Granted this requires a rebuild of the project, but its almost trivial to add in new consumable streams.  If you have a request for a stream source please open an issue for me to track.
+
+A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
+
 Generic Operators
 ----
 
