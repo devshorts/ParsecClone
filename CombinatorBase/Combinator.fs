@@ -130,7 +130,11 @@ module Combinator =
     let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> = takeTillWithCount 0 predicate parser           
 
     let takeWhile predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTill (predicate >> not) parser
-        
+   
+    (* 
+        Take the parser while the end parser does not succeed. When the end parser succeeds
+        validate that how much was taken matches the minCount and returns a list of results 
+    *)
     let private manyTillWithCount minCount parser endParser = 
         fun state ->
             let ifHasMore apply (state:IStreamP<_,_>) acc = 
@@ -169,7 +173,8 @@ module Combinator =
             
         takeWhile (countReached >> not) parser >>= fun result -> 
             if result.Length <> num then
-                raise(Error("Error, attempted to match " + num.ToString() + " but only got " + (result.Length).ToString())) 
+                failwith ("Error, attempted to match " + num.ToString() + " but only got " + result.Length.ToString())
+
             preturn result          
     
     let eof = 
@@ -263,16 +268,20 @@ module Combinator =
         (fwdParser, refParser)
 
 
-    let reproc (elevator : 'a -> IStreamP<_,_>) seed bitParser = 
+    (*
+        Elevates the seed to a new stream and applies the parser 
+        to the seeded stream state
+    *)
+    let reproc (elevator : 'a -> IStreamP<_,_>) seed parser = 
         fun stream ->
             let result = seed stream
             match result with
                 | Some(m), (postSeedState:IStreamP<_,_>) -> 
                     let elevatedStream = elevator m
                     
-                    let (bitParserResult, _) = bitParser elevatedStream
+                    let (parseResult, _) = parser elevatedStream
 
-                    (bitParserResult, postSeedState)                        
+                    (parseResult, postSeedState)                        
                                         
                 | (None, consumed) -> (None, consumed)
 

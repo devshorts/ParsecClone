@@ -157,39 +157,43 @@ Bit parsing works left to right and doesn't get run through the endianness conve
 
 If you need to extend the bit parsing, there is a `BitStream` class that handles the bit handling from a byte array
 
-Overview
+A note on FParsec vs ParsecClone regarding strings
 ---
-This is both a string parser, and a binary parser, which is extensible to any parsing type (either on streams or primitives).  I've encapsulated the parsing state into the `IStreamP` interface which takes both the underlying state type, and what to return when it does a raw state consume. For example, on a `Stream` you want to consume `byte[]`. But on a `string` you want to consume other `string` types. In general, F#'s type inference system hides this nastiness away.
+One thing I really wanted to implement that Fparsec didn't have regular expressions support for strings.  Just to demonstrate what you need to do to parse a string given by the grammar
 
-```fsharp
-type State<'StateType, 'ConsumeType> = IStreamP<'StateType, 'ConsumeType>
-
-type Reply<'Return, 'StateType, 'ConsumeType> = 'Return option * State<'StateType, 'ConsumeType>
-
-type Parser<'Return, 'StateType, 'ConsumeType> = State<'StateType, 'ConsumeType> -> Reply<'Return, 'StateType, 'ConsumeType>
+```
+<f> 		 := "f"
+<oos> 		 := "o" | "o"<oos>
+<fighter> 	 := "fighter"
+<foofighter> := <f><oos><fighter>
 ```
 
-The state is generalized so we can plug in different stream sources (strings, streams, whatever).  For example, here is the state interface that all state consumers need to implement. The assumption is that consuming should always say how *much* to consume, which is why the consume function takes an integer.  If it can consume that much it will return consume type from the state type.
+Basically the word `foofighter` with at least one or more `o`'s. Here is an example in fparsec
 
-```fsharp
-type IStreamP<'StateType, 'ConsumeType> =        
-    abstract member state : 'StateType
-    abstract member consume : int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
-    abstract member skip : int -> bool option * IStreamP<'StateType, 'ConsumeType>
-    abstract member backtrack : unit -> unit
-    abstract member hasMore : unit -> bool
-    abstract member equals : IStreamP<'StateType, 'ConsumeType> -> bool
+```
+let fooString = pstring "f" >>= fun f ->
+                many1 (pstring "o") >>= fun os ->
+                pstring "fighter" >>= fun fighter ->
+                preturn (f + (List.reduce (+) os) + fighter)
+
+test fooString "foofighter" |> should equal "foofighter"
 ```
 
-An unfortunate side effect of this is that I ran into a value restriction because of the generics, so every combinator needs to include a generic declaration like 
+Here is an example in ParsecClone
 
-`let chars<'a> = //..whatever"` 
- 
-Included is a set of nunit tests that demonstrates the combinators (both string and binary).
+```
+let foo = regexStr "fo+fighter"
+
+let state = new StringStreamP("foofighter")
+
+test state foo |> should equal "foofighter"
+```
+
+Just different flavors.  You can do the fparsec way in ParsecClone as well.  Arguably, I'd say that FParsec is more correct here since you are forced to implement the grammar without cheating with regex, but regex does make the problem succinct.
 
 A CSV Parser
 ---
-Now, lets actually use my parsec clone. Below is a grammar that will parse csv files
+Lets actually use my parsec clone. Below is a grammar that will parse csv files
 
 ```fsharp
 namespace StringMatchers
@@ -442,3 +446,33 @@ let testApplyManyBits() =
 
     result |> should equal target 
 ```
+
+Implementation Basics
+---
+This is both a string parser, and a binary parser, which is extensible to any parsing type (either on streams or primitives).  I've encapsulated the parsing state into the `IStreamP` interface which takes both the underlying state type, and what to return when it does a raw state consume. For example, on a `Stream` you want to consume `byte[]`. But on a `string` you want to consume other `string` types. In general, F#'s type inference system hides this nastiness away.
+
+```fsharp
+type State<'StateType, 'ConsumeType> = IStreamP<'StateType, 'ConsumeType>
+
+type Reply<'Return, 'StateType, 'ConsumeType> = 'Return option * State<'StateType, 'ConsumeType>
+
+type Parser<'Return, 'StateType, 'ConsumeType> = State<'StateType, 'ConsumeType> -> Reply<'Return, 'StateType, 'ConsumeType>
+```
+
+The state is generalized so we can plug in different stream sources (strings, streams, whatever).  For example, here is the state interface that all state consumers need to implement. The assumption is that consuming should always say how *much* to consume, which is why the consume function takes an integer.  If it can consume that much it will return consume type from the state type.
+
+```fsharp
+type IStreamP<'StateType, 'ConsumeType> =        
+    abstract member state : 'StateType
+    abstract member consume : int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
+    abstract member skip : int -> bool option * IStreamP<'StateType, 'ConsumeType>
+    abstract member backtrack : unit -> unit
+    abstract member hasMore : unit -> bool
+    abstract member equals : IStreamP<'StateType, 'ConsumeType> -> bool
+```
+
+An unfortunate side effect of this is that I ran into a value restriction because of the generics, so every combinator needs to include a generic declaration like 
+
+`let chars<'a> = //..whatever"` 
+ 
+Included is a set of nunit tests that demonstrates the combinators (both string and binary).
