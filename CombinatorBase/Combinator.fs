@@ -101,17 +101,17 @@ module Combinator =
                 | None         -> (None, currentState)      
    
      
+    (* 
+        Take parser till predicate is true and validate the mininum number of elements was found
+    *)
     let private takeTillB predicate parser minCount = 
         fun state ->
             let didFind found currentState = 
-                if List.length found > 0 then
-                    (Some(List.rev found), currentState)          
-                else
-                    if List.length found < minCount then 
-                        failwith ("Needed to consume at least " + minCount.ToString() + " element but did not")
-                    else                
-                        (None, currentState)
-
+                match List.length found with 
+                    | x when x > 0 && x >= minCount -> (Some(List.rev found), currentState) 
+                    | x when x < minCount -> failwith ("Needed to consume at least " + minCount.ToString() + " element but did not")
+                    | _ -> (None, currentState)
+               
             let rec many' parser (returnList, currentState:IStreamP<'A, 'B>) =              
                 let returnValue() = didFind returnList currentState
 
@@ -119,10 +119,10 @@ module Combinator =
                     returnValue()
                 else
                     match parser currentState with
-                        | (Some(m), (nextState:IStreamP<'A, 'B>)) ->                                                 
-                            if not (predicate m) then                                   
+                        | (Some(m), (nextState:IStreamP<'A, 'B>)) when predicate m |> not ->                                                                              
                                 many' parser (m::returnList, nextState)
-                            else 
+
+                        | (Some(_), _) ->  
                                 currentState.backtrack()
                                 returnValue()
 
@@ -137,26 +137,24 @@ module Combinator =
     let private manyTillB minCount (parser:Parser<_,_,_>) (parserEnd:Parser<_,_,_>) : Parser<_,_,_> = 
         fun state ->
             let rec take (currentState:IStreamP<_,_>) acc = 
-                if not (currentState.hasMore()) then
-                    (None, state)
-                else                    
-                    let result = parser currentState
+                match currentState.hasMore() with 
+                    | true ->                           
+                        match parser currentState with 
+                            | Some(m), newState ->                             
+                                let (suceeded, nextState) = succeed parserEnd newState
 
-                    match result with 
-                        | Some(m), newState -> 
-                            let (suceeded, s) = succeed parserEnd newState
+                                // if the end parser succeeds, return the value of the other 
+                                // accumulated parser
+                                match suceeded with 
+                                    | false -> take newState (m::acc)
+                                    | true -> (Some(m::acc), nextState)
 
-                            if not suceeded then 
-                                take newState (m::acc)
-                            else 
-                                (Some(m::acc), s)
-
-                        | (None, newState) -> 
-                            if List.length acc < minCount then
-                                (None, newState)
-                            else
-                                failwith "Needed to match one more of parser, but found zero"
-
+                            | (None, newState) -> 
+                                match List.length acc with
+                                    | x when x < minCount -> (None, newState)
+                                    | _ -> failwith "Needed to match one more of parser, but found zero"
+                    | false -> (None, state)
+                
             take state []
 
     let manyTill p pEnd = manyTillB 0 p pEnd
@@ -225,30 +223,28 @@ module Combinator =
 
     let (.<<?>.) parser listParser = optWith (opt listParser) (opt parser)
 
+    let private backtrackNone (state:IStreamP<_,_>) = 
+        state.backtrack()
+        None, state   
+
     let satisfy predicate parser = 
         fun (state : IStreamP<_,_>) ->  
-            let result = parser state                                 
-            match result with
-                | (Some(m), nextState) ->
-                    if predicate m then
-                        result
-                    else
-                        state.backtrack()
-                        (None, state)
-                | _ -> result       
+            let (r, nextState) as result = parser state
+            match r with 
+                | Some(m) when predicate m -> result 
+                | Some(_) -> backtrackNone state                                                     
+                | _ -> None, nextState                                             
 
     let attempt (parser) : Parser<'Return, 'StateType, 'ConsumeType> =         
         fun state ->
-            let backtrack () = state.backtrack()
-                               (None, state)
-
+            
             try
                 let result = parser state 
                 match result with
                     | (Some(_), _) -> result
-                    | _ -> backtrack()
+                    | _ -> backtrackNone state
             with
-                | e -> backtrack()
+                | e -> backtrackNone state
                
     let choiceAttempts parsers = 
         match List.rev parsers with 
