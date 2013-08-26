@@ -159,7 +159,7 @@ If you need to extend the bit parsing, there is a `BitStream` class that handles
 
 A note on FParsec vs ParsecClone regarding strings
 ---
-One thing I really wanted to implement that Fparsec didn't have regular expressions support for strings.  Just to demonstrate what you need to do to parse a string given by the grammar
+One thing I really wanted to implement that Fparsec didn't have was regular expression support for strings.  Just to demonstrate what you need to do to parse a string given by the grammar
 
 ```
 <f> 		 := "f"
