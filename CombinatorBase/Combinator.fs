@@ -105,28 +105,25 @@ module Combinator =
         Take parser till predicate is true and validate the mininum number of elements was found
     *)
     let private takeTillB predicate parser minCount = 
-        fun state ->
-            let didFind found currentState = 
+
+        let didFind found currentState = 
                 match List.length found with 
                     | x when x > 0 && x >= minCount -> (Some(List.rev found), currentState) 
                     | x when x < minCount -> failwith ("Needed to consume at least " + minCount.ToString() + " element but did not")
                     | _ -> (None, currentState)
                
+        fun state ->
             let rec many' parser (returnList, currentState:IStreamP<'A, 'B>) =              
                 let returnValue() = didFind returnList currentState
 
-                if not (currentState.hasMore()) then
-                    returnValue()
-                else
-                    match parser currentState with
-                        | (Some(m), (nextState:IStreamP<'A, 'B>)) when predicate m |> not ->                                                                              
-                                many' parser (m::returnList, nextState)
+                match currentState.hasMore() with
+                    | false -> returnValue()
+                    | true ->
+                        match parser currentState with
+                            | Some(m), nextState when predicate m |> not -> many' parser (m::returnList, nextState)
 
-                        | (Some(_), _) ->  
-                                currentState.backtrack()
-                                returnValue()
-
-                        | _ ->  returnValue()
+                            | Some(_), _ ->  currentState.backtrack(); returnValue()
+                            | _ ->  returnValue()
                                   
             many' parser ([], state)
 
@@ -136,26 +133,27 @@ module Combinator =
         
     let private manyTillB minCount (parser:Parser<_,_,_>) (parserEnd:Parser<_,_,_>) : Parser<_,_,_> = 
         fun state ->
-            let rec take (currentState:IStreamP<_,_>) acc = 
-                match currentState.hasMore() with 
-                    | true ->                           
-                        match parser currentState with 
-                            | Some(m), newState ->                             
-                                let (suceeded, nextState) = succeed parserEnd newState
+            let ifHasMore apply (state:IStreamP<_,_>) acc = 
+                match state.hasMore() with 
+                    | true -> apply state acc
+                    | false -> None, state
 
-                                // if the end parser succeeds, return the value of the other 
-                                // accumulated parser
-                                match suceeded with 
-                                    | false -> take newState (m::acc)
-                                    | true -> (Some(m::acc), nextState)
+            let rec testStream state acc = ifHasMore takeParser state acc    
+                                
+            and takeParser currentState acc = 
+                match parser currentState with 
+                    | Some(m), consumedParserState ->                                                                             
+                        match succeed parserEnd consumedParserState with 
+                            | false, _ -> testStream consumedParserState (m::acc)
+                            | true, consumedEndParserState -> (Some(m::acc), consumedEndParserState)
 
-                            | (None, newState) -> 
-                                match List.length acc with
-                                    | x when x < minCount -> (None, newState)
-                                    | _ -> failwith "Needed to match one more of parser, but found zero"
-                    | false -> (None, state)
-                
-            take state []
+                    | (None, newState) -> 
+                        match List.length acc with
+                            | x when x < minCount -> (None, newState)
+                            | _ -> failwith "Needed to match one more of parser, but found zero"
+    
+            
+            testStream state []
 
     let manyTill p pEnd = manyTillB 0 p pEnd
 
