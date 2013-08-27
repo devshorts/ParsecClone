@@ -9,3 +9,4 @@ type IStreamP<'StateType, 'ConsumeType, 'UserState> =
     abstract member equals : IStreamP<'StateType, 'ConsumeType, 'UserState> -> bool
     abstract member canConsume : int -> int option
     abstract member getUserState :  unit -> 'UserState
+    abstract member setUserState : 'UserState -> unit

@@ -25,11 +25,12 @@ module Mp4ParserUtils =
         attempt (
             atomSize >>= fun size ->
             name id >>= fun name ->
-                preturn 
-                    {
-                        Size = size
-                        Name = name
-                    }
+            //Console.WriteLine ("in " + name)
+            preturn 
+                {
+                    Size = size
+                    Name = name
+                }
         )
 
     let unknown : VideoParser<_> =

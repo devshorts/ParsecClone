@@ -6,7 +6,9 @@ open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module StringStreamP = 
-    type StringStreamP<'UserState> (state:string, userState:'UserState) =     
+    type StringStreamP<'UserState> (state:string, userState:'UserState) =  
+        let mutable userState = userState
+           
         let currentState = state
 
         let (|RegexStr|_|) (pattern:string) (input:IStreamP<string, string, 'UserState>) =
@@ -42,6 +44,8 @@ module StringStreamP =
             member x.canConsume count = if state.Length <= count then Some(count) else None
 
             member x.getUserState () =  userState
+
+            member x.setUserState s = userState <- s
 
         member x.startsWith (inputStream:IStreamP<string, string, 'UserState>) target = 
             if String.IsNullOrEmpty inputStream.state then None

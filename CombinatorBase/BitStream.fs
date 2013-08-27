@@ -4,7 +4,8 @@ open System.IO
 open ParsecClone.CombinatorBase
 
 type BitStream<'UserState> (state:byte[], bitOffset:int, userState:'UserState) =   
-           
+    let mutable userState = userState
+              
     member x.toI = x :> IStreamP<byte[], Bit[], 'UserState>
 
     member x.bitOffset = bitOffset
@@ -38,4 +39,5 @@ type BitStream<'UserState> (state:byte[], bitOffset:int, userState:'UserState) =
 
         member x.getUserState() = userState
         
+        member x.setUserState s = userState <- s
     

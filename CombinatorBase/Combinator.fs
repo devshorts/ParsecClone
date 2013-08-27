@@ -285,6 +285,11 @@ module Combinator =
                                         
                 | (None, consumed) -> (None, consumed)
 
+
+    let getUserState (state:IStreamP<_,_,_>) = (Some(state.getUserState()), state)
+
+    let setUserState value (state:IStreamP<_,_,_>) = (Some(state.setUserState value), state)
+
     let test (input:State<_,_,'UserState>) (parser:Parser<_,_,_,'UserState>) = 
         match parser input with
             | (Some(m), s) -> m
