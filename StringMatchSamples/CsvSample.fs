@@ -41,7 +41,7 @@ module CsvSample =
     
     let literal<'a> = quoteStrings |> between2 quote
 
-    let csvElement = many (literal <|> normalAndEscaped) >>= foldStrings
+    let csvElement<'a> = many (literal <|> normalAndEscaped) >>= foldStrings
 
     let listItem<'a> = delim >>. ws >>. opt csvElement
 

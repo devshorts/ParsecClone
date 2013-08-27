@@ -3,13 +3,13 @@
 open System.IO
 open ParsecClone.CombinatorBase
 
-type BitStream (state:byte[], bitOffset:int) =   
+type BitStream<'UserState> (state:byte[], bitOffset:int, userState:'UserState) =   
            
-    member x.toI = x :> IStreamP<byte[], Bit[]>
+    member x.toI = x :> IStreamP<byte[], Bit[], 'UserState>
 
     member x.bitOffset = bitOffset
 
-    interface IStreamP<byte[], Bit[]>  with       
+    interface IStreamP<byte[], Bit[], 'UserState>  with       
         member x.state = state     
 
         member x.consume count = 
@@ -20,7 +20,7 @@ type BitStream (state:byte[], bitOffset:int) =
             else
                 let bits = bytesToBits state
 
-                (Some(bits.[bitOffset..lastBitPos - 1]), new BitStream(state, lastBitPos) :> IStreamP<byte[], Bit[]>)
+                (Some(bits.[bitOffset..lastBitPos - 1]), new BitStream<'UserState>(state, lastBitPos, userState) :> IStreamP<byte[], Bit[], 'UserState>)
             
         member x.skip count = 
             let (_, newState) = x.toI.consume count
@@ -35,5 +35,7 @@ type BitStream (state:byte[], bitOffset:int) =
         
         member x.canConsume count =  
             if count + bitOffset <= (Array.length state) * 8 then Some(count) else None
+
+        member x.getUserState() = userState
         
     

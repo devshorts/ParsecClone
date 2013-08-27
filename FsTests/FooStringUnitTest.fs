@@ -10,7 +10,7 @@ open StringMatchers.FooSample
 
 [<Test>]
 let preturnTest () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
 
     let band = test target band
         
@@ -20,13 +20,13 @@ let preturnTest () =
 [<Test>]
 let manyTest () = 
         
-    let manyFooStr = test (new StringStreamP("foofoofoofoofob")) manyFoo
+    let manyFooStr = test (makeStringStream "foofoofoofoofob") manyFoo
 
     Assert.IsTrue (List.length manyFooStr = 4)
 
 [<Test>]
 let fooString () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
         
     let fString = test target fooString
 
@@ -34,7 +34,7 @@ let fooString () =
 
 [<Test>]
 let fightString () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
 
     let fightString = test target fighterString
         
@@ -42,7 +42,7 @@ let fightString () =
 
 [<Test>]
 let testTuples () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
 
     let (foo, fighters) = test target fighterTuples
 
@@ -52,7 +52,7 @@ let testTuples () =
         
 [<Test>]
 let options () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
         
     test target opts = "foo" |> Assert.IsTrue
 
@@ -60,20 +60,20 @@ let options () =
 
 [<Test>]
 let manyOptions () = 
-    let target = new StringStreamP("foofighters") :> IStreamP<string, string>
+    let target = makeStringStream "foofighters" |> toInterface
         
     test target (many opts) = ["foo";"fighter"] |> Assert.IsTrue
     test target (many optsC) = ["foo";"fighter"] |> Assert.IsTrue
 
 [<Test>]
 let regex () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters"
         
     test target fRegex = "foof" |> Assert.IsTrue
 
 [<Test>]
 let regexes () = 
-    let target = new StringStreamP("      foofighters           foofighters")
+    let target = makeStringStream "      foofighters           foofighters"
         
     let result = test target fooFightersWithSpaces
         
@@ -81,7 +81,7 @@ let regexes () =
 
 [<Test>]
 let anyOfChars () = 
-    let target = new StringStreamP("      foofighters           foofighters") :> IStreamP<string, string>
+    let target = makeStringStream "      foofighters           foofighters" |> toInterface
         
     let result = test target allFooCharacters |> List.fold (+) ""
         
@@ -89,12 +89,12 @@ let anyOfChars () =
 
 [<Test>]
 let newLine () = 
-    let fullNewline = new StringStreamP("\r\n")  :> IStreamP<string, string>
-    let carriageReturn = new StringStreamP("\r") :> IStreamP<string, string>
-    let newLine = new StringStreamP("\n")  :> IStreamP<string, string>
+    let fullNewline = makeStringStream "\r\n"  |> toInterface
+    let carriageReturn = makeStringStream "\r" |> toInterface
+    let newLine = makeStringStream "\n"  |> toInterface
     let nl = @"
 "
-    let newLine2 = new StringStreamP(nl) :> IStreamP<string, string>
+    let newLine2 = makeStringStream(nl) |> toInterface
 
     test fullNewline newline = fullNewline.state |> Assert.IsTrue
     test carriageReturn newline = carriageReturn.state |> Assert.IsTrue
@@ -103,14 +103,14 @@ let newLine () =
 
 [<Test>]
 let attemptTest () = 
-    let target = new StringStreamP("foofighters")
+    let target = makeStringStream "foofighters" 
         
     match test target parseWithErrorAttempt with
         | FooFighter -> Assert.IsTrue true
 
 [<Test>]
 let manyTillTest () =
-    let target = new StringStreamP("abc abc def abc")
+    let target = makeStringStream "abc abc def abc" 
 
     let abc = matchStr "abc" .>> ws
 
@@ -125,7 +125,7 @@ let manyTillTest () =
 [<Test>]
 [<ExpectedException>]
 let manyTillOneOrMore () =
-    let target = new StringStreamP("x abc def abc")
+    let target = makeStringStream "x abc def abc"
 
     let abc = matchStr "abc" .>> ws
 
@@ -139,7 +139,7 @@ let manyTillOneOrMore () =
 
 [<Test>]
 let lookaheadTest () =
-    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    let target = makeStringStream "abc abc def abc" |> toInterface
     
     let abc = lookahead (matchStr "abc" .>> ws) >>= fun r -> 
         if r = "abc" then preturn "found"
@@ -155,7 +155,7 @@ let lookaheadTest () =
 [<Test>]
 [<ExpectedException>]
 let many1TestFail () = 
-    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    let target = makeStringStream "abc abc def abc" |> toInterface
     
     let foo = matchStr "foo"
 
@@ -165,7 +165,7 @@ let many1TestFail () =
 
 [<Test>]
 let many1Test () = 
-    let target = new StringStreamP("abc abc def abc") :> IStreamP<string, string>
+    let target = makeStringStream "abc abc def abc" |> toInterface
     
     let abc = ws >>. matchStr "abc"
 
@@ -175,7 +175,7 @@ let many1Test () =
 
 [<Test>]
 let testForwardingRefP() = 
-    let target = new StringStreamP("{abc}") :> IStreamP<string, string> 
+    let target = makeStringStream "{abc}" |> toInterface
 
     let abc = matchStr "abc"
     
@@ -189,7 +189,7 @@ let testForwardingRefP() =
 
 [<Test>]
 let testForwardingRefPRecursive() = 
-    let target = new StringStreamP("{a{a{a{a{a}}}}}")
+    let target = makeStringStream "{a{a{a{a{a}}}}}" 
 
     
     let impl, fwd = createParserForwardedToRef()
@@ -208,7 +208,7 @@ let testForwardingRefPRecursive() =
 
 [<Test>]
 let reprocessTest() = 
-    let target = new StringStreamP("abc") :> IStreamP<string, string> 
+    let target = makeStringStream "abc" |> toInterface
 
     let abc = matchStr "abc"
 
@@ -216,7 +216,7 @@ let reprocessTest() =
             matchStr "b" >>= fun b ->
             matchStr "c" >>= fun c -> preturn (a + b + c + "foo")
 
-    let elevator = (fun i -> new StringStreamP(i) :> IStreamP<string, string>)
+    let elevator = fun i s -> makeStringStream(i) |> toInterface
         
     let r = reproc elevator (abc .>> eof) a
 

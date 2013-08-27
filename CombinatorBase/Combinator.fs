@@ -5,13 +5,13 @@ module Combinator =
     
     exception Error of string          
 
-    type State<'StateType, 'ConsumeType> = IStreamP<'StateType, 'ConsumeType>
+    type State<'StateType, 'ConsumeType, 'UserState> = IStreamP<'StateType, 'ConsumeType, 'UserState>
 
-    type Reply<'Return, 'StateType, 'ConsumeType> = 'Return option * State<'StateType, 'ConsumeType>
+    type Reply<'Return, 'StateType, 'ConsumeType, 'UserState> = 'Return option * State<'StateType, 'ConsumeType, 'UserState>
 
-    type Parser<'Return, 'StateType, 'ConsumeType> = State<'StateType, 'ConsumeType> -> Reply<'Return, 'StateType, 'ConsumeType>  
+    type Parser<'Return, 'StateType, 'ConsumeType, 'UserState> = State<'StateType, 'ConsumeType, 'UserState> -> Reply<'Return, 'StateType, 'ConsumeType, 'UserState>  
     
-    let preturn value : Parser<'Return, 'StateType, 'ConsumeType> = fun stream -> (Some(value), stream)
+    let preturn value = fun stream -> (Some(value), stream)
         
     let pzero = fun stream -> (None, stream)
 
@@ -33,13 +33,13 @@ module Combinator =
         // if the first one matches, stop
         match match1 with 
             | (Some(m), _) -> match1 
-            | (None, state : IStreamP<_,_>)  when state.equals inputState -> second inputState            
+            | (None, state : IStreamP<_,_,_>)  when state.equals inputState -> second inputState            
             | (None, state) ->  failwith "No match found and underlying state was modified"
 
     let getBacktrackReply current next input =
         let match1 = current input
         match match1 with 
-            | (Some(result), (state:IStreamP<'A, 'B>)) -> 
+            | (Some(result), (state:IStreamP<_,_,_>)) -> 
                 try
                     state |> next result                              
                 with
@@ -49,54 +49,54 @@ module Combinator =
             | (None, state) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)      
 
-    let getReply current next (input:IStreamP<_,_>) : Reply<'Return, 'StateType, 'ConsumeType> =       
+    let getReply current next (input:IStreamP<_,_,_>) =       
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> next result state
-            | (None, state : IStreamP<_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
+            | (None, state : IStreamP<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
-    let (>>=)  (current) (next)  : Parser<'Return, 'StateType, 'ConsumeType> = getReply current next                                   
+    let (>>=)  (current) (next)  = getReply current next                                   
 
     let (>>=?) (current) (next) = getBacktrackReply current next       
         
-    let (|>>)  parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let (|>>)  parser targetType = 
         parser >>= fun value -> 
         preturn (targetType value)
 
-    let (|>>%) parser targetType : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let (|>>%) parser targetType = 
         parser >>= fun _ -> 
         preturn targetType
 
-    let (>>.)  parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let (>>.)  parser1 parser2 = 
         parser1 >>= fun first -> 
         parser2 >>= fun second -> 
         preturn second
 
-    let (.>>)  parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let (.>>)  parser1 parser2 = 
         parser1 >>= fun first -> 
         parser2 >>= fun second -> 
         preturn first
 
-    let (>>..)  parser1 applier : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let (>>..)  parser1 applier = 
         parser1 >>= fun first -> applier first        
 
-    let (.>>.) parser1 parser2 : Parser<_, 'StateType, 'ConsumeType> = 
+    let (.>>.) parser1 parser2 = 
         parser1 >>= fun first -> 
         parser2 >>= fun second -> 
         preturn (first, second)
 
-    let (<|>) parser1 parser2 : Parser<'Return, 'StateType, 'ConsumeType> = getAltReply parser1 parser2        
+    let (<|>) parser1 parser2 = getAltReply parser1 parser2        
 
     let matcher eval target =         
         fun currentState -> 
-            match eval (currentState:State<'StateType, 'ConsumeType>) target with
+            match eval (currentState:IStreamP<_,_,_>) target with
                 | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
       
     let skipper eval target =         
         fun currentState -> 
-            match eval (currentState:State<'StateType, 'ConsumeType>) target with
+            match eval (currentState:IStreamP<_,_,_>) target with
                 | Some(amount) -> currentState.skip amount                        
                 | None         -> (None, currentState)      
    
@@ -113,7 +113,7 @@ module Combinator =
                     | _ -> (None, currentState)
                
         fun state ->
-            let rec many' parser (returnList, currentState:IStreamP<'A, 'B>) =              
+            let rec many' parser (returnList, currentState:IStreamP<_,_,_>) =              
                 let returnValue() = didFind returnList currentState
 
                 match currentState.hasMore() with
@@ -127,9 +127,9 @@ module Combinator =
                                   
             many' parser ([], state)
 
-    let takeTill predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> = takeTillWithCount 0 predicate parser           
+    let takeTill predicate (parser) = takeTillWithCount 0 predicate parser           
 
-    let takeWhile predicate (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTill (predicate >> not) parser
+    let takeWhile predicate (parser) = takeTill (predicate >> not) parser
    
     (* 
         Take the parser while the end parser does not succeed. When the end parser succeeds
@@ -137,7 +137,7 @@ module Combinator =
     *)
     let private manyTillWithCount minCount parser endParser = 
         fun state ->
-            let ifHasMore apply (state:IStreamP<_,_>) acc = 
+            let ifHasMore apply (state:IStreamP<_,_,_>) acc = 
                 match state.hasMore() with 
                     | true -> apply state acc
                     | false -> None, state
@@ -163,7 +163,7 @@ module Combinator =
 
     let manyTill1 p pEnd = manyTillWithCount 1 p pEnd
         
-    let manyN num (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =                      
+    let manyN num (parser) =                      
         let count = ref 0
 
         let countReached _ = 
@@ -178,27 +178,27 @@ module Combinator =
             preturn result          
     
     let eof = 
-        fun (state:IStreamP<_,_>) -> 
+        fun (state:IStreamP<_,_,_>) -> 
             if state.hasMore() then
                 (None, state)
             else 
                 (Some(()), state)
 
-    let lookahead p : Parser<_,_,_> = 
-        fun (state:IStreamP<_,_>) ->
+    let lookahead p = 
+        fun (state:IStreamP<_,_,_>) ->
             let result = p state
 
             state.backtrack()
 
             (fst result, state)
                                 
-    let many (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeWhile (fun s -> true) parser   
+    let many (parser) =  takeWhile (fun s -> true) parser   
 
-    let many1 (parser) : Parser<'Return list, 'StateType, 'ConsumeType> =  takeTillWithCount 1 (fun s -> false) parser  
+    let many1 (parser) =  takeTillWithCount 1 (fun s -> false) parser  
 
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
-    let choice parsers  : Parser<'Return, 'StateType, 'ConsumeType> = 
+    let choice parsers = 
         parsers |> List.fold (fun acc value -> acc <|> value) pzero
 
     let between ``open`` parser close = ``open`` >>. parser .>> close
@@ -226,19 +226,19 @@ module Combinator =
 
     let (.<<?>.) parser listParser = optWith (opt listParser) (opt parser)
 
-    let private backtrackNone (state:IStreamP<_,_>) = 
+    let private backtrackNone (state:IStreamP<_,_,_>) = 
         state.backtrack()
         None, state   
 
     let satisfy predicate parser = 
-        fun (state : IStreamP<_,_>) ->  
+        fun (state : IStreamP<_,_,_>) ->  
             let (r, nextState) as result = parser state
             match r with 
                 | Some(m) when predicate m -> result 
                 | Some(_) -> backtrackNone state                                                     
                 | _ -> None, nextState                                             
 
-    let attempt (parser) : Parser<'Return, 'StateType, 'ConsumeType> =         
+    let attempt (parser) =         
         fun state ->
             
             try
@@ -261,7 +261,7 @@ module Combinator =
     let createParserForwardedToRef()= 
         let refParser = ref (fun state -> failwith "Forwarded ref parser was never initialized")
 
-        let fwdParser : Parser<_,_,_>  = 
+        let fwdParser : Parser<_,_,_,_>  = 
             fun s -> 
                 !refParser s
 
@@ -272,12 +272,12 @@ module Combinator =
         Elevates the seed to a new stream and applies the parser 
         to the seeded stream state
     *)
-    let reproc (elevator : 'a -> IStreamP<_,_>) seed parser = 
+    let reproc elevator seed parser = 
         fun stream ->
             let result = seed stream
             match result with
-                | Some(m), (postSeedState:IStreamP<_,_>) -> 
-                    let elevatedStream = elevator m
+                | Some(m), (postSeedState:IStreamP<_,_,_>) -> 
+                    let elevatedStream = elevator m (postSeedState.getUserState())
                     
                     let (parseResult, _) = parser elevatedStream
 
@@ -285,7 +285,7 @@ module Combinator =
                                         
                 | (None, consumed) -> (None, consumed)
 
-    let test input (parser: Parser<'Return,_,_>) = 
+    let test input (parser:Parser<_,_,_,_>) = 
         match parser input with
             | (Some(m), s) -> m
             | (None, _) -> failwith "No matches"

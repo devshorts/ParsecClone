@@ -5,20 +5,20 @@ open System.IO
 
 [<AutoOpen>]
 module BinParsers = 
-    type ParseState = State<Stream, byte[]>
-    type BitState = State<byte[], Bit[]>
+    type ParseState<'UserState> = State<Stream, byte[], 'UserState>
+    type BitState<'UserState> = State<byte[], Bit[], 'UserState>
     
     type BinParser (endianNessConverter : byte[] -> byte[]) = 
                 
-        let getBinStream (state:ParseState) = state :?> BinStream
-        let getBitStream (state:BitState) = state :?> BitStream
+        let getBinStream (state:ParseState<'UserState>) = state :?> BinStream<'UserState>
+        let getBitStream (state:BitState<'UserState>) = state :?> BitStream<'UserState>
 
-        let streamCanBeConsumed (state : ParseState) count  = state.canConsume count
-        let bitStreamCanBeConsumed (state : BitState) count  = state.canConsume count
+        let streamCanBeConsumed (state : ParseState<'UserState>) count  = state.canConsume count
+        let bitStreamCanBeConsumed (state : BitState<'UserState>) count  = state.canConsume count
     
-        let streamStartsWith (state:ParseState) bytes  = (state |> getBinStream).streamStartsWith state bytes            
+        let streamStartsWith (state:ParseState<'UserState>) bytes  = (state |> getBinStream).streamStartsWith state bytes            
 
-        let binMatch (num:int) = matcher streamCanBeConsumed num    
+        let binMatch (num:int) : Parser<_,_,_,'UserState> = matcher streamCanBeConsumed num    
 
         let bitMatch num = matcher bitStreamCanBeConsumed num
         
@@ -41,12 +41,12 @@ module BinParsers =
         member x.skip num  = skipper streamCanBeConsumed num
 
         member x.skipToEnd = 
-            fun (state:IStreamP<_,_>) ->
+            fun (state:IStreamP<_,_,_>) ->
                 (state |> getBinStream).seekToEnd()
 
-                (Some(true),  new BinStream(state.state) :> IStreamP<Stream, byte[]> )
+                (Some(true),  new BinStream<_>(state.state, state.getUserState()) :> IStreamP<Stream, byte[], _> )
 
-        member x.byteN = binMatch         
+        member x.byteN : int -> Parser<_,_,_,_> = binMatch         
 
         member x.byte1 = x.byteN 1 >>= fun b1 -> preturn b1.[0]  
 
@@ -87,7 +87,9 @@ module BinParsers =
 
         member x.bitsToInt = bitsToUInt                       
 
-        member x.makeBitP seed parser = reproc (fun (b:byte[]) -> new BitStream(b, 0) :> IStreamP<byte[], Bit[]>) seed parser
+        member x.makeBitP seed parser = 
+            let elevator (b:byte[]) userState = new BitStream<obj>(b, 0, userState) :> IStreamP<_, _, _>
+            reproc elevator seed parser
 
         member x.bitN n = 
                           let zeroBasedN = n - 1

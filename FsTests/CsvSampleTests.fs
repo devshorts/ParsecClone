@@ -11,7 +11,7 @@ open StringMatchers.CsvSample
 
 [<Test>]
 let testEmptyWhiteSpace() = 
-    let csv = new StringStreamP("")
+    let csv = makeStringStream ""
 
     let result = test csv ws
 
@@ -19,7 +19,7 @@ let testEmptyWhiteSpace() =
 
 [<Test>]
 let testWhiteSpace() = 
-    let csv = new StringStreamP(" ")
+    let csv = makeStringStream " "
 
     let result = test csv ws
 
@@ -27,7 +27,7 @@ let testWhiteSpace() =
 
 [<Test>]
 let testElement() = 
-    let csv = new StringStreamP("some text")
+    let csv = makeStringStream "some text"
 
     let result = test csv csvElement
 
@@ -35,7 +35,7 @@ let testElement() =
     
 [<Test>]
 let testElements() = 
-    let csv = new StringStreamP("some text,")
+    let csv = makeStringStream "some text,"
 
     let result = test csv csvElement
 
@@ -43,7 +43,7 @@ let testElements() =
 
 [<Test>]
 let testTwoElement() = 
-    let csv = new StringStreamP("some text, text two")
+    let csv = makeStringStream "some text, text two"
 
     let result = test csv elements
 
@@ -54,7 +54,7 @@ let testTwoLines() =
     let t = @"a, b
 c, d"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines
 
@@ -65,7 +65,7 @@ c, d"
 let testEscaped() = 
     let t = @"\,"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv escapedChar
 
@@ -75,7 +75,7 @@ let testEscaped() =
 let testLiteral() = 
     let t = "\"foo\""
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv literal
 
@@ -85,7 +85,7 @@ let testLiteral() =
 let testLiteral2() = 
     let t = "a\,b"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv normalAndEscaped
 
@@ -95,7 +95,7 @@ let testLiteral2() =
 let testUnEscaped1() = 
     let t = "a,b"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv normalAndEscaped
 
@@ -105,7 +105,7 @@ let testUnEscaped1() =
 let testCsvWithQuotes1() = 
     let t = "\"cd,fg\""
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines
 
@@ -115,7 +115,7 @@ let testCsvWithQuotes1() =
 let testEmpties() =
     let t = ",,,"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines
 
@@ -126,7 +126,7 @@ let testCsvWithQuotes2() =
     let t = "a,\"b 1.\\\",\"cd,fg\"
 a,b,\\\", \"cd,fg\",,"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines |> List.toArray
 
@@ -137,7 +137,7 @@ a,b,\\\", \"cd,fg\",,"
 let testCsvWithOptionalElements() = 
     let t = ",,"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines |> List.toArray
 
@@ -159,7 +159,7 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"""
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines
 
@@ -170,7 +170,7 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
 let testCsvWithEscapedNewlines() = 
     let t = "a\\nb"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines |> List.toArray
 
@@ -182,7 +182,7 @@ let testCsvWithNewlinesInQuotes() =
     
 b"""
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines 
 
@@ -196,7 +196,7 @@ let testReadmeExample1 () =
     let t = "foo\,,,bar,baz\\\"
 faisal rules!"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines |> List.toArray
 
@@ -206,7 +206,7 @@ faisal rules!"
 let testDoubleQuotes () = 
     let t = "\"a\" b def \"foo\","
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let result = test csv lines |> List.toArray
 
@@ -217,7 +217,7 @@ let testDoubleQuotes () =
 let testEofMissing () = 
     let t = "\"foo,\",bar,baz"
 
-    let csv = new StringStreamP(t)
+    let csv = makeStringStream t
 
     let r = test csv (csvElement .>> eof)
 

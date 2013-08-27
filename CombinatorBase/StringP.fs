@@ -6,22 +6,22 @@ open System
 
 [<AutoOpen>]
 module StringP = 
-
-    type ParseState = State<string, string>
     
+    type ParseState<'UserState> = IStreamP<string,string,'UserState>
+
     let foldStrings = fun (strings : string list) -> preturn (List.reduce (+) strings)
 
     let isMatch regex item = Regex.IsMatch(item, regex)
 
-    let private getStringStream (state:ParseState) = (state :?> StringStreamP)
+    let private getStringStream (state:ParseState<'UserState>) = (state :?> StringStreamP<'UserState>)
 
-    let private isEof (input:ParseState) target = not (input.hasMore())
+    let private isEof (input:ParseState<'UserState>) target = not (input.hasMore())
 
-    let private invertRegexMatch (input:ParseState) target = (input |> getStringStream).invertRegexMatch input target 1
+    let private invertRegexMatch (input:ParseState<'UserState>) target = (input |> getStringStream).invertRegexMatch input target 1
     
-    let private startsWith (input:ParseState) target = (input |> getStringStream).startsWith input target
+    let private startsWith (input:ParseState<'UserState>) target = (input |> getStringStream).startsWith input target
 
-    let private regexMatch (input:ParseState) target = (input |> getStringStream).regexMatch input target 
+    let private regexMatch (input:ParseState<'UserState>) target = (input |> getStringStream).regexMatch input target 
 
     let regexStr pattern = matcher regexMatch pattern
 

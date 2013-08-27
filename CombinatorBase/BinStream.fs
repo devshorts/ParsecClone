@@ -3,65 +3,66 @@
 open System.IO
 open ParsecClone.CombinatorBase
 
-type BinStream (state:Stream) =   
+[<AutoOpen>]
+module BinStreams = 
+    type BinStream<'UserState> (state:Stream, userState:'UserState) =   
     
-    let startPos = state.Position
+        let startPos = state.Position
     
-    interface IStreamP<Stream, byte[]>  with       
-        member x.state = state     
+        interface IStreamP<Stream, byte[],'UserState>  with       
+            member x.state = state     
 
-        member x.consume (count) = 
-            let bytes = x.initBytes count
+            member x.consume (count) = 
+                let bytes = x.initBytes count
 
-            state.Read(bytes, 0, count) |> ignore
+                state.Read(bytes, 0, count) |> ignore
             
-            System.Console.WriteLine(state.Position.ToString())
+                System.Console.WriteLine(state.Position.ToString())
 
-            (Some(bytes), new BinStream(state) :> IStreamP<Stream, byte[]> )
+                (Some(bytes), new BinStream<'UserState>(state, userState) :> IStreamP<Stream, byte[], 'UserState> )
 
-        member x.skip count = 
-            state.Seek((int64)count, SeekOrigin.Current) |> ignore
+            member x.skip count = 
+                state.Seek((int64)count, SeekOrigin.Current) |> ignore
 
-            (Some(true),  new BinStream(state) :> IStreamP<Stream, byte[]> )
+                (Some(true),  new BinStream<'UserState>(state, userState) :> IStreamP<Stream, byte[], 'UserState> )
 
-        member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
+            member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
 
-        member x.hasMore () = state.Position <> state.Length
+            member x.hasMore () = state.Position <> state.Length
 
-        member x.equals istream = istream.state.Position = startPos
+            member x.equals istream = istream.state.Position = startPos
 
-        member x.canConsume count = 
-            if (int)state.Position + (int)count <= (int)state.Length then Some(count)
-            else None
+            member x.canConsume count = 
+                if (int)state.Position + (int)count <= (int)state.Length then Some(count)
+                else None
+
+            member x.getUserState() = userState
             
         
-    member x.initBytes size = Array.init size (fun i -> byte(0))
+        member x.initBytes size = Array.init size (fun i -> byte(0))
 
-    (*
-    member x.streamCanBeConsumed (state:IStreamP<Stream, byte[]> ) count =                 
-        if (int)state.state.Position + (int)count <= (int)state.state.Length then
-            Some(count)
-        else 
-            None*)
+        member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 
-    member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
-
-    member x.streamStartsWith (input:IStreamP<Stream, byte[]> ) bytes =                 
-        if (int)input.state.Position + (Array.length bytes) > (int)input.state.Length then
-            None
-        else 
-            let start = input.state.Position
-
-            let count = Array.length bytes
-
-            let b = x.initBytes count
-
-            input.state.Read(b, 0, count) |> ignore
-
-            input.state.Seek(start, SeekOrigin.Begin) |> ignore
-
-            if b = bytes then
-                Some(count)
-            else 
+        member x.streamStartsWith (input:IStreamP<Stream, byte[], _> ) bytes =                 
+            if (int)input.state.Position + (Array.length bytes) > (int)input.state.Length then
                 None
+            else 
+                let start = input.state.Position
+
+                let count = Array.length bytes
+
+                let b = x.initBytes count
+
+                input.state.Read(b, 0, count) |> ignore
+
+                input.state.Seek(start, SeekOrigin.Begin) |> ignore
+
+                if b = bytes then
+                    Some(count)
+                else 
+                    None
+
+    let makeBinStream stream = new BinStream<obj>(stream, ())
+
+    let toInterface binstream = binstream :> IStreamP<Stream, byte[], obj>
 

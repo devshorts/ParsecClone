@@ -24,7 +24,7 @@ let binTest1() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)
+    let parserStream = makeBinStream(stream)
 
     let parser = byte1
 
@@ -41,7 +41,7 @@ let binTest2() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)
+    let parserStream = makeBinStream(stream)
 
     let parser = manyN 4 byte1 
 
@@ -55,7 +55,7 @@ let binTest3() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream) 
+    let parserStream = makeBinStream(stream) 
 
     let parser = manyN 2 byte4
 
@@ -71,7 +71,7 @@ let binTest4() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)   
+    let parserStream = makeBinStream(stream)   
 
     let result = test parserStream p.int32 
     
@@ -86,7 +86,7 @@ let binaryWithBacktracker() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)   
+    let parserStream = makeBinStream(stream)   
 
     let failureParse =  manyN 10 p.int32
 
@@ -106,7 +106,7 @@ let ``test backtracker with attempt operator``() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)   
+    let parserStream = makeBinStream(stream)   
 
     let shouldFail = int32 >>= fun b1 -> 
                                manyN 10 int32 >>= fun b2 -> 
@@ -124,7 +124,7 @@ let takeTillTest() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)   
+    let parserStream = makeBinStream(stream)   
 
     let takenLower = takeTill (fun i -> i >= byte(4)) byte1
     
@@ -138,7 +138,7 @@ let takeTillTest2() =
 
     let stream = new MemoryStream(bytes)   
 
-    let parserStream = new BinStream(stream)   
+    let parserStream = makeBinStream(stream)   
 
     let takeUpper = takeTill (fun i -> i >= byte(4)) byte1 >>. byteN 5    
 
@@ -151,7 +151,7 @@ let takeTillTest2() =
 let takeWhileTest() = 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     let takeUpper = takeWhile (fun i -> i < byte(4)) byte1 >>. byteN 5    
 
@@ -163,7 +163,7 @@ let takeWhileTest() =
 let endianessTest() = 
     let bytes = [|0x11;0x7B;0;0;0;0;0;0|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     let result = test parserStream uint16
     
@@ -174,7 +174,7 @@ let endianessTest() =
 let endianessTest2() = 
     let bytes = [|0xF1;0x7B;0;0;0;0;0;0|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     let result = test parserStream int16
     
@@ -184,11 +184,11 @@ let endianessTest2() =
 let bitParserTest() = 
     let bytes = [|0xF0;0x01|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     let bitToBool = bp.bitsN 4 |>> bp.bitsToInt
-
-    let bitP = bp.makeBitP (byteN 1) bitToBool
+    
+    let bitP = bp.makeBitP (bp.byteN 1) bitToBool
 
     let result = test parserStream (bitP .>> bp.byte1 .>> eof)
     
@@ -198,7 +198,7 @@ let bitParserTest() =
 let selectBitTest() = 
     let bytes = [|0xF0;0x01|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     let selectLastBit = bp.bitN 16 
 
@@ -213,7 +213,7 @@ let selectBitTest() =
 let testConsumingBitsError() = 
     let bytes = [|0xF0|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
 
     // exception should happen since we consumed one bit
     // then tried to consume 8 more, but the underlying byte array
@@ -230,7 +230,7 @@ let testConsumingBitsError() =
 let testConsumingBits() = 
     let bytes = [|0x01|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
     
     let selectLastBit = bp.bit1 >>= fun one ->
                         bp.bit1 >>= fun two ->
@@ -252,7 +252,7 @@ let testConsumingBits() =
 let testApplyManyBits() = 
     let bytes = Array.init 10 (fun i -> byte(0x01))
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream(new MemoryStream(bytes))   
     
     let selectLastBit = bp.bit1 >>= fun one ->
                         bp.bit1 >>= fun two ->

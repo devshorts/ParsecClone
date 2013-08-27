@@ -12,7 +12,7 @@ let moovFtypTest() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = new BinStream(f)
+    let parserStream = makeBinStream f
 
     let result = test parserStream ftyp
     
@@ -34,7 +34,7 @@ let expectedMatchOnName() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = new BinStream(f)
+    let parserStream = makeBinStream f
 
     let result = test parserStream (mvhd >>. ftyp)
     
@@ -45,7 +45,7 @@ let matchFtypAndMoov() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = new BinStream(f)
+    let parserStream = makeBinStream f
 
     let result = test parserStream video
     
@@ -56,7 +56,7 @@ let matchOptFtypAndMoov() =
     
     use f = new FileStream(@"NoFtyp.m4v", FileMode.Open)
 
-    let parserStream = new BinStream(f)
+    let parserStream = makeBinStream f
 
     let result = test parserStream video
     
@@ -67,7 +67,7 @@ let madeByFfmpeg() =
     
     use f = new FileStream(@"ffmpegMade.m4v", FileMode.Open)
 
-    let parserStream = new BinStream(f)
+    let parserStream = makeBinStream f
 
     let result = test parserStream video
     
