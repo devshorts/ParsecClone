@@ -62,7 +62,7 @@ module BinStreams =
                 else 
                     None
 
-    let makeBinStream stream = new BinStream<obj>(stream, ())
+    let makeBinStream stream = new BinStream<unit>(stream, ())
 
-    let toInterface binstream = binstream :> IStreamP<Stream, byte[], obj>
+    let toInterface binstream = binstream :> IStreamP<Stream, byte[], unit>
 

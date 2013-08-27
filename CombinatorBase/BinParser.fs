@@ -5,10 +5,11 @@ open System.IO
 
 [<AutoOpen>]
 module BinParsers = 
+    
     type ParseState<'UserState> = State<Stream, byte[], 'UserState>
     type BitState<'UserState> = State<byte[], Bit[], 'UserState>
     
-    type BinParser (endianNessConverter : byte[] -> byte[]) = 
+    type BinParser<'UserState> (endianNessConverter : byte[] -> byte[]) = 
                 
         let getBinStream (state:ParseState<'UserState>) = state :?> BinStream<'UserState>
         let getBitStream (state:BitState<'UserState>) = state :?> BitStream<'UserState>
@@ -88,7 +89,7 @@ module BinParsers =
         member x.bitsToInt = bitsToUInt                       
 
         member x.makeBitP seed parser = 
-            let elevator (b:byte[]) userState = new BitStream<obj>(b, 0, userState) :> IStreamP<_, _, _>
+            let elevator (b:byte[]) userState = new BitStream<'a>(b, 0, userState) :> IStreamP<_, _, _>
             reproc elevator seed parser
 
         member x.bitN n = 

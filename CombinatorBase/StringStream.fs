@@ -63,6 +63,6 @@ module StringStreamP =
                     | RegexStr target result -> None
                     | _ -> Some(takeAmount)
 
-    let makeStringStream str = new StringStreamP<obj>(str, ())
+    let makeStringStream str = new StringStreamP<unit>(str, ())
 
-    let toInterface streamp = streamp :> IStreamP<string, string, obj>
+    let toInterface streamp = streamp :> IStreamP<string, string, unit>

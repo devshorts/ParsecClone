@@ -7,28 +7,28 @@ open System
 [<AutoOpen>]
 module Mp4Leaves = 
    
-    let udta<'a> = 
+    let udta : VideoParser<_> = 
         atom "udta"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id  |>> UDTA
 
-    let free<'a> = 
+    let free : VideoParser<_> = 
         atom "free"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id  |>> FREE
         
    
-    let edts<'a> = 
+    let edts : VideoParser<_> = 
         atom "edts"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id |>> EDTS
         
-    let uuid<'a> = 
+    let uuid : VideoParser<_> = 
         atom "uuid"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id                                      
                            
-    let ftyp<'a> = 
+    let ftyp : VideoParser<_> = 
         atom "ftyp" >>= fun id -> 
         stringId         >>= fun majorBrand ->
         bp.uint32        >>= fun minorVersion ->
@@ -40,7 +40,7 @@ module Mp4Leaves =
                     Brands = foundBrands
                 } |>> FTYP
 
-    let mvhd<'a> = 
+    let mvhd : VideoParser<_> = 
         atom "mvhd"            >>= fun id -> 
         versionAndFlags             >>= fun vFlags ->
         date                        >>= fun creationTime ->
@@ -60,12 +60,12 @@ module Mp4Leaves =
         } |>> MVHD
 
 
-    let iods<'a> = 
+    let iods : VideoParser<_> = 
         atom "iods" >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id |>> IODS
 
-    let tkhd<'a> = 
+    let tkhd : VideoParser<_> = 
         atom "tkhd" >>= fun id ->
         versionAndFlags >>= fun vFlags ->
         date >>= fun creationTime ->
@@ -94,7 +94,7 @@ module Mp4Leaves =
             Width = height
         } |>> TKHD
     
-    let vmhd<'a> = 
+    let vmhd : VideoParser<_> = 
         atom "vmhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun graphicsMode ->
@@ -103,31 +103,31 @@ module Mp4Leaves =
         bp.uint16           >>= fun opcodeBlue ->
         preturn id |>> VMHD
 
-    let smhd<'a> = 
+    let smhd : VideoParser<_> = 
         atom "smhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun balance ->
         bp.skip 2           >>= fun _ ->
         preturn id |>> SMHD
 
-    let drefEntry<'a> = 
+    let drefEntry : VideoParser<_> = 
         bp.uint32           >>= fun size ->
         bp.byte4 |>> System.Text.Encoding.ASCII.GetString >>= fun ``type`` ->
         versionAndFlags     >>= fun vFlags ->
         preturn ()
 
-    let dref<'a> = 
+    let dref : VideoParser<_> = 
         atom "dref"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) drefEntry >>= fun entries ->
         preturn id |>> DREF
 
-    let dinf<'a> = 
+    let dinf : VideoParser<_> = 
         atom "dinf"    >>= fun id ->
         dref |>> DINF
 
-    let mdhd<'a> = 
+    let mdhd : VideoParser<_> = 
         atom "mdhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         date                >>= fun creationTime ->
@@ -138,7 +138,7 @@ module Mp4Leaves =
         bp.uint16           >>= fun quality ->
         preturn id |>> MDHD
 
-    let hdlr<'a> = 
+    let hdlr : VideoParser<_> = 
         atom "hdlr"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun componentType ->

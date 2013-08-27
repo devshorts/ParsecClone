@@ -5,6 +5,8 @@ open ParsecClone.CombinatorBase
 
 module CsvSample = 
     
+    type CsvParser<'Return> = Parser<'Return, string, string, unit>
+
     let delimType = ","
 
     let(|DelimMatch|EscapedType|Other|) i = 
@@ -12,7 +14,7 @@ module CsvSample =
         else if i = delimType then DelimMatch
         else Other
 
-    let delim<'a> = matchStr delimType
+    let delim : CsvParser<_> = matchStr delimType
 
     let quote  = matchStr "\""
 
@@ -33,18 +35,18 @@ module CsvSample =
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldStrings
 
-    let escapedChar<'a> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
+    let escapedChar : CsvParser<_> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
     
-    let normal<'a> = satisfy validNormalChars any 
+    let normal : CsvParser<_> = satisfy validNormalChars any 
 
     let normalAndEscaped = many (normal <|> escapedChar) >>= foldStrings
     
-    let literal<'a> = quoteStrings |> between2 quote
+    let literal: CsvParser<_> = quoteStrings |> between2 quote
 
-    let csvElement<'a> = many (literal <|> normalAndEscaped) >>= foldStrings
+    let csvElement: CsvParser<_> = many (literal <|> normalAndEscaped) >>= foldStrings
 
-    let listItem<'a> = delim >>. ws >>. opt csvElement
+    let listItem: CsvParser<_> = delim >>. ws >>. opt csvElement
 
-    let elements<'a> = csvElement .<?>>. many listItem
+    let elements: CsvParser<_> = csvElement .<?>>. many listItem
 
-    let lines<'a> = many (elements |> sepBy <| newline) .>> eof
+    let lines: CsvParser<_> = many (elements |> sepBy <| newline) .>> eof

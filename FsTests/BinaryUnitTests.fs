@@ -6,7 +6,7 @@ open System.IO
 open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 
-let bp = new BinParser(Array.rev)
+let bp = new BinParser<_>(Array.rev)
 
 let byte1 = bp.byte1
 let byte2 = bp.byte2
@@ -65,7 +65,7 @@ let binTest3() =
 
 [<Test>]
 let binTest4() = 
-    let p = new BinParser(id)
+    let p = new BinParser<_>(id)
 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 
@@ -80,7 +80,7 @@ let binTest4() =
 
 [<Test>]
 let binaryWithBacktracker() = 
-    let p = new BinParser(id)
+    let p = new BinParser<_>(id)
 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
 

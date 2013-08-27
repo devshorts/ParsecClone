@@ -7,37 +7,37 @@ open System
 [<AutoOpen>]
 module Mp4StsdElements = 
         
-    let esds<'a> = 
+    let esds : VideoParser<_> = 
         atom "esds"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id 
 
-    let avcC<'a> = 
+    let avcC : VideoParser<_> = 
         atom "avcC"        >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
-    let btrt<'a> = 
+    let btrt : VideoParser<_> = 
         atom "btrt"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
-    let uuid<'a> = 
+    let uuid : VideoParser<_> = 
         atom "uuid"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
-    let colr<'a> = 
+    let colr : VideoParser<_> = 
         atom "colr"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
-    let pasp<'a> = 
+    let pasp : VideoParser<_> = 
         atom "pasp"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
         preturn id 
 
-    let soundDescription<'a> = 
+    let soundDescription : VideoParser<_> = 
         bp.uint32   >>= fun size ->
         stringId    >>= fun dataFormat ->
         bp.skip 6   >>= fun _ ->
@@ -52,7 +52,7 @@ module Mp4StsdElements =
         bp.uint32   >>= fun sampleRate ->
         preturn ()
     
-    let videoDescription<'a> = 
+    let videoDescription : VideoParser<_> = 
         bp.uint32   >>= fun size ->
         stringId    >>= fun dataFormat ->
         bp.skip 6   >>= fun _ ->
@@ -75,19 +75,19 @@ module Mp4StsdElements =
         let x = dataFormat
         preturn ()
 
-    let videoStsd<'a> = 
+    let videoStsd : VideoParser<_> = 
         attempt(
                     videoDescription      >>= fun vDesc ->
                     many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid) >>= fun inner ->
                     preturn ()
                ) |>> STSD_VIDEO
 
-    let audioStsd<'a> = 
+    let audioStsd : VideoParser<_> = 
         attempt(
                     soundDescription >>= fun sDesc ->
                     esds >>= fun esds ->
                     preturn ()
                ) |>> STSD_AUDIO
 
-    let sampleDescription<'a> = audioStsd <|> videoStsd
+    let sampleDescription : VideoParser<_> = audioStsd <|> videoStsd
     

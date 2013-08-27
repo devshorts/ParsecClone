@@ -285,7 +285,7 @@ module Combinator =
                                         
                 | (None, consumed) -> (None, consumed)
 
-    let test input (parser:Parser<_,_,_,_>) = 
+    let test (input:State<_,_,'UserState>) (parser:Parser<_,_,_,'UserState>) = 
         match parser input with
             | (Some(m), s) -> m
             | (None, _) -> failwith "No matches"

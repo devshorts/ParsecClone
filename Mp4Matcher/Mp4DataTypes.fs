@@ -1,9 +1,14 @@
 ﻿namespace Mp4Matcher
 
 open System
+open ParsecClone.CombinatorBase
 
 [<AutoOpen>]
 module Mp4DataTypes = 
+
+    
+
+    type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], unit>
 
     type AtomBase = {
         Size: uint32

@@ -29,29 +29,29 @@ module StringP =
 
     let invertRegex pattern = matcher invertRegexMatch pattern 
         
-    let anyBut<'a> = invertRegex
+    let anyBut = invertRegex
 
-    let char<'a> = regexStr "[a-z]"
+    let char s = regexStr "[a-z]" s
 
-    let chars<'a> = regexStr "[a-z]+"    
+    let chars s = regexStr "[a-z]+" s   
 
-    let digit<'a> = regexStr "[0-9]"
+    let digit s = regexStr "[0-9]" s
 
-    let digits<'a> = regexStr "[0-9]+"
+    let digits s = regexStr "[0-9]+" s
    
-    let newline<'a> = regexStr "\r\n" <|> regexStr "\r" <|> regexStr "\n"
+    let newline s = (regexStr "\r\n" <|> regexStr "\r" <|> regexStr "\n") s
 
-    let whitespace<'a> = regexStr "\s"
+    let whitespace s = regexStr "\s" s
 
-    let whitespaces<'a> = regexStr "\s+"
+    let whitespaces s = regexStr "\s+" s
     
-    let space<'a> = regexStr " "
+    let space s = regexStr " " s
 
-    let spaces<'a> = regexStr " +"
+    let spaces s = regexStr " +" s
 
-    let tab<'a> = regexStr "\t"
+    let tab s = regexStr "\t" s
 
-    let tabs<'a> = regexStr "\t+"
+    let tabs s = regexStr "\t+" s
 
     let isDigit = isMatch "[0-9]"
 
@@ -59,7 +59,7 @@ module StringP =
 
     let isLower = isMatch "[a-z]"  
 
-    let any<'a> = regexStr "."
+    let any s = regexStr "." s
 
     let isChar = isMatch "[A-z]"
 
@@ -68,9 +68,9 @@ module StringP =
                     | "\t" -> true
                     | _ -> false
 
-    let ws<'a> = opt (many (satisfy isSpace any))
+    let ws s = (opt (many (satisfy isSpace any))
                     >>= function
                         | Some(i) -> preturn (List.reduce (+) i)
-                        | None -> preturn ""
+                        | None -> preturn "") s
 
     let isNewLine i = isMatch "\r\n" i || isMatch "\r" i || isMatch "\n" i
