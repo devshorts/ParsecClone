@@ -61,7 +61,7 @@ let convertToRecordTest1() =
     let result = test parserStream video
     
     let record = rootListToRecord result
-
+    
     ()
 
 [<Test>]
@@ -86,7 +86,7 @@ let madeByFfmpeg() =
     
     result.Length |> should equal 5
 
-(*
+
 [<Test>]
 let findStts() = 
     for file in ["a1"; "b1"; "c1"; "d1"] do 
@@ -99,38 +99,38 @@ let findStts() =
 
         let parserStream = makeBinStream buff
 
-        let result = test parserStream video
-    
-        let moov = List.find(function | MOOV(x) -> true | _ -> false) result
+        let result = test parserStream video |> rootListToRecord   
 
-        let tracks = 
-            match moov with
-                | MOOV(l) -> 
-                    List.filter (function | TRAK(_) -> true | _ -> false) l
-                                    |> List.map (function | TRAK(l) -> l)   
-                                    |> List.collect id                             
-                                    |> List.filter (function | MDIA(x) -> true | _ -> false)
-                                    |> List.map (function |MDIA(x) -> x)
-                                    |> List.collect id
-                                    |> List.filter (function | MINF(x) -> true | _ -> false)
-                                    |> List.map (function | MINF(x) -> x)
-                                    |> List.collect id
-                                    |> List.filter (function | STBL(x) -> true | _ -> false)
-                                    |> List.map (function | STBL(x) -> x)
-                                    |> List.collect id
-                                    |> List.filter(function | STTS(x) -> true | _ -> false)
-                                    |> List.map(function | STTS(x) -> x)
+        let getAudioMetadata src = maybe {
+            let extractAudio (trak:Trak) = maybe {
+                let! mdia = trak.Mdia
+                let! minf = mdia.Minf
+                let! header =  minf.MediaTypeHeader
+                let! audio = header.Audio
+                let! stbl = minf.Stbl
+                let! stts = stbl.Stts
+                return stts
+            }
 
-                | _ -> failwith "error"
+            let! mov = src.Mov
+            let tracks = mov.Traks
 
-        let (_::audioStts::_) = tracks
+            return List.map extractAudio tracks |> List.filter Option.isSome |> List.map Option.get                           
+        }
 
-        let fuckedUp = List.filter (fun (i, b) -> (int)i.SampleDuration > 2000) (List.zip audioStts.SampleTimes [0..(int)audioStts.NumberOfEntries - 1])
+        let audioStts = match getAudioMetadata result with
+                            | Some(stts::_) -> stts
+                            | _ -> failwith "shouldn't have gotten here"
+
+        let fuckedUp = List.zip audioStts.SampleTimes [0..(int)audioStts.NumberOfEntries - 1]
+                            |> List.filter (fun (i, b) -> (int)i.SampleDuration > 2000) 
                             |> List.map (fun (i, b) -> System.String.Format("{0}: {1}", b, i.SampleDuration))
 
         List.map (printfn "%s") fuckedUp |> ignore
 
         () |> should equal ()
+
+
 
 [<Test>]
 let bigVidTest() = 
@@ -143,10 +143,9 @@ let bigVidTest() =
 
     let parserStream = makeBinStream buff
 
-    let result = test parserStream video
+    let result = test parserStream video |> rootListToRecord
         
     printfn "took %s" ((System.DateTime.Now - now).ToString())
 
     () |> should equal ()
 
-*)

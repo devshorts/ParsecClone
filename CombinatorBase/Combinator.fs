@@ -56,11 +56,11 @@ module Combinator =
             | (None, state : IStreamP<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
-    let (>>=)  (current) (next)  = getReply current next                                   
+    let (>>=) (current) (next)  = getReply current next                                   
 
     let (>>=?) (current) (next) = getBacktrackReply current next       
         
-    let (|>>)  parser targetType = 
+    let (|>>) parser targetType = 
         parser >>= fun value -> 
         preturn (targetType value)
 

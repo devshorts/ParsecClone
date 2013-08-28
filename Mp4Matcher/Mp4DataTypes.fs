@@ -6,7 +6,18 @@ open ParsecClone.CombinatorBase
 [<AutoOpen>]
 module Mp4DataTypes = 
 
-    
+    type MaybeBuilder () = 
+        member x.Bind (result:'a option, func) = 
+            if result.IsSome then func(result.Value)
+            else None
+
+        member x.Return value = Some(value)
+        
+        member x.Delay f = f()    
+        
+        member x.Zero() = None                   
+
+    let maybe = new MaybeBuilder()
 
     type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], unit>
 
