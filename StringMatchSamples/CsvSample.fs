@@ -13,8 +13,8 @@ module CsvSample =
         if i = "\\" || i ="\"" then EscapedType
         else if i = delimType then DelimMatch
         else Other
-
-    let delim : CsvParser<_> = matchStr delimType
+        
+    let delim = matchStr delimType
 
     let quote  = matchStr "\""
 
@@ -35,18 +35,18 @@ module CsvSample =
 
     let quoteStrings = (many (satisfy (inQuotesChars) any)) >>= foldStrings
 
-    let escapedChar : CsvParser<_> = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
+    let escapedChar = matchStr "\\" >>. (anyOf matchStr [delimType; "\"";"n";"r";"t"] |>> unescape)
     
-    let normal : CsvParser<_> = satisfy validNormalChars any 
+    let normal = satisfy validNormalChars any 
 
     let normalAndEscaped = many (normal <|> escapedChar) >>= foldStrings
     
-    let literal: CsvParser<_> = quoteStrings |> between2 quote
+    let literal = quoteStrings |> between2 quote
 
-    let csvElement: CsvParser<_> = many (literal <|> normalAndEscaped) >>= foldStrings
+    let csvElement = many (literal <|> normalAndEscaped) >>= foldStrings
 
-    let listItem: CsvParser<_> = delim >>. ws >>. opt csvElement
+    let listItem = delim >>. ws >>. opt csvElement
 
-    let elements: CsvParser<_> = csvElement .<?>>. many listItem
+    let elements = csvElement .<?>>. many listItem
 
     let lines: CsvParser<_> = many (elements |> sepBy <| newline) .>> eof

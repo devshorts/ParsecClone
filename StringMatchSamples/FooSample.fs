@@ -10,9 +10,9 @@ module FooSample =
     type Band = 
         | FooFighter
 
-    let foo : FooParser<_>  = matchStr "foo" 
+    let foo = matchStr "foo" 
 
-    let fighter : FooParser<_> = matchStr "fighter" 
+    let fighter = matchStr "fighter" 
 
     let fRegex : FooParser<_> = regexStr "fo{2}f" 
 
@@ -36,9 +36,9 @@ module FooSample =
 
     let parseWithErrorAttempt : FooParser<_> = choice[attempt (errAttempt >>. errAttempt) |>>% FooFighter;band]
 
-    let manyFoo s = many foo s
+    let manyFoo : FooParser<_> = many foo
     
-    let opts<'a, 'b> = fighter <|> foo
+    let opts : FooParser<_> = fighter <|> foo
 
     let optsC : FooParser<_> = choice[fighter;foo]
 

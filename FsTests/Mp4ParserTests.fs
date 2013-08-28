@@ -52,6 +52,19 @@ let matchFtypAndMoov() =
     result.Length |> should equal 3
 
 [<Test>]
+let convertToRecordTest1() = 
+    
+    use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
+
+    let parserStream = makeBinStream f
+
+    let result = test parserStream video
+    
+    let record = rootListToRecord result
+
+    ()
+
+[<Test>]
 let matchOptFtypAndMoov() = 
     
     use f = new FileStream(@"NoFtyp.m4v", FileMode.Open)

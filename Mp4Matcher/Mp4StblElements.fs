@@ -7,7 +7,7 @@ open System
 [<AutoOpen>]
 module Mp4StblElements =
     
-    let timeToSample : VideoParser<_> = 
+    let timeToSample = 
         bp.uint32       >>= fun sampleCount ->
         bp.uint32       >>= fun sampleDuration ->
         preturn {
@@ -27,8 +27,6 @@ module Mp4StblElements =
             SampleTimes = samples
         } |>> STTS
 
-   
-   
     let ctts : VideoParser<_> = 
         atom "ctts"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
@@ -40,7 +38,7 @@ module Mp4StblElements =
         bp.uint32           >>= fun numEntries ->
         sampleDescription  |>> STSD
 
-    let sampleSizeEntry : VideoParser<_> = bp.uint32 >>= fun i -> preturn { SampleSize = i }
+    let sampleSizeEntry = bp.uint32 >>= fun i -> preturn { SampleSize = i }
 
     let stsz : VideoParser<_> = 
         atom "stsz"    >>= fun id ->
@@ -56,7 +54,7 @@ module Mp4StblElements =
         } |>> STSZ
 
 
-    let sampleToChunkEntry : VideoParser<_> = 
+    let sampleToChunkEntry = 
         bp.uint32 >>= fun firstChunk ->
         bp.uint32 >>= fun samplesPerChunk ->
         bp.uint32 >>= fun sampleDescriptionId ->
@@ -78,7 +76,7 @@ module Mp4StblElements =
             SampleChunks = samples
         } |>> STSC
 
-    let chunkOffSet : VideoParser<_> = bp.uint32 >>= fun i -> preturn { ChunkOffset = i }
+    let chunkOffSet = bp.uint32 >>= fun i -> preturn { ChunkOffset = i }
 
     let stco : VideoParser<_> = 
         atom "stco"    >>= fun id ->
@@ -92,7 +90,7 @@ module Mp4StblElements =
             ChunkOffsets = offsets
         } |>> STCO
 
-    let sampleNumber : VideoParser<_> = bp.uint32 >>= fun i -> preturn { SampleNumber = i }
+    let sampleNumber = bp.uint32 >>= fun i -> preturn { SampleNumber = i }
 
     let stss : VideoParser<_> = 
         atom "stss" >>= fun id ->

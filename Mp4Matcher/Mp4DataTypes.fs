@@ -93,6 +93,8 @@ module Mp4DataTypes =
         SyncSamples: SyncSampleEntry list
     }
     
+    (* A tree for use with parsing *)
+
     type StsdTypes = 
         | STSD_AUDIO of unit
         | STSD_VIDEO of unit
@@ -133,5 +135,102 @@ module Mp4DataTypes =
         | UDTA of AtomBase
         | FREE of AtomBase
         | UNKNOWN of AtomBase
+    
+
+    (* Records that represent the transformed tree *)
+
+    type Stbl = {
+        Stts: Stts option
+        Stsz: Stsz option
+        Stsc: Stsc option
+        Stco: Stco option
+        Stss: Stss option
+    }
+    type VSMhd = {
+        Video: AtomBase option
+        Audio: AtomBase option
+    }
+    type Dref = {
+        Dref: AtomBase    
+    }
+    type Minf = {
+        MediaTypeHeader: VSMhd option
+        Dinf: Dref option
+        Stbl: Stbl option
+    }
+    type Mdia = {
+        Mdhd: AtomBase option
+        Hdlr: AtomBase option
+        Minf: Minf option
+    }
+    type Trak = {
+        Header: Tkhd option
+        Edts: AtomBase option
+        Mdia: Mdia option
+    }
+    type Mov = {
+        Mvd: Mvhd option
+        Iods: AtomBase option
+        Traks: Trak list 
+    }
+    type Movie = {     
+        Mov: Mov option
+    }
+
+    (* Functions to transform the tree into records for easier querying *)
+
+    let stblListToRecord stbls = 
+        let seed = { Stts = None; Stsz = None; Stsc =  None; Stco = None; Stss = None }
+        List.fold (fun acc i ->
+            match i with 
+            | STTS(x) -> { acc with Stts = Some(x) }
+            | STSZ(x) -> { acc with Stsz = Some(x) }
+            | STSC(x) -> { acc with Stsc = Some(x) }
+            | STCO(x) -> { acc with Stco = Some(x) }
+            | STSS(x) -> { acc with Stss = Some(x) }
+            | _ -> acc) seed stbls
+
+
+    let minfListToRecord minfs = 
+        let seed = { MediaTypeHeader = None; Dinf = None; Stbl = None }
+        List.fold (fun acc i ->
+            match i with 
+                | VMHD(x) -> { acc with MediaTypeHeader = Some({ Video = Some(x); Audio = None }) }
+                | SMHD(x) -> { acc with MediaTypeHeader = Some({ Video = None;    Audio = Some(x) }) }
+                | DINF(DREF(x)) -> { acc with Dinf = Some({ Dref = x }) } 
+                | STBL(xs) -> { acc with Stbl = Some(stblListToRecord xs) }) seed minfs
                     
+    let mdiaListToRecord mdias = 
+        let seed = { Mdhd = None; Hdlr = None; Minf = None }
+        List.fold (fun acc i ->
+            match i with 
+                | MINF(xs) -> { acc with Minf = Some(minfListToRecord xs) }
+                | HDLR(x) -> { acc with Hdlr = Some(x) }
+                | MDHD(x) -> { acc with Mdhd = Some(x) }) seed mdias
+
+    let trackListToRecord tracks = 
+        let seed = { Header = None; Edts = None; Mdia = None }
+        List.fold (fun acc i -> 
+            match i with 
+                | TKHD(x) -> { acc with Header = Some(x) }
+                | EDTS(x) -> { acc with Edts = Some(x) }
+                | MDIA(x) -> { acc with Mdia = Some(mdiaListToRecord x) }
+                | _ -> acc) seed tracks
+
+    let moovListToRecord moovs = 
+        let seed = { Mvd = None; Iods = None; Traks = [] }
+        List.fold (fun acc i ->
+            match i with 
+                | MVHD(x) -> { acc with Mvd = Some(x) }
+                | IODS(x) -> { acc with Iods = Some(x) }
+                | TRAK(xs) -> { acc with Traks = (trackListToRecord xs)::acc.Traks }
+                | _ -> acc) seed moovs
+
+    let rootListToRecord roots = 
+        let seed = { Mov = None }
+        List.fold (fun acc i ->
+            match i with 
+                | MOOV(xs) -> { acc with Mov = Some(moovListToRecord xs) }
+                | _ -> acc) seed roots
+                                
 
