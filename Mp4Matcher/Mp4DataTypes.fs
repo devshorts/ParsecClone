@@ -19,7 +19,7 @@ module Mp4DataTypes =
 
     let maybe = new MaybeBuilder()
 
-    type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], unit>
+    type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], bool>
 
     type AtomBase = {
         Size: uint32

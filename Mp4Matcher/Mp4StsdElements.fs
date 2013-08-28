@@ -76,18 +76,22 @@ module Mp4StsdElements =
         preturn ()
 
     let videoStsd : VideoParser<_> = 
-        attempt(
-                    videoDescription      >>= fun vDesc ->
-                    many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid) >>= fun inner ->
-                    preturn ()
-               ) |>> STSD_VIDEO
+        getUserState >>= fun isAudio ->
+        if isAudio then 
+            pzero 
+        else        
+            videoDescription      >>= fun vDesc ->
+            many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid) >>= fun inner ->
+            preturn () |>> STSD_VIDEO
 
     let audioStsd : VideoParser<_> = 
-        attempt(
-                    soundDescription >>= fun sDesc ->
-                    esds >>= fun esds ->
-                    preturn ()
-               ) |>> STSD_AUDIO
+        getUserState >>= fun isAudio ->
+        if isAudio then 
+            soundDescription >>= fun sDesc ->
+            esds >>= fun esds ->
+            preturn () |>> STSD_AUDIO
+        else 
+            pzero
 
     let sampleDescription : VideoParser<_> = audioStsd <|> videoStsd
     

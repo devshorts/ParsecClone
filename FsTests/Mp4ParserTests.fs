@@ -7,12 +7,14 @@ open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
 
+let mp4Stream f = new BinStream<bool>(f, false)
+
 [<Test>]
 let moovFtypTest() = 
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream ftyp
     
@@ -34,7 +36,7 @@ let expectedMatchOnName() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream (mvhd >>. ftyp)
     
@@ -45,7 +47,7 @@ let matchFtypAndMoov() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream video
     
@@ -56,7 +58,7 @@ let convertToRecordTest1() =
     
     use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream video
     
@@ -69,7 +71,7 @@ let matchOptFtypAndMoov() =
     
     use f = new FileStream(@"NoFtyp.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream video
     
@@ -80,7 +82,7 @@ let madeByFfmpeg() =
     
     use f = new FileStream(@"ffmpegMade.m4v", FileMode.Open)
 
-    let parserStream = makeBinStream f
+    let parserStream = mp4Stream f
 
     let result = test parserStream video
     
@@ -97,7 +99,7 @@ let findStts() =
 
         use buff = new BufferedStream(f)
 
-        let parserStream = makeBinStream buff
+        let parserStream = mp4Stream buff
 
         let result = test parserStream video |> rootListToRecord   
 
@@ -141,7 +143,7 @@ let bigVidTest() =
 
     use buff = new BufferedStream(f)
 
-    let parserStream = makeBinStream buff
+    let parserStream = mp4Stream buff
 
     let result = test parserStream video |> rootListToRecord
         
