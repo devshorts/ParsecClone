@@ -67,6 +67,8 @@ Included operators are
 - `opt` - takes a parser, applies the the state, and returns a result option. Careful using this in the context of a `many` since it you can get into infinite loops since you always "succeed"
 - `createParserForwardedToRef` - returns a tuple of (parser, ref parser) to use for recursive calling parsers 
 - `reproc elevator seed parser` - This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed.
+- `getUserState` - returns to you the currently stored user state
+- `setUserState` - takes a value and sets the userstate with that value
 
 String operators
 ----
@@ -399,7 +401,9 @@ let tkhd<'a> =
 Binary bit parsing
 ----
 
-Bit parsing is new, and I don't have a big example yet, but here is a sample from a unit test:
+Parsing bits requires you to work on a pre-seeded byte stream. This is achieved by calling the `makeBitP` parser which reads a certain number of bytes from the byte stream, and then elevates the stream into a bit stream. The returned result from the `makeBitP` parser is the return result from the bit parsers.  Only bit parsers can be used in the bit parsing stream, byte parsers won't work.
+
+Here is a simple example: 
 
 ```fsharp
 [<Test>]
@@ -417,7 +421,7 @@ let bitParserTest() =
     result |> should equal 15
 ```
 
-We create a single byte seed to use for the bit parsing, and then read 4 bits from the read byte (the other 4 bits are ignored).  Then I check if the 4 bytes equals 15 (0b1111). The underlying source stream was advanced by 1 byte, so I read the next byte to discard it, and then check for eof for completeness.  
+We create a single byte seed to use for the bit parsing, and then read 4 bits from the read byte (the other 4 bits are ignored).  The underlying source stream was advanced by 1 byte, so I read the next byte to discard it, and then check for eof for completeness.  The final tests makes sure that the 4 bits we read were all ones, validating that the value is 15 (0b1111). 
 
 Here is another example that applies the combinator `many` to the bitParser.  This example parses each bit and returns the bit value for a byte, and is applied to an array of 10 bytes
 
@@ -447,32 +451,3 @@ let testApplyManyBits() =
     result |> should equal target 
 ```
 
-Implementation Basics
----
-This is both a string parser, and a binary parser, which is extensible to any parsing type (either on streams or primitives).  I've encapsulated the parsing state into the `IStreamP` interface which takes both the underlying state type, and what to return when it does a raw state consume. For example, on a `Stream` you want to consume `byte[]`. But on a `string` you want to consume other `string` types. In general, F#'s type inference system hides this nastiness away.
-
-```fsharp
-type State<'StateType, 'ConsumeType> = IStreamP<'StateType, 'ConsumeType>
-
-type Reply<'Return, 'StateType, 'ConsumeType> = 'Return option * State<'StateType, 'ConsumeType>
-
-type Parser<'Return, 'StateType, 'ConsumeType> = State<'StateType, 'ConsumeType> -> Reply<'Return, 'StateType, 'ConsumeType>
-```
-
-The state is generalized so we can plug in different stream sources (strings, streams, whatever).  For example, here is the state interface that all state consumers need to implement. The assumption is that consuming should always say how *much* to consume, which is why the consume function takes an integer.  If it can consume that much it will return consume type from the state type.
-
-```fsharp
-type IStreamP<'StateType, 'ConsumeType> =        
-    abstract member state : 'StateType
-    abstract member consume : int -> 'ConsumeType option * IStreamP<'StateType, 'ConsumeType>
-    abstract member skip : int -> bool option * IStreamP<'StateType, 'ConsumeType>
-    abstract member backtrack : unit -> unit
-    abstract member hasMore : unit -> bool
-    abstract member equals : IStreamP<'StateType, 'ConsumeType> -> bool
-```
-
-An unfortunate side effect of this is that I ran into a value restriction because of the generics, so every combinator needs to include a generic declaration like 
-
-`let chars<'a> = //..whatever"` 
- 
-Included is a set of nunit tests that demonstrates the combinators (both string and binary).
