@@ -78,6 +78,19 @@ let matchOptFtypAndMoov() =
     result.Length |> should equal 2
 
 [<Test>]
+let testMessedUpFreeAtoms() = 
+    
+    use f = new FileStream(@"z:\data\video\Local_130814_1633_C105_f199e2f2d960428bb448fd2ccd172b7b.m4v", FileMode.Open)
+
+    let parserStream = mp4Stream (new BufferedStream(f))
+
+    let result = test parserStream video
+    
+    result.Length |> should equal 3
+
+
+
+[<Test>]
 let madeByFfmpeg() = 
     
     use f = new FileStream(@"ffmpegMade.m4v", FileMode.Open)
@@ -91,11 +104,11 @@ let madeByFfmpeg() =
 
 [<Test>]
 let findStts() = 
-    for file in ["a1"; "b1"; "c1"; "d1"] do 
+    for file in Directory.EnumerateFiles(@"C:\temp\errs\test2") do 
         printfn "---"
         printfn "%s" file
 
-        use f = new FileStream(@"c:\temp\errs\" + file + ".m4b", FileMode.Open)
+        use f = new FileStream(file, FileMode.Open)
 
         use buff = new BufferedStream(f)
 
@@ -135,6 +148,7 @@ let findStts() =
 
 
 [<Test>]
+[<Ignore>]
 let bigVidTest() = 
     
     let now = System.DateTime.Now

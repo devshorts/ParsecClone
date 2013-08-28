@@ -20,7 +20,7 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) timeToSample >>= fun samples ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             NumberOfEntries = numEntries
@@ -30,13 +30,13 @@ module Mp4StblElements =
     let ctts : VideoParser<_> = 
         atom "ctts"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
-        preturn id  |>> CTTS
+        freeOpt >>. preturn id  |>> CTTS
 
     let stsd : VideoParser<_> = 
         atom "stsd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        sampleDescription  |>> STSD
+        freeOpt >>. sampleDescription  |>> STSD
 
     let sampleSizeEntry = bp.uint32 >>= fun i -> preturn { SampleSize = i }
 
@@ -46,7 +46,7 @@ module Mp4StblElements =
         bp.uint32           >>= fun sampleSize ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) sampleSizeEntry >>= fun samples ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             NumberOfEntries = numEntries
@@ -69,7 +69,7 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) sampleToChunkEntry >>= fun samples ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             NumberOfEntries = numEntries
@@ -83,7 +83,7 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) chunkOffSet >>= fun offsets ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             NumberOfEntries = numEntries
@@ -97,7 +97,7 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) sampleNumber >>= fun syncSamples ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             NumberOfEntries = numEntries

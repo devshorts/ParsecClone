@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>1a66b236-6be3-4a5a-9b40-ddf030bd8b23</ProjectGuid>
+    <ProjectGuid>6c92be9f-549a-4526-b52b-cdc70bb92501</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Mp4Matcher</RootNamespace>
-    <AssemblyName>Mp4Matcher</AssemblyName>
+    <RootNamespace>FooFighterMatcher</RootNamespace>
+    <AssemblyName>FooFighterMatcher</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Mp4Matcher</Name>
+    <Name>StringMatchers</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Mp4Matcher.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FooFighterMatcher.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,7 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Mp4Matcher.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FooFighterMatcher.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -41,17 +41,12 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mp4DataTypes.fs" />
-    <Compile Include="Mp4ParserUtils.fs" />
-    <Compile Include="Mp4StsdElements.fs" />
-    <Compile Include="Mp4StblElements.fs" />
-    <Compile Include="Mp4Leaves.fs" />
-    <Compile Include="Mp4Sample.fs" />
-    <None Include="Script.fsx" />
+    <Compile Include="FooSample.fs" />
+    <Compile Include="CsvSample.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CombinatorBase\Combinator.fsproj">
-      <Name>Combinator</Name>
+    <ProjectReference Include="..\..\Combinator\Combinator.fsproj">
+      <Name>Combinator (Combinator\Combinator)</Name>
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>
       <Private>True</Private>
     </ProjectReference>

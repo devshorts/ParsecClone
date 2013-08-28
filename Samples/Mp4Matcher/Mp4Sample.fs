@@ -10,13 +10,13 @@ module Mp4P =
     
     let stbl = 
         atom "stbl" >>= fun id ->        
-        many (stts <|> stsd <|> stsz <|> stsc <|> stco <|> stss <|> ctts) |>> STBL
+        freeOpt >>. many (stts <|> stsd <|> stsz <|> stsc <|> stco <|> stss <|> ctts) |>> STBL
 
     let vOrSmhd = vmhd <|> smhd
 
     let minf = 
         atom "minf" >>= fun id ->       
-        many (vOrSmhd <|> dinf <|> stbl) |>> MINF
+        freeOpt >>. many (vOrSmhd <|> dinf <|> stbl) |>> MINF
 
     let mdia = 
         atom "mdia" >>= fun id ->        

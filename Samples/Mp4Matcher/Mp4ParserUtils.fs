@@ -33,6 +33,17 @@ module Mp4ParserUtils =
                 }
         )
 
+    let free : VideoParser<_> = 
+        atom "free"         >>= fun id ->
+        skipRemaining id.Size 8  >>= fun _ ->
+        preturn id  |>> FREE
+
+    let freeOpt : VideoParser<_> = 
+        opt (atom "free"         >>= fun id ->
+            skipRemaining id.Size 8  >>= fun _ ->
+            preturn id  |>> FREE)
+        
+   
     let unknown : VideoParser<_> =
         atomSize >>= fun size ->
         stringId >>= fun name ->
@@ -41,7 +52,6 @@ module Mp4ParserUtils =
                 Size = size
                 Name = name
             }
-
     let versionAndFlags : VideoParser<_> = 
         bp.byte1 |>> bp.byteToUInt  >>= fun version ->
         bp.byte3 |>> bp.toUInt24    >>= fun flags ->

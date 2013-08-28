@@ -10,32 +10,32 @@ module Mp4StsdElements =
     let esds : VideoParser<_> = 
         atom "esds"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let avcC : VideoParser<_> = 
         atom "avcC"        >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let btrt : VideoParser<_> = 
         atom "btrt"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let uuid : VideoParser<_> = 
         atom "uuid"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let colr : VideoParser<_> = 
         atom "colr"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let pasp : VideoParser<_> = 
         atom "pasp"        >>= fun id ->    
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id 
+        freeOpt >>. preturn id 
 
     let soundDescription : VideoParser<_> = 
         bp.uint32   >>= fun size ->
@@ -50,7 +50,7 @@ module Mp4StsdElements =
         bp.uint16   >>= fun compressionId ->
         bp.uint16   >>= fun packetSize ->
         bp.uint32   >>= fun sampleRate ->
-        preturn ()
+        freeOpt >>. preturn ()
     
     let videoDescription : VideoParser<_> = 
         bp.uint32   >>= fun size ->
@@ -73,7 +73,7 @@ module Mp4StsdElements =
         bp.uint16   >>= fun colorTableId ->
         bp.skip 28  >>= fun _ ->        
         let x = dataFormat
-        preturn ()
+        freeOpt >>. preturn ()
 
     let videoStsd : VideoParser<_> = 
         getUserState >>= fun isAudio ->
@@ -82,14 +82,14 @@ module Mp4StsdElements =
         else        
             videoDescription      >>= fun vDesc ->
             many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid) >>= fun inner ->
-            preturn () |>> STSD_VIDEO
+            freeOpt >>. preturn () |>> STSD_VIDEO
 
     let audioStsd : VideoParser<_> = 
         getUserState >>= fun isAudio ->
         if isAudio then 
             soundDescription >>= fun sDesc ->
             esds >>= fun esds ->
-            preturn () |>> STSD_AUDIO
+            freeOpt >>. preturn () |>> STSD_AUDIO
         else 
             pzero
 

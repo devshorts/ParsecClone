@@ -12,28 +12,22 @@ module Mp4Leaves =
         skipRemaining id.Size 8  >>= fun _ ->
         preturn id  |>> UDTA
 
-    let free : VideoParser<_> = 
-        atom "free"         >>= fun id ->
-        skipRemaining id.Size 8  >>= fun _ ->
-        preturn id  |>> FREE
-        
-   
     let edts : VideoParser<_> = 
         atom "edts"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
-        preturn id |>> EDTS
+        freeOpt >>. preturn id |>> EDTS
         
     let uuid : VideoParser<_> = 
         atom "uuid"         >>= fun id ->
         skipRemaining id.Size 8  >>= fun _ ->
-        preturn id                                      
+        freeOpt >>. preturn id                                      
                            
     let ftyp : VideoParser<_> = 
         atom "ftyp" >>= fun id -> 
         stringId         >>= fun majorBrand ->
         bp.uint32        >>= fun minorVersion ->
             let brands = ((int)id.Size - 16) / 4
-            opt (manyN brands stringId) >>= fun foundBrands ->
+            freeOpt >>. opt (manyN brands stringId) >>= fun foundBrands ->
                 preturn {
                     MajorBrand = majorBrand;
                     MinorVersion = minorVersion;
@@ -51,7 +45,7 @@ module Mp4Leaves =
         bp.uint16                   >>= fun volume ->
         bp.skip 70                  >>= fun _ -> 
         bp.uint32                   >>= fun nextTrackId ->
-        preturn {
+        freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
             CreationTime = creationTime
@@ -63,7 +57,7 @@ module Mp4Leaves =
     let iods : VideoParser<_> = 
         atom "iods" >>= fun id ->
         skipRemaining id.Size 8 >>= fun _ ->
-        preturn id |>> IODS
+        freeOpt >>. preturn id |>> IODS
 
     let tkhd : VideoParser<_> = 
         atom "tkhd" >>= fun id ->
@@ -80,7 +74,7 @@ module Mp4Leaves =
         manyN 9 bp.floatP >>= fun matrix ->
         bp.uint32 >>.. bp.shiftR 16 >>= fun width ->
         bp.uint32  >>.. bp.shiftR 16 >>= fun height ->
-        preturn {
+        freeOpt >>. preturn {
             Atom  = id
             VersionAndFlags = vFlags
             CreationTime  = creationTime
@@ -101,31 +95,31 @@ module Mp4Leaves =
         bp.uint16           >>= fun opcodeRed ->
         bp.uint16           >>= fun opcodeGreen ->
         bp.uint16           >>= fun opcodeBlue ->
-        setUserState false >>. preturn id |>> VMHD
+        freeOpt >>. setUserState false >>. preturn id |>> VMHD
 
     let smhd : VideoParser<_> = 
         atom "smhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun balance ->
-        bp.skip 2           >>= fun _ ->
-        setUserState true   >>. preturn id |>> SMHD
+        bp.skip 2           >>= fun _ ->        
+        freeOpt >>. setUserState true   >>. preturn id |>> SMHD
 
     let drefEntry : VideoParser<_> = 
         bp.uint32           >>= fun size ->
         bp.byte4 |>> System.Text.Encoding.ASCII.GetString >>= fun ``type`` ->
         versionAndFlags     >>= fun vFlags ->
-        preturn ()
+        freeOpt >>. preturn ()
 
     let dref : VideoParser<_> = 
         atom "dref"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         manyN ((int)numEntries) drefEntry >>= fun entries ->
-        preturn id |>> DREF
+        freeOpt >>. preturn id |>> DREF
 
     let dinf : VideoParser<_> = 
         atom "dinf"    >>= fun id ->
-        dref |>> DINF
+        freeOpt >>. dref |>> DINF
 
     let mdhd : VideoParser<_> = 
         atom "mdhd"    >>= fun id ->
@@ -136,7 +130,7 @@ module Mp4Leaves =
         bp.uint32           >>= fun duration ->
         bp.uint16           >>= fun language ->
         bp.uint16           >>= fun quality ->
-        preturn id |>> MDHD
+        freeOpt >>. preturn id |>> MDHD
 
     let hdlr : VideoParser<_> = 
         atom "hdlr"    >>= fun id ->
@@ -147,5 +141,5 @@ module Mp4Leaves =
         bp.uint32           >>= fun flags ->
         bp.uint32           >>= fun flagMask ->
         bp.byteN ((int)id.Size - 32) |>> System.Text.Encoding.ASCII.GetString >>= fun componentName ->
-        preturn id |>> HDLR
+        freeOpt >>. preturn id |>> HDLR
 
