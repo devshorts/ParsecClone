@@ -95,14 +95,20 @@ module Mp4Leaves =
         bp.uint16           >>= fun opcodeRed ->
         bp.uint16           >>= fun opcodeGreen ->
         bp.uint16           >>= fun opcodeBlue ->
-        freeOpt >>. setUserState false >>. preturn id |>> VMHD
+        freeOpt >>. 
+            (getUserState >>= fun state ->
+            setUserState { state with IsAudio = false }) >>. 
+                preturn id |>> VMHD
 
     let smhd : VideoParser<_> = 
         atom "smhd"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint16           >>= fun balance ->
         bp.skip 2           >>= fun _ ->        
-        freeOpt >>. setUserState true   >>. preturn id |>> SMHD
+        freeOpt >>. 
+            (getUserState >>= fun state ->
+            setUserState { state with IsAudio = true })   >>. 
+                preturn id |>> SMHD
 
     let drefEntry : VideoParser<_> = 
         bp.uint32           >>= fun size ->

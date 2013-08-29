@@ -76,8 +76,8 @@ module Mp4StsdElements =
         freeOpt >>. preturn ()
 
     let videoStsd : VideoParser<_> = 
-        getUserState >>= fun isAudio ->
-        if isAudio then 
+        getUserState >>= fun state ->
+        if state.IsAudio then 
             pzero 
         else        
             videoDescription      >>= fun vDesc ->
@@ -85,8 +85,8 @@ module Mp4StsdElements =
             freeOpt >>. preturn () |>> STSD_VIDEO
 
     let audioStsd : VideoParser<_> = 
-        getUserState >>= fun isAudio ->
-        if isAudio then 
+        getUserState >>= fun state ->
+        if state.IsAudio then 
             soundDescription >>= fun sDesc ->
             esds >>= fun esds ->
             freeOpt >>. preturn () |>> STSD_AUDIO

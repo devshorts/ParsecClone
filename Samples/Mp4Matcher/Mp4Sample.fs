@@ -8,23 +8,49 @@ open System
 [<AutoOpen>]
 module Mp4P = 
     
+    
     let stbl = 
-        atom "stbl" >>= fun id ->        
-        freeOpt >>. many (stts <|> stsd <|> stsz <|> stsc <|> stco <|> stss <|> ctts) |>> STBL
+        fullConsume "stbl" 
+            (fun id ->        
+                    stts <|> 
+                    stsd <|> 
+                    stsz <|> 
+                    stsc <|> 
+                    stco <|> 
+                    stss <|> 
+                    ctts <|>
+                    (unknown |>> StblTypes.UNKNOWN) ) |>> STBL
 
     let vOrSmhd = vmhd <|> smhd
 
     let minf = 
-        atom "minf" >>= fun id ->       
-        freeOpt >>. many (vOrSmhd <|> dinf <|> stbl) |>> MINF
+        freeOpt >>.
+        fullConsume "minf" 
+            (fun id -> 
+                vOrSmhd <|> 
+                dinf <|> 
+                stbl <|>
+                (unknown |>> MinfTypes.UNKNOWN)) |>> MINF
 
     let mdia = 
-        atom "mdia" >>= fun id ->        
-        many (mdhd <|> hdlr <|> minf) |>> MDIA
+        freeOpt >>.
+        fullConsume "mdia"
+            (fun id ->        
+                mdhd <|> 
+                hdlr <|> 
+                minf <|>
+                (unknown |>> MdiaTypes.UNKNOWN)
+            ) |>> MDIA
 
     let trak = 
-        atom "trak" >>= fun id ->        
-        many (tkhd <|> mdia <|> edts) |>> TRAK
+        freeOpt >>.
+        fullConsume "trak" 
+            (fun id ->        
+                tkhd <|> 
+                mdia <|> 
+                edts <|>
+                (unknown |>> TrakTypes.UNKNOWN)
+            ) |>> TRAK
 
     let mdat = 
         atom "mdat" >>= fun id ->
@@ -34,7 +60,17 @@ module Mp4P =
             bp.skip ((int)id.Size-8) >>= fun _ ->
             preturn id |>> MDAT
 
-    let moov = atom "moov" >>. many (mvhd <|> iods <|> trak) |>> MOOV   
+    let moov =         
+        fullConsume "moov" 
+            (fun id ->
+                mvhd <|> 
+                iods <|> 
+                trak <|>
+                (unknown |>> MoovTypes.UNKNOWN)
+            ) |>> MOOV   
 
-    let video : VideoParser<_> = manyTill1 (choice[attempt ftyp; moov; mdat; udta; free]) eof
+    let video : VideoParser<_> = many (choice[  attempt ftyp; 
+                                                moov; 
+                                                mdat; 
+                                                free;]) .>> eof
                         

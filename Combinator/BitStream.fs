@@ -40,4 +40,6 @@ type BitStream<'UserState> (state:byte[], bitOffset:int, userState:'UserState) =
         member x.getUserState() = userState
         
         member x.setUserState s = userState <- s
+
+        member x.position () = (int64)bitOffset
     

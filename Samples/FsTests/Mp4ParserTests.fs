@@ -7,7 +7,7 @@ open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
 
-let mp4Stream f = new BinStream<bool>(f, false)
+let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; StateStart = (int64)0})
 
 [<Test>]
 let moovFtypTest() = 
@@ -28,7 +28,28 @@ let moovFtypTest() =
                                                       ])
                                 }))
 
+[<Test>]
+let testUnknown() = 
+    
+    use f = new FileStream(@"WithFtyp.m4v", FileMode.Open)
 
+    let parserStream = mp4Stream f
+
+    let result = test parserStream unknown 
+
+    result.Name |> should equal "ftyp"
+
+[<Test>]
+[<ExpectedException>]
+let testUnknownFailure() = 
+    
+    use f = new MemoryStream([|0x00;0x00;0x00;0x00;0xD0;0xFF;0x01;0x01|] |> Array.map byte)
+
+    let parserStream = mp4Stream f
+
+    let result = test parserStream unknown
+    
+    result.Name |> should equal "ftyp"
 
 [<Test>]
 [<ExpectedException>]
@@ -89,7 +110,6 @@ let testMessedUpFreeAtoms() =
     result.Length |> should equal 3
 
 
-
 [<Test>]
 let madeByFfmpeg() = 
     
@@ -99,7 +119,9 @@ let madeByFfmpeg() =
 
     let result = test parserStream video
     
-    result.Length |> should equal 5
+    printf "%s" <| result.ToString()
+
+    result.Length |> should equal 4
 
 
 [<Test>]

@@ -154,7 +154,8 @@ module Combinator =
                     | (None, newState) -> 
                         match List.length acc with
                             | x when x < minCount -> (None, newState)
-                            | _ -> failwith "Needed to match one more of parser, but found zero"
+                            | x when x > 0 -> (Some(acc), newState)
+                            | _ -> (None, newState)
     
             
             testStream state []
@@ -230,6 +231,15 @@ module Combinator =
         state.backtrack()
         None, state   
 
+    let satisfyUserState predicate parser = 
+        fun (state : IStreamP<_,_,'UserState>) ->  
+            let (r, nextState:IStreamP<_,_,_>) as result = parser state
+
+            match r with 
+                | Some(m) when predicate (state.getUserState()) -> result 
+                | Some(_) -> backtrackNone state                                                                     
+                | _ -> None, nextState
+
     let satisfy predicate parser = 
         fun (state : IStreamP<_,_,_>) ->  
             let (r, nextState) as result = parser state
@@ -289,6 +299,10 @@ module Combinator =
     let getUserState (state:IStreamP<_,_,_>) = (Some(state.getUserState()), state)
 
     let setUserState value (state:IStreamP<_,_,_>) = (Some(state.setUserState value), state)
+
+    let statePosition = 
+        fun (state:IStreamP<_,_,_>) -> 
+            (Some(state.position()), state)
 
     let test (input:State<_,_,'UserState>) (parser:Parser<_,_,_,'UserState>) = 
         match parser input with

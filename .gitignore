@@ -22,3 +22,4 @@ obj/
 !WinPCap/Lib/*
 TestResults/
 nuget/
+ValidateStts/

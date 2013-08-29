@@ -7,6 +7,7 @@ open ParsecClone.CombinatorBase
 module BinStreams = 
     type BinStream<'UserState> (state:Stream, userState:'UserState) =   
         let mutable userState = userState
+        
         let startPos = state.Position
     
         interface IStreamP<Stream, byte[],'UserState>  with       
@@ -38,6 +39,7 @@ module BinStreams =
 
             member x.setUserState s = userState <- s
             
+            member x.position () = startPos
         
         member x.initBytes size = Array.init size (fun i -> byte(0))
 

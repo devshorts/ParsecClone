@@ -7,7 +7,7 @@ open System.Text.RegularExpressions
 [<AutoOpen>]
 module StringStreamP = 
     type StringStreamP<'UserState> (state:string, userState:'UserState) =  
-        let mutable userState = userState
+        let mutable userState = userState        
            
         let currentState = state
 
@@ -46,6 +46,8 @@ module StringStreamP =
             member x.getUserState () =  userState
 
             member x.setUserState s = userState <- s
+
+            member x.position () = (int64)0   
 
         member x.startsWith (inputStream:IStreamP<string, string, 'UserState>) target = 
             if String.IsNullOrEmpty inputStream.state then None

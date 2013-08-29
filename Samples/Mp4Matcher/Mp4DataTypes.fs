@@ -19,8 +19,42 @@ module Mp4DataTypes =
 
     let maybe = new MaybeBuilder()
 
-    type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], bool>
+    type VideoState = { IsAudio: bool; StateStart: int64 }
 
+    type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], VideoState>
+
+    let knownAtoms = [  "free";
+                        "esds";
+                        "avcC";
+                        "btrt";
+                        "uuid";
+                        "colr";
+                        "pasp";
+                        "stts";
+                        "ctts";
+                        "stsd";
+                        "stsz";
+                        "stsc";
+                        "stco";
+                        "stss";                        
+                        "edts";
+                        "uuid";
+                        "ftyp";
+                        "mvhd";
+                        "iods";
+                        "tkhd";
+                        "vmhd";
+                        "smhd";
+                        "dref";
+                        "dinf";
+                        "mdhd";
+                        "hdlr";
+                        "stbl";
+                        "minf";
+                        "mdia";
+                        "trak";
+                        "mdat";
+                        "moov";]
     type AtomBase = {
         Size: uint32
         Name: string
@@ -120,15 +154,18 @@ module Mp4DataTypes =
         | UNKNOWN of AtomBase
     type DinfTypes = 
         | DREF of AtomBase   
+        | UNKNOWN of AtomBase
     type MinfTypes = 
         | VMHD of AtomBase
         | SMHD of AtomBase
         | DINF of DinfTypes
         | STBL of StblTypes list
+        | UNKNOWN of AtomBase
     type MdiaTypes = 
         | MDHD of AtomBase
         | HDLR of AtomBase
         | MINF of MinfTypes list
+        | UNKNOWN of AtomBase
     type TrakTypes = 
         | TKHD of Tkhd
         | EDTS of AtomBase
@@ -137,13 +174,13 @@ module Mp4DataTypes =
     type MoovTypes = 
         | MVHD of Mvhd
         | IODS of AtomBase
+        | UDTA of AtomBase
         | TRAK of TrakTypes list
         | UNKNOWN of AtomBase
     type Atom = 
         | FTYP of Ftyp 
         | MOOV of MoovTypes list
         | MDAT of AtomBase
-        | UDTA of AtomBase
         | FREE of AtomBase
         | UNKNOWN of AtomBase
     
