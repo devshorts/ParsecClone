@@ -50,7 +50,8 @@ module Mp4ParserUtils =
         attempt (
             trackStatePosition >>= fun _ ->
             atomSize >>= fun size ->
-            name id >>= fun name ->              
+            name id >>= fun name -> 
+            Console.WriteLine("In " + name)             
             preturn 
                 {
                     Size = size

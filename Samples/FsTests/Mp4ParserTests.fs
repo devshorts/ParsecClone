@@ -109,6 +109,25 @@ let testMessedUpFreeAtoms() =
     
     result.Length |> should equal 3
 
+[<Test>]
+let sampleFromAppl1() = 
+    use f = new FileStream(@"sample_iPod.m4v", FileMode.Open)
+
+    let parserStream = mp4Stream (new BufferedStream(f))
+
+    let result = test parserStream video
+    
+    result.Length |> should equal 4
+
+[<Test>]
+let sampleFromAppl2() = 
+    use f = new FileStream(@"sample_mpeg4.mp4", FileMode.Open)
+
+    let parserStream = mp4Stream (new BufferedStream(f))
+
+    let result = test parserStream video
+    
+    result.Length |> should equal 4
 
 [<Test>]
 let madeByFfmpeg() = 
