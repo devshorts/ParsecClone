@@ -30,7 +30,10 @@ module Mp4ParserUtils =
 
     let atomSize : VideoParser<_> = bp.uint32
 
-    let skipRemaining (start : uint32) consumed : VideoParser<_> = bp.byteN ((int)start - consumed)
+    let skipRemaining (start : uint32) consumed : VideoParser<_> = 
+        let skipAmount = ((int)start - consumed)
+        if skipAmount > 0 then bp.byteN skipAmount
+        else preturn [||]
          
     /// <summary>
     /// Parser that sets the user state with the current stream position
@@ -51,7 +54,7 @@ module Mp4ParserUtils =
             trackStatePosition >>= fun _ ->
             atomSize >>= fun size ->
             name id >>= fun name -> 
-            Console.WriteLine("In " + name)             
+            //Console.WriteLine("In " + name)             
             preturn 
                 {
                     Size = size
@@ -105,12 +108,12 @@ module Mp4ParserUtils =
     /// <param name="start"></param>
     /// <param name="size"></param>
     /// <param name="parser"></param>
-    let satisfyAtomSize start size parser = 
-        satisfyUserState (
-            fun (s:VideoState) -> 
-                let consumed = s.StateStart - (int64)start
-                consumed < (int64)size
-            ) parser 
+    let takeIfAtomNotConsumed start size parser = 
+        let shouldConsume = fun (s:VideoState) -> 
+                                    let consumed = s.StateStart - (int64)start
+                                    consumed < (int64)size
+                                
+        satisfyUserState shouldConsume parser
         
     /// <summary>
     /// runs the parser many times until the 
@@ -119,11 +122,12 @@ module Mp4ParserUtils =
     /// <param name="name"></param>
     /// <param name="getParser"></param>
     let fullConsume name getParser = 
-        atom name >>= fun id ->
+        atom name >>= fun id ->        
         getUserState >>= fun state ->
+
         let parser = getParser id
-        let consumeTillSize = satisfyAtomSize state.StateStart id.Size parser
-        many consumeTillSize
+
+        takeIfAtomNotConsumed state.StateStart id.Size parser |> many
 
     
     let versionAndFlags : VideoParser<_> = 
