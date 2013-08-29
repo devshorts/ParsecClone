@@ -117,6 +117,10 @@ let sampleFromAppl1() =
 
     let result = test parserStream video
     
+    // even though it actually has 5 atoms at the root (including 2 free's)
+    // the sub atoms have optionally consumed the free's and discarded it. since
+    // we don't care about free's this is OK, so the length is actually 1 less
+
     result.Length |> should equal 4
 
 [<Test>]
@@ -127,6 +131,10 @@ let sampleFromAppl2() =
 
     let result = test parserStream video
     
+    // even though it actually has 5 atoms at the root (including 2 free's)
+    // the sub atoms have optionally consumed the free's and discarded it. since
+    // we don't care about free's this is OK, so the length is actually 1 less
+
     result.Length |> should equal 4
 
 [<Test>]
