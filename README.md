@@ -764,14 +764,7 @@ takes a seed parser (to provide the underlying byte array to use as the parser s
 val bitsN
 ```
 
-Takes an integer N and returns a list of `Bit
-```
-
-union types (`Zero
-```
-
-or `One`)
-
+Takes an integer N and returns a list of `Bit` union types (`Zero` or `One`)
 
 ----------
 
