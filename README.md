@@ -46,6 +46,8 @@ The documentation below is intended for people who are familiar with combinator 
 
 While the following documentation is not as robust as theirs, ParsecClone operators are very similar. Once you are familiar with FParsec operator and operator styles the following documentation should be enough to get you on your way.
 
+[[Top]](#table-of-contents) 
+
 ## When to use and known limitations
 
 ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.
