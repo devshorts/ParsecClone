@@ -5,8 +5,25 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 In general, combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well.I decided to mimic the fparsec combinator syntax since I really liked that format.
 
-Installation
----
+## Table of contents
+
+[Installation](#Installation)
+[When to use and known limitations](#when-to-use-and-known-limitations)
+[Types and notation](#types-and-notation)
+[Generic operators](#generic-operators)
+[String operators](#string-operators)
+[Binary operators](#binary-operators)
+[Bit parsers](#bit-parsers)
+[Bit parsing order](#bit-parsing-order)
+[A note on FParsec vs ParsecClone regarding strings](#A-note-on-FParsec-vs-ParsecClone-regarding-strings)
+[Instantiating user states](#Instantiating-User-States)
+[Dealing with value restrictions](#Value-Restrictions)
+[A CSV parser example (string)](#a-csv-parser)
+[An MP4 parser example (binary)](#binary-parser-example)
+[Bit parsing example](#binary-bit-parsing)
+
+## Installation
+
 Install ParsecClone v0.2.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/0.2.0)
 
 ```
@@ -19,8 +36,10 @@ String handling is in `ParsecClone.StringCombinator`.
 
 Binary handling is in `ParsecClone.BinaryCombinator`.
 
-When to use and known limitations
----
+(#test-anchor) 
+
+## When to use and known limitations
+
 ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.
 
 ParseClone can also parse strings, but doesn't work on string streams. One of the reasons is that to use regular expressions you need to have unlimited lookahead to your stream. With a stream you'd end up having to read the whole stream in anyways!  Since FParsec works on streams, I chose to not duplicate that functionality. 
@@ -31,8 +50,7 @@ More importantly, ParsecClone is great for adding new stream sources to extend i
 
 A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
 
-Types and notation
-----
+## Types and notation
 
 ParsecClone uses 3 main types for all of its combinators.
 
@@ -53,8 +71,7 @@ Parser<'Return> implies Parser<'Return,_,_,_>
 If other type information is needed in the signature I'll use the full parser type signature.
 
 
-Generic Operators
-----
+## Generic Operators
 
 Included operators are
 
@@ -333,8 +350,7 @@ val statePosition: unit -> Parser<int64>
 
 Returns the position of the state. Does not modify the stream.
 
-String operators
-----
+## String operators
 
 One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
 
@@ -505,8 +521,7 @@ val isNewLine : String -> bool
 
 Returns true if the string is `\r\n`, `\n`, or `\r`.
 
-Binary operators
-----
+## Binary operators
 
 To use a binary parser, you need to instantiate the `BinParser` class, which is the container for these operators. They are not imported into the global space. The reason being that you can pass an endianess converter to it. The endianess converter is run against all number converters, but not anything else.   
 
@@ -785,8 +800,8 @@ val toInt64 : byte[] -> int64
 
 Takes a 8 byte array, applies endianess converter, and converts to int 64
 
-Bit Parsers
-----
+## Bit Parsers
+
 Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  
 
 The bit type that is returned looks like this
@@ -906,8 +921,8 @@ val bit8 : Parser<Bit>
 
 Returns the value of the eight bit (zero or one)
 
-Bit parsing ordering
-----
+## Bit parsing ordering
+
 Bit parsing works left to right and doesn't get run through the endianness converter.  Here is the layout of what is meant by bit 1 through bit 8, 
 
 ```
@@ -917,8 +932,8 @@ Bit parsing works left to right and doesn't get run through the endianness conve
 
 If you need to extend the bit parsing, there is a `BitStream` class that handles the bit handling from a byte array
 
-A note on FParsec vs ParsecClone regarding strings
----
+## A note on FParsec vs ParsecClone regarding strings
+
 One thing I really wanted to implement that Fparsec didn't have was regular expression support for strings.  Just to demonstrate what you need to do to parse a string given by the grammar
 
 ```
@@ -951,8 +966,8 @@ test state foo |> should equal "foofighter"
 
 Just different flavors.  You can do the fparsec way in ParsecClone as well.  Arguably, I'd say that FParsec is more correct here since you are forced to implement the grammar without cheating with regex, but regex does make the problem succinct.
 
-Instantiating User States
-----
+## Instantiating User States
+
 
 One thing that can happen is you need to track context sensitive information during your parsing. This is where the user state comes into play. For the simple cases, `makeStringStream` and `makeBinStream` create state sources that have no user state (`unit`).  To create a stream source with a custom user state type do the following:
 
@@ -965,8 +980,8 @@ let makeBinStreamState (stream:Stream) =
 
 In this scenario I am creating a user state of the record `VideoState` and seeding the `BinStream` with a default value. The user state is mutable, so you can pass it whatever you want.
 
-Value Restrictions
----
+## Value Restrictions
+
 
 Just like with FParsec, you can run into an F# value restriction. This is due to un-inferrable generics that are used by the parser types. There are a lot of generic types (more than FParsec, since this is more customizable).  The same rules apply here as with FParsec. If the parser gets used in some context where the final user state gets evaluated (for example by actually using the parser in a `test` function), OR, by directly qualifying the parser.
 
@@ -987,8 +1002,8 @@ let video : VideoParser<_> = many (choice[  attempt ftyp;
 
 The other parsers don't need to be marked as `VideoParser` since they all get used from `video`.  If you have errors, pin the types. 
 
-A CSV Parser
----
+## A CSV Parser
+
 Lets actually use my parsec clone. Below is a grammar that will parse csv files
 
 ```fsharp
@@ -1069,7 +1084,7 @@ Here is an example of how to use the csv parser
 ```fsharp
 [<Test>]
 let testAll() = 
-    let t = @"This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
+    let csv = makeStringStream @"This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
@@ -1081,15 +1096,13 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words""
 This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"""
 
-    let csv = new StringStreamP(t)
-
     let result = test csv lines
 
     List.length result |> should equal 11
 ```
 
-Binary Parser Example
----
+## Binary Parser Example
+
 As another example, this time of the binary parser, I wrote a small mp4 video file header parser.  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
 
 One limitation is there isn't a way to do bit level parsing, since the stream gives you things byte by byte. 
@@ -1192,8 +1205,8 @@ let tkhd<'a> =
     } |>> TKHD
 ```
 
-Binary bit parsing
-----
+## Binary bit parsing
+
 
 Parsing bits requires you to work on a pre-seeded byte stream. This is achieved by calling the `makeBitP` parser which reads a certain number of bytes from the byte stream, and then elevates the stream into a bit stream. The returned result from the `makeBitP` parser is the return result from the bit parsers.  Only bit parsers can be used in the bit parsing stream, byte parsers won't work.
 
