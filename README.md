@@ -1134,7 +1134,7 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
 
 ## Binary Parser Example
 
-As another example, this time of the binary parser, I wrote a small mp4 video file header parser.  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
+As another example, this time of the binary parser, I wrote a small [mp4 video file header parser](https://github.com/devshorts/ParsecClone/blob/master/Samples/Mp4Matcher/Mp4Sample.fs).  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
 
 One limitation is there isn't a way to do bit level parsing, since the stream gives you things byte by byte. 
 
