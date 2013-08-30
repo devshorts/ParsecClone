@@ -42,7 +42,7 @@ ParsecClone comes as one DLL that contains all three libraries.
 
 ## Target Audience 
 
-The documentation below is intended for people who are familiar with combinator libraries. If you are not familiar with [FParsec style combinators](http://www.quanttec.com/fparsec/) and notation, you may want to run through their tutorials and explanations first.  I highly recommend running through their [tutorial](http://www.quanttec.com/fparsec/tutorial.html) first.
+The documentation below is intended for people who are familiar with combinator libraries. If you are not familiar with [FParsec style combinators](http://www.quanttec.com/fparsec/) and notation, you may want to run through their tutorials and explanations first.  For beginners, I highly recommend running through their [tutorial](http://www.quanttec.com/fparsec/tutorial.html).
 
 While the following documentation is not as robust as theirs, ParsecClone operators are very similar. Once you are familiar with FParsec operator and operator styles the following documentation should be enough to get you on your way.
 
