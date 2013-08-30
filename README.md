@@ -7,7 +7,7 @@ In general, combinators are a way to express complex parsing and chained actions
 
 Installation
 ---
-Install ParsecClone via [NuGet](https://www.nuget.org/packages/ParsecClone/0.1.0)
+Install ParsecClone v0.2.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/0.2.0)
 
 ```
 Install-Package ParsecClone
@@ -31,6 +31,28 @@ More importantly, ParsecClone is great for adding new stream sources to extend i
 
 A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
 
+Types and notation
+----
+
+ParsecClone uses 3 main types for all of its combinators.
+
+```fsharp
+type State<'StateType, 'ConsumeType, 'UserState> = IStreamP<'StateType, 'ConsumeType, 'UserState>
+
+type Reply<'Return, 'StateType, 'ConsumeType, 'UserState> = 'Return option * State<'StateType, 'ConsumeType, 'UserState>
+
+type Parser<'Return, 'StateType, 'ConsumeType, 'UserState> = State<'StateType, 'ConsumeType, 'UserState> -> Reply<'Return, 'StateType, 'ConsumeType, 'UserState>
+```
+
+Since the types are kind of nasty, in the following operator examples I will use a shorthand notation of
+
+```fsharp
+Parser<'Return> implies Parser<'Return,_,_,_>
+```
+
+If other type information is needed in the signature I'll use the full parser type signature.
+
+
 Generic Operators
 ----
 
@@ -44,35 +66,35 @@ Combiner with function callback
 ----------
 
 ```fsharp
-val (>>=?) : Parser -> (Reply option -> Parser) -> Parser
+val (>>=?) : Parser<'a> -> ('a option -> Parser<'b>) -> Parser<'b>
 ```
 Combiner with function callback and backtracking
 
 ----------
 
 ```fsharp
-val (>>.) : Parser -> Parser -> Parser
+val (>>.) : Parser<'a> -> Parser<'b> -> Parser<'b>
 ```
 Use result of second combinator
 
 ----------
 
 ```fsharp
-val (.>>) : Parser -> Parser -> Parser
+val (.>>) : Parser<'a> -> Parser<'b> -> Parser<'a>
 ```
 Use result of first combinator
 
 ----------
 
 ```fsharp
-val preturn: 'a -> Parser
+val preturn: 'a -> Parser<'a>
 ```
 Return a value as a combinator
 
 ----------
 
 ```fsharp
-val pzero: unit -> Parser
+val pzero: unit -> Parser<'a>
 ```
 Defines a zero (for use with folds and other starting states). Result is `(None, state`)
 
@@ -80,7 +102,7 @@ Defines a zero (for use with folds and other starting states). Result is `(None,
 
 
 ```fsharp
-val (|>>) : 'a -> Parser<'a>
+val (|>>) : 'a -> ('a -> 'b) -> Parser<'b>
 ```
 
 Pipe value into union or constructor
@@ -88,7 +110,7 @@ Pipe value into union or constructor
 ----------
 
 ```fsharp
-val |>>%) : unit -> Parser
+val |>>%) : 'a -> Parser<'a>
 ```
 
 Pipe to zero argument discriminated union
@@ -96,7 +118,7 @@ Pipe to zero argument discriminated union
 ----------
 
 ```fsharp
-val <|>) : Parser -> Parser -> Parser
+val <|>) : Parser<'a> -> Parser<'b> -> Parser<'c>
 ```
 
 Takes two parsers, and returns a new parser.  The result is either the result of the first parser (if it succeeds) or the result of the second parser, as long as the or'd parsers don't modify the underlying state.
@@ -104,23 +126,31 @@ Takes two parsers, and returns a new parser.  The result is either the result of
 ----------
 
 ```fsharp
-val .<?>>.) :
+val .<?>>.) : Parser<'a> -> Parser<'a list> -> Parser<'a list>
 ```
 
-Takes a parser of `T`and a parser of `T list` and applies both parers as options. if the first parser succeeds and the second parser fails, returns a list of the result of the first parser (`Some(T)::[]`), if the first parser succeeds and the second parser succeeds returns a cons list of both results (`Some(T)::Some(T) list`). This operator does not backtrack but will not fail if the first parser doesn't succeed (since its wrapped as an `opt`).
+Takes a single parser, and a list parser and applies both parers as options. 
+
+If the first parser succeeds and the second parser fails, returns a list of the result of the first parser (`Some('a)::[]`). 
+
+If the first parser succeeds and the second parser succeeds returns a cons list of both results (`Some('a)::Some('a) list`). This operator does not backtrack but will not fail if the first parser doesn't succeed (since its wrapped as an `opt`).
+
+If the first parser fails, this parser fails.
 
 ----------
 
 ```fsharp
-val .<<?>.) :
+val .<<?>.) : Parser<'a list> -> Parser<'a> -> Parser<'a list>
 ```
 
-Basically the same as `.<?>>.` except with the arguments inverted. The list parser is first and the single parser is second. Returns a list of `T`.
+The same as `.<?>>.` except with the arguments inverted. The list parser is first and the single parser is second. 
+
+If the first parser fails, this parser fails.
 
 ----------
 
 ```fsharp
-val >>..) :
+val >>..) : Parser<'a> -> ('a -> Parser<'b>) -> Parser<'b>
 ```
 
 Takes a parser and a processor function.  Applies the processor function to the result of the the parser. Alias for `parser1 >>= fun first -> applier first `. The applier should use preturn. An example applier is used in the binary parser to shift bits: `shiftL n = fun (b : uint32)  -> preturn (b <<< n)`. See the mp4 example below to see how it can be used in conjunction with a regular parser.
@@ -128,7 +158,7 @@ Takes a parser and a processor function.  Applies the processor function to the 
 ----------
 
 ```fsharp
-val many: Parser
+val many: Parser<'a list>
 ```
 
 Repeats a parser zero or more times, until the parser fails to match or the end of stream is encountered.
@@ -136,7 +166,7 @@ Repeats a parser zero or more times, until the parser fails to match or the end 
 ----------
 
 ```fsharp
-val match
+val matcher: (State<_, 'ConsumeType, _>  -> 'a -> int option) -> 'a -> Parser<'ConsumeType>
 ```
 
 Generic match on predicate and executes state modifier to return result
@@ -144,15 +174,15 @@ Generic match on predicate and executes state modifier to return result
 ----------
 
 ```fsharp
-val anyOf
+val anyOf: ('a -> Parser<'a>) -> 'a list -> Parser<'b> 
 ```
 
-Takes a combinator and a list of strings and or's them all together with the `<|>` combinator
+Takes a function that maps the list into a bunch of parsers and or's each result together with the `<|>` combinator. For example: `anyOf matchStr ["f";"o";"i";"g";"h";"t";"e";"r";"s";" "]`
 
 ----------
 
 ```fsharp
-val choice
+val choice: Parser<'a> list -> Parser<'a>
 ```
 
 Takes a list of parsers and or's them together with `<|>`
@@ -160,7 +190,7 @@ Takes a list of parsers and or's them together with `<|>`
 ----------
 
 ```fsharp
-val attempt
+val attempt: Parser<'a>
 ```
 
 If no match occurs or an exception happens, backtracks to the beginning of the state of the parser
@@ -168,7 +198,7 @@ If no match occurs or an exception happens, backtracks to the beginning of the s
 ----------
 
 ```fsharp
-val takeTill
+val takeTill: ('a -> bool) -> Parser<'a> -> Parser<'a list>
 ```
 
 Takes a predicate and a parser and consumes until the predicate is true. Then backtracks one element
@@ -176,15 +206,15 @@ Takes a predicate and a parser and consumes until the predicate is true. Then ba
 ----------
 
 ```fsharp
-val takeWhile
+val takeWhile: ('a -> bool) -> Parser<'a> -> Parser<'a list>
 ```
 
-Same as take till except inverted predicate
+Takes a predicate and a parser and consumes until the predicate is false. Then backtracks one element
 
 ----------
 
 ```fsharp
-val manyN: int -> Parser
+val manyN: int -> Parser<'a> -> Parser<'a list>
 ```
 
 Takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
@@ -192,7 +222,7 @@ Takes a number and tries to consume N parsers. If it doesn't consume exactly N i
 ----------
 
 ```fsharp
-val many1: Parser
+val many1: Parser<'a> -> Parser<'a list>
 ```
 
 Repeats a parser one or more times (fails if no match found)
@@ -200,7 +230,7 @@ Repeats a parser one or more times (fails if no match found)
 ----------
 
 ```fsharp
-val lookahead
+val lookahead: Parser<'a>
 ```
 
 Returns a result and a new parser, but backtracks the state 
@@ -208,7 +238,7 @@ Returns a result and a new parser, but backtracks the state
 ----------
 
 ```fsharp
-val manyTill
+val manyTill: Parser<'a> -> Parser<'b> -> Parser<'a list>
 ```
 
 Takes a parser and an end parser, and repeats the first parser zero or more times until the second parser succeeds
@@ -216,7 +246,7 @@ Takes a parser and an end parser, and repeats the first parser zero or more time
 ----------
 
 ```fsharp
-val manyTill1: 
+val manyTill1: Parser<'a> -> Parser<'b> -> Parser<'a list>
 ```
 
 Same as `manyTill` except fails on zero matches, so expects at least one or more
@@ -224,7 +254,7 @@ Same as `manyTill` except fails on zero matches, so expects at least one or more
 ----------
 
 ```fsharp
-val between: Parser -> Parser -> Parser
+val between: Parser<'a> -> Parser<'b> -> Parser<'c> -> Parser<'b>
 ```
 
 Takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
@@ -232,7 +262,7 @@ Takes a bookend parser, the parser, and another bookened parse and returns the v
 ----------
 
 ```fsharp
-val between2: Parser -> Parser
+val between2: Parser<'a> -> Parser<'b> -> Parser<'b>
 ```
 
 Takes a bookend parser and the target parser, and applies the bookend parser twice to `between`. Usage could be for `parser |> between2 quote`
@@ -240,7 +270,7 @@ Takes a bookend parser and the target parser, and applies the bookend parser twi
 ----------
 
 ```fsharp
-val manySatisfy
+val manySatisfy: ('a -> bool) -> Parser<'a> -> Parser<'a list>
 ```
 
 Alias for `takeWhile`
@@ -248,7 +278,7 @@ Alias for `takeWhile`
 ----------
 
 ```fsharp
-val satisfy : ('Result -> bool) -> Parser<'Result>
+val satisfy : ('a -> bool) -> Parser<'a>
 ```
 
 Takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
@@ -256,7 +286,7 @@ Takes a predicate and a parser, applies the parser once and if the return result
 ----------
 
 ```fsharp
-val opt : Parser<'Result> -> Parser<'Result option>
+val opt : Parser<'a> -> Parser<'a option>
 ```
 
 Takes a parser, applies the the state, and returns a result option. Careful using this in the context of a 'many' since it you can get into infinite loops since you always "succeed"
@@ -264,7 +294,7 @@ Takes a parser, applies the the state, and returns a result option. Careful usin
 ----------
 
 ```fsharp
-val createParserForwardedToRef: unit -> (Parser, ref Parser)
+val createParserForwardedToRef: unit -> (Parser<'a>, ref Parser<'a>)
 ```
 
 Returns a tuple of (parser, ref parser) to use for recursive calling parsers 
@@ -272,7 +302,10 @@ Returns a tuple of (parser, ref parser) to use for recursive calling parsers
 ----------
 
 ```fsharp
-val reproc elevator seed parser : ('Result -> IStreamP<'Result2>) -> Parser<'Result> -> Parser<'Result2>  
+val reproc elevator seed parser : ('result -> 'userState -> State<'newStateType,'newConsumeType,'userState>) -> 
+									 Parser<'result, 'originalStateType, 'consumeType, 'userState> -> 
+									 Parser<'b, 'newStateType, 'newConsumeType, 'userState> -> 
+									 Parser<'b, 'originalStateType, 'consumeType, 'userSTate>
 ```
 
 This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed.
@@ -280,7 +313,7 @@ This functions lets you apply a parser to a buffered set of data. The buffered s
 ----------
 
 ```fsharp
-val getUserState : unit -> Parser
+val getUserState : unit -> Parser<'UserState, 'StateType, 'ConsumeType, 'UserState>
 ```
 
 Returns a parser whose result is the currently stored user state
@@ -288,7 +321,7 @@ Returns a parser whose result is the currently stored user state
 ----------
 
 ```fsharp
-val setUserState : 'UserState -> Parser
+val setUserState : 'UserState -> Parser<unit>
 ```
 
 Takes a value and sets the userstate with that value
@@ -336,7 +369,7 @@ Parses the regex `.` from the stream.
 ----------
 
 ```fsharp
-val anyBut: 
+val anyBut: string -> Parser<string>
 ```
 
 Takes a regular expression and returns a character that does not match the regex
@@ -754,9 +787,18 @@ Takes a 8 byte array, applies endianess converter, and converts to int 64
 
 Bit Parsers
 ----
-Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  Operators that make this possible include:
+Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  
+
+The bit type that is returned looks like this
+
+```fsharp
+type Bit = 
+    | One
+    | Zero
+```
 
 
+Operators that make this possible include:
 
 ----------
 
