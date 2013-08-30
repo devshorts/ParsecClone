@@ -158,7 +158,7 @@ Takes a parser and a processor function.  Applies the processor function to the 
 ----------
 
 ```fsharp
-val many: Parser<'a list>
+val many: Parser<'a> -> Parser<'a list>
 ```
 
 Repeats a parser zero or more times, until the parser fails to match or the end of stream is encountered.
@@ -190,7 +190,7 @@ Takes a list of parsers and or's them together with `<|>`
 ----------
 
 ```fsharp
-val attempt: Parser<'a>
+val attempt: Parser<'a> -> Parser<'a>
 ```
 
 If no match occurs or an exception happens, backtracks to the beginning of the state of the parser
@@ -230,7 +230,7 @@ Repeats a parser one or more times (fails if no match found)
 ----------
 
 ```fsharp
-val lookahead: Parser<'a>
+val lookahead: Parser<'a> -> Parser<'a>
 ```
 
 Returns a result and a new parser, but backtracks the state 
