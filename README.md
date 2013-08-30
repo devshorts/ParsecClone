@@ -80,7 +80,7 @@ Defines a zero (for use with folds and other starting states). Result is `(None,
 
 
 ```fsharp
-val (|>>) :
+val (|>>) : 'a -> Parser<'a>
 ```
 
 Pipe value into union or constructor
@@ -88,7 +88,7 @@ Pipe value into union or constructor
 ----------
 
 ```fsharp
-val |>>%) :
+val |>>%) : unit -> Parser
 ```
 
 Pipe to zero argument discriminated union
@@ -96,10 +96,10 @@ Pipe to zero argument discriminated union
 ----------
 
 ```fsharp
-val <|>) :
+val <|>) : Parser -> Parser -> Parser
 ```
 
-First parser or second parser, as long as the or'd parsers don't modify the underlying state
+Takes two parsers, and returns a new parser.  The result is either the result of the first parser (if it succeeds) or the result of the second parser, as long as the or'd parsers don't modify the underlying state.
 
 ----------
 
@@ -128,10 +128,10 @@ Takes a parser and a processor function.  Applies the processor function to the 
 ----------
 
 ```fsharp
-val many
+val many: Parser
 ```
 
-Repeats a parser zero or more times
+Repeats a parser zero or more times, until the parser fails to match or the end of stream is encountered.
 
 ----------
 
@@ -184,7 +184,7 @@ Same as take till except inverted predicate
 ----------
 
 ```fsharp
-val manyN
+val manyN: int -> Parser
 ```
 
 Takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
@@ -192,7 +192,7 @@ Takes a number and tries to consume N parsers. If it doesn't consume exactly N i
 ----------
 
 ```fsharp
-val many1
+val many1: Parser
 ```
 
 Repeats a parser one or more times (fails if no match found)
@@ -216,7 +216,7 @@ Takes a parser and an end parser, and repeats the first parser zero or more time
 ----------
 
 ```fsharp
-val manyTill1
+val manyTill1: 
 ```
 
 Same as `manyTill` except fails on zero matches, so expects at least one or more
@@ -224,7 +224,7 @@ Same as `manyTill` except fails on zero matches, so expects at least one or more
 ----------
 
 ```fsharp
-val between
+val between: Parser -> Parser -> Parser
 ```
 
 Takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
@@ -232,7 +232,7 @@ Takes a bookend parser, the parser, and another bookened parse and returns the v
 ----------
 
 ```fsharp
-val between2
+val between2: Parser -> Parser
 ```
 
 Takes a bookend parser and the target parser, and applies the bookend parser twice to `between`. Usage could be for `parser |> between2 quote`
@@ -295,7 +295,7 @@ Takes a value and sets the userstate with that value
 
 ----------
 ```fsharp
-val statePosition
+val statePosition: unit -> Parser<int64>
 ```
 
 Returns the position of the state. Does not modify the stream.
@@ -308,24 +308,30 @@ One major difference between this and fparsec is that my string parsing is based
 String operators in the `StringP` module are:
 
 
+----------
+
+```fsharp
+val matchStr: string -> Parser<string>
+```
+
+Matches a string if it starts with some text uses match
+
 
 ----------
 
 ```fsharp
-val matchStr: 
+val regexStr: string -> Parser<string>
 ```
 
-matches a string if it starts with some text uses match
-
+Takes a regular expression and tests to see if the current state begins with a match uses match
 
 ----------
 
 ```fsharp
-val regexStr: 
+val any: Parser<string>
 ```
 
-takes a regular expression and tests to see if the current state begins with a match uses match
-
+Parses the regex `.` from the stream.
 
 ----------
 
@@ -333,127 +339,121 @@ takes a regular expression and tests to see if the current state begins with a m
 val anyBut: 
 ```
 
-takes a regular expression and returns a character that does not match the regex
+Takes a regular expression and returns a character that does not match the regex
 
 
 ----------
 
 ```fsharp
-val char: 
+val char: Parser<string>
 ```
 
-[a-z] character
+Parses the regex `[a-z]` from the stream.
 
 
 ----------
 
 ```fsharp
-val chars: 
+val chars: Parser<string>
 ```
 
-[a-z]+ characters
+Parses the regex `[a-z]+` from the stream.
 
 
 ----------
 
 ```fsharp
-val digit: 
+val digit: Parser<string>
 ```
 
-[0-9] 
+Parses the regex `[0-9]` from the stream.
 
 
 ----------
 
 ```fsharp
-val digits: 
+val digits: Parser<string>
 ```
 
-[0-9]+
+Parses the regex `[0-9]+` from the stream.
 
 
 ----------
 
 ```fsharp
-val newline: 
+val newline: Parser<string>
 ```
 
-matches `\r\n: 
-```
-
-or `\n: 
-```
-
-or `\r`
+Matches `\r\n` or `\n:` or `\r`
 
 
 ----------
 
 ```fsharp
-val whitespace: 
+val whitespace: Parser<string>
 ```
 
-\s
+Parses the regex `\s` from the stream.
 
 
 ----------
 
 ```fsharp
-val whitespaces: 
+val whitespaces: Parser<string>
 ```
 
-\s+
+Parses the regex `\s+` from the stream.
 
 
 ----------
 
 ```fsharp
-val space: 
+val space: Parser<string>
 ```
 
-" "
+Parses the regex `" "` from the stream.
 
 
 ----------
 
 ```fsharp
-val spaces: 
+val spaces: Parser<string>
 ```
 
-" "+
+Parses the regex `" "+` from the stream.
 
 
 ----------
 
 ```fsharp
-val tab: 
+val tab: Parser<string>
 ```
 
-\t
+Parses the regex `\t` from the stream.
 
 
 ----------
 
 ```fsharp
-val tabs: 
+val tabs: Parser<string>
 ```
 
-\t+
+Parses the regex `\t+` from the stream.
 
 
 ----------
 
 ```fsharp
-val ws: 
+val ws: Parser<string>
 ```
 
-optional whitespace parser
+optional whitespace parser. Always succeeds, if it consumes actual whitespace the resulting string will not be an empty string. If it fails, it will return an empty string.
 
 
 ----------
 
 ```fsharp
-val foldStrings: 
+val foldStrings: string list -> Parser<string>
 ```
 
 takes a string list and preturns a concatenated version of those strings `string list -> parser<string>` 
@@ -465,14 +465,23 @@ val makeStringStream : String -> StringStreamP<unit>
 
 Utility function to create a stream from a string. Use this if you don't need to create any user state.
 
+----------
+```fsharp
+val isNewLine : String -> bool
+```
+
+Returns true if the string is `\r\n`, `\n`, or `\r`.
+
 Binary operators
 ----
 
 To use a binary parser, you need to instantiate the `BinParser` class, which is the container for these operators. They are not imported into the global space. The reason being that you can pass an endianess converter to it. The endianess converter is run against all number converters, but not anything else.   
 
 ```fsharp
-let bp = new BinParser(Array.rev)
+let bp = new BinParser<_>(Array.rev)
 ```
+
+The BinParser takes a generic argument representing the userstate of the stream.  In general, just declare it as an unknown parameter and the type inference system will figure it out for you.
 
 Binary operators of the `BinParser` class in the `BinaryParser` module are:
 
