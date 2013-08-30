@@ -7,6 +7,7 @@ In general, combinators are a way to express complex parsing and chained actions
 
 ## Table of contents
 - [Installation](#installation)
+- [Target audience for documentation](#target-audience)
 - [When to use and known limitations](#when-to-use-and-known-limitations)
 - [Types and notation](#types-and-notation)
 - [Generic operators](#generic-operators)
@@ -35,7 +36,15 @@ String handling is in `ParsecClone.StringCombinator`.
 
 Binary handling is in `ParsecClone.BinaryCombinator`.
 
+ParsecClone comes as one DLL that contains all three libraries.
+
 [[Top]](#table-of-contents) 
+
+## Target Audience 
+
+The documentation below is intended for people who are familiar with combinator libraries. If you are not familiar with [FParsec style combinators](http://www.quanttec.com/fparsec/) and notation, you may want to run through their tutorials and explanations first.  I highly recommend running through their [tutorial](http://www.quanttec.com/fparsec/tutorial.html) first.
+
+While the following documentation is not as robust as theirs, ParsecClone operators are very similar. Once you are familiar with FParsec operator and operator styles the following documentation should be enough to get you on your way.
 
 ## When to use and known limitations
 
@@ -75,6 +84,7 @@ If other type information is needed in the signature I'll use the full parser ty
 [[Top]](#table-of-contents)
 
 ## Generic Operators
+
 
 Included operators are
 
