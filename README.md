@@ -900,12 +900,48 @@ Here is an example in ParsecClone
 ```
 let foo = regexStr "fo+fighter"
 
-let state = new StringStreamP("foofighter")
+let state = makeStringStream "foofighter"
 
 test state foo |> should equal "foofighter"
 ```
 
 Just different flavors.  You can do the fparsec way in ParsecClone as well.  Arguably, I'd say that FParsec is more correct here since you are forced to implement the grammar without cheating with regex, but regex does make the problem succinct.
+
+Instantiating User States
+----
+
+One thing that can happen is you need to track context sensitive information during your parsing. This is where the user state comes into play. For the simple cases, `makeStringStream` and `makeBinStream` create state sources that have no user state (`unit`).  To create a stream source with a custom user state type do the following:
+
+```fsharp
+type VideoState = { IsAudio: bool; StateStart: int64 }
+
+let makeBinStreamState (stream:Stream) =
+	new BinStream<VideoState>(stream, { IsAudio = false; StateStart = (int64)0 })
+```
+
+In this scenario I am creating a user state of the record `VideoState` and seeding the `BinStream` with a default value. The user state is mutable, so you can pass it whatever you want.
+
+Value Restrictions
+---
+
+Just like with FParsec, you can run into an F# value restriction. This is due to un-inferrable generics that are used by the parser types. There are a lot of generic types (more than FParsec, since this is more customizable).  The same rules apply here as with FParsec. If the parser gets used in some context where the final user state gets evaluated (for example by actually using the parser in a `test` function), OR, by directly qualifying the parser.
+
+The mp4 sample does this, since it defines parsers in one assembly but uses them from another. Notice the trick here:
+
+```fsharp
+type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], VideoState>
+```
+
+This creates a generic type of `VideoParser` who's `'Return` type is unknown, but we know that it takes a `Stream`, it will consume `byte[]`, and the user state should be `VideoState`.  Then declare parsers return type as:
+
+```fsharp
+let video : VideoParser<_> = many (choice[  attempt ftyp; 
+                                            moov; 
+                                            mdat; 
+                                            free;]) .>> eof
+```
+
+The other parsers don't need to be marked as `VideoParser` since they all get used from `video`.  If you have errors, pin the types. 
 
 A CSV Parser
 ---
@@ -1124,7 +1160,7 @@ Here is a simple example:
 let bitParserTest() = 
     let bytes = [|0xF0;0x01|] |> Array.map byte
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream <| new MemoryStream(bytes)   
 
     let bitToBool = bp.bitsN 4 
 
@@ -1144,7 +1180,7 @@ Here is another example that applies the combinator `many` to the bitParser.  Th
 let testApplyManyBits() = 
     let bytes = Array.init 10 (fun i -> byte(0x01))
 
-    let parserStream = new BinStream(new MemoryStream(bytes))   
+    let parserStream = makeBinStream <| new MemoryStream(bytes)   
     
     let selectAllBits = bp.bit1 >>= fun one ->
                         bp.bit1 >>= fun two ->
