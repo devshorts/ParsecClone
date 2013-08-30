@@ -486,7 +486,7 @@ Helper function to take a stream and create a `BinStream` instance for use with 
 ----------
 
 ```fsharp
-val byteN
+val byteN: int -> : Parser<byte[]>
 ```
 
 Takes an integer N and consumes a byte array of that size
@@ -495,7 +495,7 @@ Takes an integer N and consumes a byte array of that size
 ----------
 
 ```fsharp
-val byte1
+val byte1: Parser<byte>
 ```
 
 Returns one byte
@@ -504,7 +504,7 @@ Returns one byte
 ----------
 
 ```fsharp
-val byte2
+val byte2: Parser<byte[]>
 ```
 
 Returns two bytes
@@ -513,7 +513,7 @@ Returns two bytes
 ----------
 
 ```fsharp
-val byte3
+val byte3: Parser<byte[]>
 ```
 
 Returns three bytes
@@ -522,7 +522,7 @@ Returns three bytes
 ----------
 
 ```fsharp
-val byte4
+val byte4: Parser<byte[]>
 ```
 
 Returns four bytes
@@ -531,7 +531,7 @@ Returns four bytes
 ----------
 
 ```fsharp
-val intB
+val intB: Parser<int>
 ```
 
 Returns the byte value as a signed integer
@@ -540,7 +540,7 @@ Returns the byte value as a signed integer
 ----------
 
 ```fsharp
-val int16
+val int16: Parser<int16>
 ```
 
 Parses 2 bytes and returns a signed 16 bit integer
@@ -549,7 +549,7 @@ Parses 2 bytes and returns a signed 16 bit integer
 ----------
 
 ```fsharp
-val int32
+val int32: Parser<int32>
 ```
 
 Parses 4 bytes and returns a signed 32 bit integer
@@ -558,7 +558,7 @@ Parses 4 bytes and returns a signed 32 bit integer
 ----------
 
 ```fsharp
-val int64
+val int64: Parser<int64>
 ```
 
 Parses 8 bytes and returns a signed 64 bit integer
@@ -567,7 +567,7 @@ Parses 8 bytes and returns a signed 64 bit integer
 ----------
 
 ```fsharp
-val uintB
+val uintB: Parser<uint>
 ```
 
 Returns the byte value as an unsigned integer
@@ -576,7 +576,7 @@ Returns the byte value as an unsigned integer
 ----------
 
 ```fsharp
-val uint16
+val uint16: Parser<uint16>
 ```
 
 Parses 2 bytes and returns an unsigned 16 bit integer
@@ -585,7 +585,7 @@ Parses 2 bytes and returns an unsigned 16 bit integer
 ----------
 
 ```fsharp
-val uint32
+val uint32: Parser<uint32>
 ```
 
 Parses 4 bytes and returns an unsigned 32 bit integer
@@ -594,7 +594,7 @@ Parses 4 bytes and returns an unsigned 32 bit integer
 ----------
 
 ```fsharp
-val uint64
+val uint64: Parser<uint64>
 ```
 
 Parses 8 bytes and returns an unsigned 64 bit integer
@@ -603,16 +603,16 @@ Parses 8 bytes and returns an unsigned 64 bit integer
 ----------
 
 ```fsharp
-val skip
+val skip: int -> Parser<bool>
 ```
 
-Skips N bytes in the stream by seeking
+Skips N bytes in the stream by seeking. Returns true if succeeded.
 
 
 ----------
 
 ```fsharp
-val skiptoEnd
+val skiptoEnd: Parser<unit>
 ```
 
 Skips to the end of the stream
@@ -621,7 +621,7 @@ Skips to the end of the stream
 ----------
 
 ```fsharp
-val shiftL
+val shiftL: uint32 -> (uint32 -> Parser<uint32>)
 ```
 
 Shifts left N bits
@@ -630,7 +630,7 @@ Shifts left N bits
 ----------
 
 ```fsharp
-val shiftR
+val shiftR: uint32 -> (uint32 -> Parser<uint32>)
 ```
 
 Shifts right N bits
@@ -639,7 +639,7 @@ Shifts right N bits
 ----------
 
 ```fsharp
-val floatP
+val floatP: Parser<float>
 ```
 
 Parses a 4 byte float
@@ -648,16 +648,16 @@ Parses a 4 byte float
 ----------
 
 ```fsharp
-val matchBytes
+val matchBytes: byte[] -> Parser<byte[]>
 ```
 
-Parses the exact byte sequence (as byte array)
+Parses the exact byte sequence (as byte array). Result is the byte sequence you expected. Fails if the byte sequence is not found at the start of the stream.
 
 
 ----------
 
 ```fsharp
-val byteToUInt
+val byteToUInt : byte -> uint
 ```
 
 Takes one byte, and converts to uint32
@@ -666,7 +666,7 @@ Takes one byte, and converts to uint32
 ----------
 
 ```fsharp
-val toUInt16
+val toUInt16 : byte[] -> uint16
 ```
 
 Takes a 2 byte array, applies endianess converter, and converts to uint 16
@@ -675,7 +675,7 @@ Takes a 2 byte array, applies endianess converter, and converts to uint 16
 ----------
 
 ```fsharp
-val toUInt24
+val toUInt24 : byte[] -> uint32
 ```
 
 Takes a 3 byte array, applies endianess converter, and converts to uint 32
@@ -684,7 +684,7 @@ Takes a 3 byte array, applies endianess converter, and converts to uint 32
 ----------
 
 ```fsharp
-val toUInt32
+val toUInt32 : byte[] -> uint32
 ```
 
 Takes a 4 byte array, applies endianess converter, and converts to uint 32
@@ -693,7 +693,7 @@ Takes a 4 byte array, applies endianess converter, and converts to uint 32
 ----------
 
 ```fsharp
-val toUInt64
+val toUInt64 : byte[] -> uint64
 ```
 
 Takes a 8 byte array, applies endianess converter, and converts to uint 64
@@ -702,7 +702,7 @@ Takes a 8 byte array, applies endianess converter, and converts to uint 64
 ----------
 
 ```fsharp
-val byteToInt
+val byteToInt : byte -> int
 ```
 
 Takes one byte and converts to int32
@@ -711,7 +711,7 @@ Takes one byte and converts to int32
 ----------
 
 ```fsharp
-val toInt16
+val toInt16 : byte[] -> int16
 ```
 
 Takes a 2 byte array, applies endianess converter, and converts to int 16
@@ -720,7 +720,7 @@ Takes a 2 byte array, applies endianess converter, and converts to int 16
 ----------
 
 ```fsharp
-val toInt24
+val toInt24 : byte[] -> int32
 ```
 
 Takes a 3 byte array, applies endianess converter, and converts to int 32
@@ -729,7 +729,7 @@ Takes a 3 byte array, applies endianess converter, and converts to int 32
 ----------
 
 ```fsharp
-val toInt32
+val toInt32 : byte[] -> int32
 ```
 
 Takes a 4 byte array, applies endianess converter, and converts to int 32
@@ -738,7 +738,7 @@ Takes a 4 byte array, applies endianess converter, and converts to int 32
 ----------
 
 ```fsharp
-val toInt64
+val toInt64 : byte[] -> int64
 ```
 
 Takes a 8 byte array, applies endianess converter, and converts to int 64
@@ -752,7 +752,7 @@ Also included in the binary parser are bit level parsers. These parsers need to 
 ----------
 
 ```fsharp
-val makeBitP
+val makeBitP: Parser<byte[]> -> Parser<'ReturnType> 
 ```
 
 takes a seed parser (to provide the underlying byte array to use as the parser set) and a bit level parser and applies the bit level parser to the seed.  Bit parsers are complicated because the smallest thing you can read off the stream is a byte, so you have to work in memory on your byte stream.    
@@ -761,24 +761,24 @@ takes a seed parser (to provide the underlying byte array to use as the parser s
 ----------
 
 ```fsharp
-val bitsN
+val bitsN: int -> Parser<Bit[]>
 ```
 
-Takes an integer N and returns a list of `Bit` union types (`Zero` or `One`)
+Takes an integer N and returns an array of `Bit` union types (`Zero` or `One`)
 
 ----------
 
 ```fsharp
-val bitsToInt
+val bitsToInt: Bit [] -> int
 ```
 
-Takes a bit list and converts it to an `int`
+Takes a bit array and converts it to an `int`
 
 
 ----------
 
 ```fsharp
-val bitN
+val bitN : int -> Parser<Bit>
 ```
 
 Takes an integer N and returns back the bit value at position N 
@@ -787,7 +787,7 @@ Takes an integer N and returns back the bit value at position N
 ----------
 
 ```fsharp
-val bit1
+val bit1 : Parser<Bit>
 ```
 
 Returns the value of the first bit (zero or one)
@@ -796,7 +796,7 @@ Returns the value of the first bit (zero or one)
 ----------
 
 ```fsharp
-val bit2
+val bit2 : Parser<Bit>
 ```
 
 Returns the value of the second bit (zero or one)
@@ -805,7 +805,7 @@ Returns the value of the second bit (zero or one)
 ----------
 
 ```fsharp
-val bit3
+val bit3 : Parser<Bit>
 ```
 
 Returns the value of the third bit (zero or one)
@@ -814,7 +814,7 @@ Returns the value of the third bit (zero or one)
 ----------
 
 ```fsharp
-val bit4
+val bit4 : Parser<Bit>
 ```
 
 Returns the value of the fourth bit (zero or one)
@@ -823,7 +823,7 @@ Returns the value of the fourth bit (zero or one)
 ----------
 
 ```fsharp
-val bit5
+val bit5 : Parser<Bit>
 ```
 
 Returns the value of the fifth bit (zero or one)
@@ -832,7 +832,7 @@ Returns the value of the fifth bit (zero or one)
 ----------
 
 ```fsharp
-val bit6
+val bit6 : Parser<Bit>
 ```
 
 Returns the value of the sixth bit (zero or one)
@@ -841,7 +841,7 @@ Returns the value of the sixth bit (zero or one)
 ----------
 
 ```fsharp
-val bit7
+val bit7 : Parser<Bit> 
 ```
 
 Returns the value of the seventh bit (zero or one)
@@ -850,7 +850,7 @@ Returns the value of the seventh bit (zero or one)
 ----------
 
 ```fsharp
-val bit8
+val bit8 : Parser<Bit>
 ```
 
 Returns the value of the eight bit (zero or one)
