@@ -6,21 +6,20 @@ This a fparsec subset clone that works on generalized stream classes. This means
 In general, combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well.I decided to mimic the fparsec combinator syntax since I really liked that format.
 
 ## Table of contents
-
-[Installation](#Installation)
-[When to use and known limitations](#when-to-use-and-known-limitations)
-[Types and notation](#types-and-notation)
-[Generic operators](#generic-operators)
-[String operators](#string-operators)
-[Binary operators](#binary-operators)
-[Bit parsers](#bit-parsers)
-[Bit parsing order](#bit-parsing-order)
-[A note on FParsec vs ParsecClone regarding strings](#A-note-on-FParsec-vs-ParsecClone-regarding-strings)
-[Instantiating user states](#Instantiating-User-States)
-[Dealing with value restrictions](#Value-Restrictions)
-[A CSV parser example (string)](#a-csv-parser)
-[An MP4 parser example (binary)](#binary-parser-example)
-[Bit parsing example](#binary-bit-parsing)
+- [Installation](#Installation)
+- [When to use and known limitations](#when-to-use-and-known-limitations)
+- [Types and notation](#types-and-notation)
+- [Generic operators](#generic-operators)
+- [String operators](#string-operators)
+- [Binary operators](#binary-operators)
+- [Bit parsers](#bit-parsers)
+- [Bit parsing order](#bit-parsing-order)
+- [A note on FParsec vs ParsecClone regarding strings](#A-note-on-FParsec-vs-ParsecClone-regarding-strings)
+- [Instantiating user states](#Instantiating-User-States)
+- [Dealing with value restrictions](#Value-Restrictions)
+- [A CSV parser example (string)](#a-csv-parser)
+- [An MP4 parser example (binary)](#binary-parser-example)
+- [Bit parsing example](#binary-bit-parsing)
 
 ## Installation
 
@@ -36,7 +35,7 @@ String handling is in `ParsecClone.StringCombinator`.
 
 Binary handling is in `ParsecClone.BinaryCombinator`.
 
-(#test-anchor) 
+[[Top]](#Table-of-contents) 
 
 ## When to use and known limitations
 
@@ -49,6 +48,8 @@ If you have strings you can buffer into memory, ParsecClone will work great (so 
 More importantly, ParsecClone is great for adding new stream sources to extend its capabilities. Granted this requires a rebuild of the project, but its almost trivial to add in new consumable streams.  If you have a request for a stream source please open an issue for me to track.
 
 A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
+
+[[Top]](#Table-of-contents)
 
 ## Types and notation
 
@@ -64,12 +65,14 @@ type Parser<'Return, 'StateType, 'ConsumeType, 'UserState> = State<'StateType, '
 
 Since the types are kind of nasty, in the following operator examples I will use a shorthand notation of
 
+
 ```fsharp
 Parser<'Return> implies Parser<'Return,_,_,_>
 ```
 
 If other type information is needed in the signature I'll use the full parser type signature.
 
+[[Top]](#Table-of-contents)
 
 ## Generic Operators
 
@@ -350,6 +353,8 @@ val statePosition: unit -> Parser<int64>
 
 Returns the position of the state. Does not modify the stream.
 
+[Top](#Table-of-contents)
+
 ## String operators
 
 One major difference between this and fparsec is that my string parsing is based on regex, not single character parsing. To me, this makes parsing a little easier since I struggled with the string parsing in fparsec.  Also it's kind of nice to not be an exact clone, because that's no fun.
@@ -520,6 +525,8 @@ val isNewLine : String -> bool
 ```
 
 Returns true if the string is `\r\n`, `\n`, or `\r`.
+
+[[Top]](#Table-of-contents)
 
 ## Binary operators
 
@@ -800,6 +807,8 @@ val toInt64 : byte[] -> int64
 
 Takes a 8 byte array, applies endianess converter, and converts to int 64
 
+[[Top]](#Table-of-contents)
+
 ## Bit Parsers
 
 Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  
@@ -921,6 +930,8 @@ val bit8 : Parser<Bit>
 
 Returns the value of the eight bit (zero or one)
 
+[[Top]](#Table-of-contents)
+
 ## Bit parsing ordering
 
 Bit parsing works left to right and doesn't get run through the endianness converter.  Here is the layout of what is meant by bit 1 through bit 8, 
@@ -931,6 +942,8 @@ Bit parsing works left to right and doesn't get run through the endianness conve
 ```
 
 If you need to extend the bit parsing, there is a `BitStream` class that handles the bit handling from a byte array
+
+[[Top]](#Table-of-contents)
 
 ## A note on FParsec vs ParsecClone regarding strings
 
@@ -966,6 +979,8 @@ test state foo |> should equal "foofighter"
 
 Just different flavors.  You can do the fparsec way in ParsecClone as well.  Arguably, I'd say that FParsec is more correct here since you are forced to implement the grammar without cheating with regex, but regex does make the problem succinct.
 
+[[Top]](#Table-of-contents)
+
 ## Instantiating User States
 
 
@@ -979,6 +994,8 @@ let makeBinStreamState (stream:Stream) =
 ```
 
 In this scenario I am creating a user state of the record `VideoState` and seeding the `BinStream` with a default value. The user state is mutable, so you can pass it whatever you want.
+
+[[Top]](#Table-of-contents)
 
 ## Value Restrictions
 
@@ -1101,6 +1118,8 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
     List.length result |> should equal 11
 ```
 
+[[Top]](#Table-of-contents)
+
 ## Binary Parser Example
 
 As another example, this time of the binary parser, I wrote a small mp4 video file header parser.  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
@@ -1205,6 +1224,8 @@ let tkhd<'a> =
     } |>> TKHD
 ```
 
+[[Top]](#Table-of-contents)
+
 ## Binary bit parsing
 
 
@@ -1258,3 +1279,4 @@ let testApplyManyBits() =
     result |> should equal target 
 ```
 
+[[Top]](#Table-of-contents)
