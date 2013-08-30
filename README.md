@@ -36,39 +36,269 @@ Generic Operators
 
 Included operators are
 
-- `>>=` - combiner with function callback
-- `>>=?` - combiner with function callback and backtracking
-- `>>.` - use result of second combinator
-- `.>>` - use result of first combinator
-- `preturn` - return a value as a combinator
-- `pzero` - defines a zero (for use with folds and other starting states)
-- `|>>` - pipe value into union or constructor
-- `|>>%` - pipe to zero argument discriminated union
-- `<|>` - first parser or second parser, as long as the or'd parsers don't modify the underlying state
-- `.<?>>.` - takes a parser of `T` and a parser of `T list` and applies both parers as options. if the first parser succeeds and the second parser fails, returns a list of the result of the first parser (`Some(T)::[]`), if the first parser succeeds and the second parser succeeds returns a cons list of both results (`Some(T)::Some(T) list`). This operator does not backtrack but will not fail if the first parser doesn't succeed (since its wrapped as an `opt`).
-- `.<<?>.` - basically the same as `.<?>>.` except with the arguments inverted. The list parser is first and the single parser is second. Returns a list of `T`.
-- `>>..` - takes a parser and a processor function.  Applies the processor function to the result of the the parser. Alias for `parser1 >>= fun first -> applier first `. The applier should use preturn. An example applier is used in the binary parser to shift bits: `shiftL n = fun (b : uint32)  -> preturn (b <<< n)`. See the mp4 example below to see how it can be used in conjunction with a regular parser.
-- `many` - repeats a parser zero or more times
-- `match` - generic match on predicate and executes state modifier to return result
-- `anyOf` - takes a combinator and a list of strings and or's them all together with the `<|>` combinator
-- `choice` - takes a list of parsers and or's them together with `<|>`
-- `attempt` - if no match occurs or an exception happens, backtracks to the beginning of the state of the parser
-- `takeTill` - takes a predicate and a parser and consumes until the predicate is true. Then backtracks one element
-- `takeWhile` - same as take till except inverted predicate
-- `manyN` - takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
-- `many1` - repeats a parser one or more times (fails if no match found)
-- `lookahead` - returns a result and a new parser, but backtracks the state 
-- `manyTill` - takes a parser and an end parser, and repeats the first parser zero or more times until the second parser succeeds
-- `manyTill1` same as manyTill except fails on zero matches, so expects at least one or more
-- `between` - takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
-- `between2` - takes a bookend parser and the target parser, and applies the bookend parser twice to `between`. Usage could be for `parser |> between2 quote`
-- `manySatisfy` - alias for `takeWhile`
-- `satisfy` - takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
-- `opt` - takes a parser, applies the the state, and returns a result option. Careful using this in the context of a `many` since it you can get into infinite loops since you always "succeed"
-- `createParserForwardedToRef` - returns a tuple of (parser, ref parser) to use for recursive calling parsers 
-- `reproc elevator seed parser` - This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed.
-- `getUserState` - returns to you the currently stored user state
-- `setUserState` - takes a value and sets the userstate with that value
+```fsharp
+val (>>=) : Parser -> (Reply option -> Parser) -> Parser
+```
+Combiner with function callback
+
+----------
+
+```fsharp
+val (>>=?) : Parser -> (Reply option -> Parser) -> Parser
+```
+Combiner with function callback and backtracking
+
+----------
+
+```fsharp
+val (>>.) : Parser -> Parser -> Parser
+```
+Use result of second combinator
+
+----------
+
+```fsharp
+val (.>>) : Parser -> Parser -> Parser
+```
+Use result of first combinator
+
+----------
+
+```fsharp
+val preturn: 'a -> Parser
+```
+Return a value as a combinator
+
+----------
+
+```fsharp
+val pzero: unit -> Parser
+```
+Defines a zero (for use with folds and other starting states). Result is `(None, state`)
+
+----------
+
+
+```fsharp
+val (|>>) :
+```
+
+Pipe value into union or constructor
+
+----------
+
+```fsharp
+val |>>%) :
+```
+
+Pipe to zero argument discriminated union
+
+----------
+
+```fsharp
+val <|>) :
+```
+
+First parser or second parser, as long as the or'd parsers don't modify the underlying state
+
+----------
+
+```fsharp
+val .<?>>.) :
+```
+
+Takes a parser of `T`and a parser of `T list` and applies both parers as options. if the first parser succeeds and the second parser fails, returns a list of the result of the first parser (`Some(T)::[]`), if the first parser succeeds and the second parser succeeds returns a cons list of both results (`Some(T)::Some(T) list`). This operator does not backtrack but will not fail if the first parser doesn't succeed (since its wrapped as an `opt`).
+
+----------
+
+```fsharp
+val .<<?>.) :
+```
+
+Basically the same as `.<?>>.` except with the arguments inverted. The list parser is first and the single parser is second. Returns a list of `T`.
+
+----------
+
+```fsharp
+val >>..) :
+```
+
+Takes a parser and a processor function.  Applies the processor function to the result of the the parser. Alias for `parser1 >>= fun first -> applier first `. The applier should use preturn. An example applier is used in the binary parser to shift bits: `shiftL n = fun (b : uint32)  -> preturn (b <<< n)`. See the mp4 example below to see how it can be used in conjunction with a regular parser.
+
+----------
+
+```fsharp
+val many
+```
+
+Repeats a parser zero or more times
+
+----------
+
+```fsharp
+val match
+```
+
+Generic match on predicate and executes state modifier to return result
+
+----------
+
+```fsharp
+val anyOf
+```
+
+Takes a combinator and a list of strings and or's them all together with the `<|>` combinator
+
+----------
+
+```fsharp
+val choice
+```
+
+Takes a list of parsers and or's them together with `<|>`
+
+----------
+
+```fsharp
+val attempt
+```
+
+If no match occurs or an exception happens, backtracks to the beginning of the state of the parser
+
+----------
+
+```fsharp
+val takeTill
+```
+
+Takes a predicate and a parser and consumes until the predicate is true. Then backtracks one element
+
+----------
+
+```fsharp
+val takeWhile
+```
+
+Same as take till except inverted predicate
+
+----------
+
+```fsharp
+val manyN
+```
+
+Takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
+
+----------
+
+```fsharp
+val many1
+```
+
+Repeats a parser one or more times (fails if no match found)
+
+----------
+
+```fsharp
+val lookahead
+```
+
+Returns a result and a new parser, but backtracks the state 
+
+----------
+
+```fsharp
+val manyTill
+```
+
+Takes a parser and an end parser, and repeats the first parser zero or more times until the second parser succeeds
+
+----------
+
+```fsharp
+val manyTill1
+```
+
+Same as `manyTill` except fails on zero matches, so expects at least one or more
+
+----------
+
+```fsharp
+val between
+```
+
+Takes a bookend parser, the parser, and another bookened parse and returns the value of the middle parser
+
+----------
+
+```fsharp
+val between2
+```
+
+Takes a bookend parser and the target parser, and applies the bookend parser twice to `between`. Usage could be for `parser |> between2 quote`
+
+----------
+
+```fsharp
+val manySatisfy
+```
+
+Alias for `takeWhile`
+
+----------
+
+```fsharp
+val satisfy : ('Result -> bool) -> Parser<'Result>
+```
+
+Takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
+
+----------
+
+```fsharp
+val opt : Parser<'Result> -> Parser<'Result option>
+```
+
+Takes a parser, applies the the state, and returns a result option. Careful using this in the context of a 'many' since it you can get into infinite loops since you always "succeed"
+
+----------
+
+```fsharp
+val createParserForwardedToRef: unit -> (Parser, ref Parser)
+```
+
+Returns a tuple of (parser, ref parser) to use for recursive calling parsers 
+
+----------
+
+```fsharp
+val reproc elevator seed parser : ('Result -> IStreamP<'Result2>) -> Parser<'Result> -> Parser<'Result2>  
+```
+
+This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed.
+
+----------
+
+```fsharp
+val getUserState : unit -> Parser
+```
+
+Returns a parser whose result is the currently stored user state
+
+----------
+
+```fsharp
+val setUserState : 'UserState -> Parser
+```
+
+Takes a value and sets the userstate with that value
+
+----------
+```fsharp
+val statePosition
+```
+
+Returns the position of the state. Does not modify the stream.
 
 String operators
 ----
@@ -77,22 +307,163 @@ One major difference between this and fparsec is that my string parsing is based
 
 String operators in the `StringP` module are:
 
-- `matchStr` - matches a string if it starts with some text (uses match)
-- `regexStr` - takes a regular expression and tests to see if the current state begins with a match (uses match)
-- `anyBut` - takes a regular expression and returns a character that does not match the regex
-- `char` - [a-z] character
-- `chars` - [a-z]+ characters
-- `digit` - [0-9] 
-- `digits` - [0-9]+
-- `newline` - matches `\r\n` or `\n` or `\r`
-- `whitespace` - \s
-- `whitespaces` - \s+
-- `space` - " "
-- `spaces` - " "+
-- `tab` - \t
-- `tabs` - \t+
-- `ws` - optional whitespace parser
-- `foldStrings` - takes a string list and preturns a concatenated version of those strings (`string list -> parser<string>`) 
+
+
+----------
+
+```fsharp
+val matchStr: 
+```
+
+matches a string if it starts with some text uses match
+
+
+----------
+
+```fsharp
+val regexStr: 
+```
+
+takes a regular expression and tests to see if the current state begins with a match uses match
+
+
+----------
+
+```fsharp
+val anyBut: 
+```
+
+takes a regular expression and returns a character that does not match the regex
+
+
+----------
+
+```fsharp
+val char: 
+```
+
+[a-z] character
+
+
+----------
+
+```fsharp
+val chars: 
+```
+
+[a-z]+ characters
+
+
+----------
+
+```fsharp
+val digit: 
+```
+
+[0-9] 
+
+
+----------
+
+```fsharp
+val digits: 
+```
+
+[0-9]+
+
+
+----------
+
+```fsharp
+val newline: 
+```
+
+matches `\r\n: 
+```
+
+or `\n: 
+```
+
+or `\r`
+
+
+----------
+
+```fsharp
+val whitespace: 
+```
+
+\s
+
+
+----------
+
+```fsharp
+val whitespaces: 
+```
+
+\s+
+
+
+----------
+
+```fsharp
+val space: 
+```
+
+" "
+
+
+----------
+
+```fsharp
+val spaces: 
+```
+
+" "+
+
+
+----------
+
+```fsharp
+val tab: 
+```
+
+\t
+
+
+----------
+
+```fsharp
+val tabs: 
+```
+
+\t+
+
+
+----------
+
+```fsharp
+val ws: 
+```
+
+optional whitespace parser
+
+
+----------
+
+```fsharp
+val foldStrings: 
+```
+
+takes a string list and preturns a concatenated version of those strings `string list -> parser<string>` 
+
+----------
+```fsharp
+val makeStringStream : String -> StringStreamP<unit>
+```
+
+Utility function to create a stream from a string. Use this if you don't need to create any user state.
 
 Binary operators
 ----
@@ -105,51 +476,394 @@ let bp = new BinParser(Array.rev)
 
 Binary operators of the `BinParser` class in the `BinaryParser` module are:
 
-- `byteN` - takes an integer N and consumes a byte array of that size
-- `byte1` - returns one byte
-- `byte2` - returns two bytes
-- `byte3` - returns three bytes
-- `byte4` - returns four bytes
-- `intB` - returns the byte value as a signed integer
-- `int16` - parses 2 bytes and returns a signed 16 bit integer
-- `int32` - parses 4 bytes and returns a signed 32 bit integer
-- `int64` - parses 8 bytes and returns a signed 64 bit integer
-- `uintB` - returns the byte value as an unsigned integer
-- `uint16` - parses 2 bytes and returns an unsigned 16 bit integer
-- `uint32` - parses 4 bytes and returns an unsigned 32 bit integer
-- `uint64` - parses 8 bytes and returns an unsigned 64 bit integer
-- `skip` - skips N bytes in the stream by seeking
-- `skiptoEnd` - skips to the end of the stream
-- `shiftL` - shifts left N bits
-- `shiftR` - shifts right N bits
-- `floatP` - parses a 4 byte float
-- `matchBytes` - parses the exact byte sequence (as byte array)
-- `byteToUInt` - takes one byte, and converts to uint32
-- `toUInt16` - takes a 2 byte array, applies endianess converter, and converts to uint 16
-- `toUInt24` - takes a 3 byte array, applies endianess converter, and converts to uint 32
-- `toUInt32` - takes a 4 byte array, applies endianess converter, and converts to uint 32
-- `toUInt64` - takes a 8 byte array, applies endianess converter, and converts to uint 64
-- `byteToInt` - takes one byte and converts to int32
-- `toInt16` - takes a 2 byte array, applies endianess converter, and converts to int 16
-- `toInt24` - takes a 3 byte array, applies endianess converter, and converts to int 32
-- `toInt32` - takes a 4 byte array, applies endianess converter, and converts to int 32
-- `toInt64` - takes a 8 byte array, applies endianess converter, and converts to int 64
+----------
+```fsharp
+val makeBinStream: Stream -> BinStream<unit>
+```
 
+Helper function to take a stream and create a `BinStream` instance for use with the binary combinators. Use this if you don't need any user state.
+
+----------
+
+```fsharp
+val byteN
+```
+
+Takes an integer N and consumes a byte array of that size
+
+
+----------
+
+```fsharp
+val byte1
+```
+
+Returns one byte
+
+
+----------
+
+```fsharp
+val byte2
+```
+
+Returns two bytes
+
+
+----------
+
+```fsharp
+val byte3
+```
+
+Returns three bytes
+
+
+----------
+
+```fsharp
+val byte4
+```
+
+Returns four bytes
+
+
+----------
+
+```fsharp
+val intB
+```
+
+Returns the byte value as a signed integer
+
+
+----------
+
+```fsharp
+val int16
+```
+
+Parses 2 bytes and returns a signed 16 bit integer
+
+
+----------
+
+```fsharp
+val int32
+```
+
+Parses 4 bytes and returns a signed 32 bit integer
+
+
+----------
+
+```fsharp
+val int64
+```
+
+Parses 8 bytes and returns a signed 64 bit integer
+
+
+----------
+
+```fsharp
+val uintB
+```
+
+Returns the byte value as an unsigned integer
+
+
+----------
+
+```fsharp
+val uint16
+```
+
+Parses 2 bytes and returns an unsigned 16 bit integer
+
+
+----------
+
+```fsharp
+val uint32
+```
+
+Parses 4 bytes and returns an unsigned 32 bit integer
+
+
+----------
+
+```fsharp
+val uint64
+```
+
+Parses 8 bytes and returns an unsigned 64 bit integer
+
+
+----------
+
+```fsharp
+val skip
+```
+
+Skips N bytes in the stream by seeking
+
+
+----------
+
+```fsharp
+val skiptoEnd
+```
+
+Skips to the end of the stream
+
+
+----------
+
+```fsharp
+val shiftL
+```
+
+Shifts left N bits
+
+
+----------
+
+```fsharp
+val shiftR
+```
+
+Shifts right N bits
+
+
+----------
+
+```fsharp
+val floatP
+```
+
+Parses a 4 byte float
+
+
+----------
+
+```fsharp
+val matchBytes
+```
+
+Parses the exact byte sequence (as byte array)
+
+
+----------
+
+```fsharp
+val byteToUInt
+```
+
+Takes one byte, and converts to uint32
+
+
+----------
+
+```fsharp
+val toUInt16
+```
+
+Takes a 2 byte array, applies endianess converter, and converts to uint 16
+
+
+----------
+
+```fsharp
+val toUInt24
+```
+
+Takes a 3 byte array, applies endianess converter, and converts to uint 32
+
+
+----------
+
+```fsharp
+val toUInt32
+```
+
+Takes a 4 byte array, applies endianess converter, and converts to uint 32
+
+
+----------
+
+```fsharp
+val toUInt64
+```
+
+Takes a 8 byte array, applies endianess converter, and converts to uint 64
+
+
+----------
+
+```fsharp
+val byteToInt
+```
+
+Takes one byte and converts to int32
+
+
+----------
+
+```fsharp
+val toInt16
+```
+
+Takes a 2 byte array, applies endianess converter, and converts to int 16
+
+
+----------
+
+```fsharp
+val toInt24
+```
+
+Takes a 3 byte array, applies endianess converter, and converts to int 32
+
+
+----------
+
+```fsharp
+val toInt32
+```
+
+Takes a 4 byte array, applies endianess converter, and converts to int 32
+
+
+----------
+
+```fsharp
+val toInt64
+```
+
+Takes a 8 byte array, applies endianess converter, and converts to int 64
+
+Bit Parsers
+----
 Also included in the binary parser are bit level parsers. These parsers need to work on a "seeded" byte stream. For example, you need to read in a 2 byte block, and then do bit level parsing on the 2 byte block.  The byte stream will be advanced by 2 bytes, but you can work on the "seeded" (or cached) version of the stream with new parser types, by lifting the parser stream to a new stream type.  Operators that make this possible include:
 
-- `makeBitP` - takes a seed parser (to provide the underlying byte array to use as the parser set) and a bit level parser and applies the bit level parser to the seed.  Bit parsers are complicated because the smallest thing you can read off the stream is a byte, so you have to work in memory on your byte stream.    
-- `bitsN` - takes an integer N and returns a list of `Bit` union types (`Zero` or `One`)
-- `bitsToInt` - takes a bit list and converts it to an `int`
-- `bitN` - takes an integer N and returns back the bit value at position N 
-- `bit1` - returns the value of the first bit (zero or one)
-- `bit2` - returns the value of the second bit (zero or one)
-- `bit3` - returns the value of the third bit (zero or one)
-- `bit4` - returns the value of the fourth bit (zero or one)
-- `bit5` - returns the value of the fifth bit (zero or one)
-- `bit6` - returns the value of the sixth bit (zero or one)
-- `bit7` - returns the value of the seventh bit (zero or one)
-- `bit8` - returns the value of the eight bit (zero or one)
 
+
+----------
+
+```fsharp
+val makeBitP
+```
+
+takes a seed parser (to provide the underlying byte array to use as the parser set) and a bit level parser and applies the bit level parser to the seed.  Bit parsers are complicated because the smallest thing you can read off the stream is a byte, so you have to work in memory on your byte stream.    
+
+
+----------
+
+```fsharp
+val bitsN
+```
+
+Takes an integer N and returns a list of `Bit
+```
+
+union types (`Zero
+```
+
+or `One`)
+
+
+----------
+
+```fsharp
+val bitsToInt
+```
+
+Takes a bit list and converts it to an `int`
+
+
+----------
+
+```fsharp
+val bitN
+```
+
+Takes an integer N and returns back the bit value at position N 
+
+
+----------
+
+```fsharp
+val bit1
+```
+
+Returns the value of the first bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit2
+```
+
+Returns the value of the second bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit3
+```
+
+Returns the value of the third bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit4
+```
+
+Returns the value of the fourth bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit5
+```
+
+Returns the value of the fifth bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit6
+```
+
+Returns the value of the sixth bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit7
+```
+
+Returns the value of the seventh bit (zero or one)
+
+
+----------
+
+```fsharp
+val bit8
+```
+
+Returns the value of the eight bit (zero or one)
+
+Bit parsing ordering
+----
 Bit parsing works left to right and doesn't get run through the endianness converter.  Here is the layout of what is meant by bit 1 through bit 8, 
 
 ```
