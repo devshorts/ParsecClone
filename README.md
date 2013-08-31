@@ -1,9 +1,8 @@
 ParsecClone
 ===========
 
-This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. I wanted to seperate out the combinator functionality from the stream. The project is reasonably complete, and I have a sample CSV parser and a sample MP4 header binary parser included in the source.
+This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. Included in the project is a sample CSV parser and a sample MP4 header binary parser. 
 
-In general, combinators are a way to express complex parsing and chained actions in composable functions.  I've been playing with fparsec for the last month and that inspired me to try my hand at making combinators as well.I decided to mimic the fparsec combinator syntax since I really liked that format.
 
 ## Table of contents
 - [Installation](#installation)
