@@ -60,17 +60,7 @@ module Mp4DataTypes =
         Name: string
     }
 
-    type Matrix = {
-        a : uint32;
-        b : uint32;
-        u : uint32;
-        c : uint32;
-        d : uint32;
-        v : uint32;
-        x : uint32;
-        y : uint32;
-        w : uint32;
-    }
+    type Matrix = uint32 [,]
 
     type VersionAndFlags = {
         Version: uint32;

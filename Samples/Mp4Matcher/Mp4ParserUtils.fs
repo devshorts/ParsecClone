@@ -156,17 +156,13 @@ module Mp4ParserUtils =
         ``16.16``   >>= fun y ->
         ``2.10``    >>= fun w ->
 
-        preturn {
-            a = a
-            b = b
-            c = c
-            d = d
-            x = x
-            y = y
-            w = w
-            v = v
-            u = u
-        }
+        let matrix = 
+            [|
+                [|a;b;u|]; 
+                [|c;d;v|];
+                [|x;y;w|]
+            |] 
+        preturn <| Array2D.init 3 3 (fun i j -> matrix.[i].[j])
 
 
                         
