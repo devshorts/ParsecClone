@@ -33,13 +33,13 @@ module Combinator =
         // if the first one matches, stop
         match match1 with 
             | (Some(m), _) -> match1 
-            | (None, state : IStreamP<_,_,_>)  when state.equals inputState -> second inputState            
+            | (None, state : State<_,_,_>)  when state.equals inputState -> second inputState            
             | (None, state) ->  failwith "No match found and underlying state was modified"
 
     let getBacktrackReply current next input =
         let match1 = current input
         match match1 with 
-            | (Some(result), (state:IStreamP<_,_,_>)) -> 
+            | (Some(result), (state:State<_,_,_>)) -> 
                 try
                     state |> next result                              
                 with
@@ -49,11 +49,11 @@ module Combinator =
             | (None, state) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)      
 
-    let getReply current next (input:IStreamP<_,_,_>) =       
+    let getReply current next (input:State<_,_,_>) =       
         let match1 = current input
         match match1 with 
             | (Some(result), state) -> next result state
-            | (None, state : IStreamP<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
+            | (None, state : State<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
     let (>>=) (current) (next)  = getReply current next                                   
@@ -90,13 +90,13 @@ module Combinator =
 
     let matcher eval target =         
         fun currentState -> 
-            match eval (currentState:IStreamP<_,_,_>) target with
+            match eval (currentState:State<_,_,_>) target with
                 | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
       
     let skipper eval target =         
         fun currentState -> 
-            match eval (currentState:IStreamP<_,_,_>) target with
+            match eval (currentState:State<_,_,_>) target with
                 | Some(amount) -> currentState.skip amount                        
                 | None         -> (None, currentState)      
    
@@ -113,7 +113,7 @@ module Combinator =
                     | _ -> (None, currentState)
                
         fun state ->
-            let rec many' parser (returnList, currentState:IStreamP<_,_,_>) =              
+            let rec many' parser (returnList, currentState:State<_,_,_>) =              
                 let returnValue() = didFind returnList currentState
 
                 match currentState.hasMore() with
@@ -137,7 +137,7 @@ module Combinator =
     *)
     let private manyTillWithCount minCount parser endParser = 
         fun state ->
-            let ifHasMore apply (state:IStreamP<_,_,_>) acc = 
+            let ifHasMore apply (state:State<_,_,_>) acc = 
                 match state.hasMore() with 
                     | true -> apply state acc
                     | false -> None, state
@@ -179,14 +179,14 @@ module Combinator =
             preturn result          
     
     let eof = 
-        fun (state:IStreamP<_,_,_>) -> 
+        fun (state:State<_,_,_>) -> 
             if state.hasMore() then
                 (None, state)
             else 
                 (Some(()), state)
 
     let lookahead p = 
-        fun (state:IStreamP<_,_,_>) ->
+        fun (state:State<_,_,_>) ->
             let result = p state
 
             state.backtrack()
@@ -227,13 +227,13 @@ module Combinator =
 
     let (.<<?>.) parser listParser = optWith (opt listParser) (opt parser)
 
-    let private backtrackNone (state:IStreamP<_,_,_>) = 
+    let private backtrackNone (state:State<_,_,_>) = 
         state.backtrack()
         None, state   
 
     let satisfyUserState predicate parser = 
-        fun (state : IStreamP<_,_,'UserState>) ->  
-            let (r, nextState:IStreamP<_,_,_>) as result = parser state
+        fun (state : State<_,_,'UserState>) ->  
+            let (r, nextState:State<_,_,_>) as result = parser state
 
             match r with 
                 | Some(m) when predicate (state.getUserState()) -> result 
@@ -241,7 +241,7 @@ module Combinator =
                 | _ -> None, nextState
 
     let satisfy predicate parser = 
-        fun (state : IStreamP<_,_,_>) ->  
+        fun (state : State<_,_,_>) ->  
             let (r, nextState) as result = parser state
             match r with 
                 | Some(m) when predicate m -> result 
@@ -286,7 +286,7 @@ module Combinator =
         fun stream ->
             let result = seed stream
             match result with
-                | Some(m), (postSeedState:IStreamP<_,_,_>) -> 
+                | Some(m), (postSeedState:State<_,_,_>) -> 
                     let elevatedStream = elevator m (postSeedState.getUserState())
                     
                     let (parseResult, _) = parser elevatedStream
@@ -296,12 +296,12 @@ module Combinator =
                 | (None, consumed) -> (None, consumed)
 
 
-    let getUserState (state:IStreamP<_,_,_>) = (Some(state.getUserState()), state)
+    let getUserState (state:State<_,_,_>) = (Some(state.getUserState()), state)
 
-    let setUserState value (state:IStreamP<_,_,_>) = (Some(state.setUserState value), state)
+    let setUserState value (state:State<_,_,_>) = (Some(state.setUserState value), state)
 
     let statePosition = 
-        fun (state:IStreamP<_,_,_>) -> 
+        fun (state:State<_,_,_>) -> 
             (Some(state.position()), state)
 
     let test (input:State<_,_,'UserState>) (parser:Parser<_,_,_,'UserState>) = 
