@@ -13,7 +13,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 - [String operators](#string-operators)
 - [Binary operators](#binary-operators)
 - [Bit parsers](#bit-parsers)
-- [Bit parsing order](#bit-parsing-order)
+- [Bit parsing order](#bit-parsing-ordering)
 - [A note on FParsec vs ParsecClone regarding strings](#a-note-on-fparsec-vs-parsecclone-regarding-strings)
 - [Instantiating user states](#instantiating-user-states)
 - [Dealing with value restrictions](#value-restrictions)
