@@ -13,9 +13,9 @@ module Mp4ParserUtils =
     /// </summary>
     let bp = new BinParser<_>(Array.rev)
 
-    let private epochSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    let private timeSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-    let date : VideoParser<_> = bp.byte4 |>> (bp.toUInt32 >> Convert.ToDouble >> epochSince1904.AddMilliseconds)
+    let date : VideoParser<_> = bp.byte4 |>> (bp.toUInt32 >> Convert.ToDouble >> timeSince1904.AddSeconds)
           
     /// <summary>
     /// Returns a 4 byte sequence as an ascii string
@@ -41,7 +41,7 @@ module Mp4ParserUtils =
     let trackStatePosition = 
         statePosition >>= fun pos ->
         getUserState  >>= fun state ->
-        setUserState { state with StateStart = pos }
+        setUserState { state with CurrentStatePosition = pos }
 
     /// <summary>
     /// Extracts an atom of the target name (if it exists)
@@ -53,8 +53,7 @@ module Mp4ParserUtils =
         attempt (
             trackStatePosition >>= fun _ ->
             atomSize >>= fun size ->
-            name id >>= fun name -> 
-            //Console.WriteLine("In " + name)             
+            name id >>= fun name ->               
             preturn 
                 {
                     Size = size
@@ -80,25 +79,23 @@ module Mp4ParserUtils =
     /// <summary>
     /// Consumes an atom if its name is a valid 4 letter lowercase ascii sequence    
     /// </summary>
-    let unknown : VideoParser<_> = 
-        attempt (  
-            trackStatePosition >>= fun _ ->     
-            atomSize >>= fun size ->
-            stringId >>= fun name ->     
+    let unknown : VideoParser<_> =         
+        trackStatePosition >>. 
+        atomSize           >>= fun size ->
+        stringId           >>= fun name ->     
 
-            let intValues = name.ToCharArray() |> Array.map (int)  
-            let nonAscii = Array.exists(fun i -> i < 97 || i > 122) intValues 
+        let intValues = name.ToCharArray() |> Array.map (int)  
+        let nonAscii = Array.exists(fun i -> i < 97 || i > 122) intValues 
 
-            if nonAscii then 
-                pzero 
-            else                
-                skipRemaining size 8 >>. 
-                preturn 
-                    {
-                        Size = size
-                        Name = name
-                    }           
-        )
+        if nonAscii then 
+            pzero 
+        else                
+            skipRemaining size 8 >>. 
+            preturn 
+                {
+                    Size = size
+                    Name = name
+                }           
 
         
     /// <summary>
@@ -108,10 +105,10 @@ module Mp4ParserUtils =
     /// <param name="start"></param>
     /// <param name="size"></param>
     /// <param name="parser"></param>
-    let takeIfAtomNotConsumed start size parser = 
+    let takeIfAtomNotConsumed start expectedSize parser = 
         let shouldConsume = fun (s:VideoState) -> 
-                                    let consumed = s.StateStart - (int64)start
-                                    consumed < (int64)size
+                                    let consumed = s.CurrentStatePosition - (int64)start
+                                    consumed < (int64)expectedSize
                                 
         satisfyUserState shouldConsume parser
         
@@ -127,7 +124,7 @@ module Mp4ParserUtils =
 
         let parser = getParser id
 
-        takeIfAtomNotConsumed state.StateStart id.Size parser |> many
+        takeIfAtomNotConsumed state.CurrentStatePosition id.Size parser |> many
 
     
     let versionAndFlags : VideoParser<_> = 
@@ -139,3 +136,37 @@ module Mp4ParserUtils =
                 Flags = flags
             }
 
+
+    let ``16.16`` = 
+        bp.uint32 >>= fun i ->
+        preturn <| i / uint32(pown 2 16)
+
+    let ``2.10`` = 
+        bp.uint32 >>= fun i ->
+        preturn <| i / uint32(pown 2 30)
+
+    let matrix : VideoParser<_> = 
+        ``16.16``   >>= fun a ->
+        ``16.16``   >>= fun b ->
+        ``2.10``    >>= fun u ->
+        ``16.16``   >>= fun c ->
+        ``16.16``   >>= fun d ->
+        ``2.10``    >>= fun v ->
+        ``16.16``   >>= fun x ->
+        ``16.16``   >>= fun y ->
+        ``2.10``    >>= fun w ->
+
+        preturn {
+            a = a
+            b = b
+            c = c
+            d = d
+            x = x
+            y = y
+            w = w
+            v = v
+            u = u
+        }
+
+
+                        

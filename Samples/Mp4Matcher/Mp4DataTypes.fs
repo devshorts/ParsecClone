@@ -19,7 +19,7 @@ module Mp4DataTypes =
 
     let maybe = new MaybeBuilder()
 
-    type VideoState = { IsAudio: bool; StateStart: int64 }
+    type VideoState = { IsAudio: bool; CurrentStatePosition: int64 }
 
     type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], VideoState>
 
@@ -60,6 +60,18 @@ module Mp4DataTypes =
         Name: string
     }
 
+    type Matrix = {
+        a : uint32;
+        b : uint32;
+        u : uint32;
+        c : uint32;
+        d : uint32;
+        v : uint32;
+        x : uint32;
+        y : uint32;
+        w : uint32;
+    }
+
     type VersionAndFlags = {
         Version: uint32;
         Flags : uint32;
@@ -76,7 +88,15 @@ module Mp4DataTypes =
         VersionAndFlags: VersionAndFlags
         CreationTime : DateTime
         ModificationTime : DateTime
+        Matrix: Matrix
         TimeScale : uint32
+        PreviewTime : uint32
+        PreviewDuration : uint32
+        PosterTime : uint32
+        SelectionTime : uint32
+        CurrentTime : uint32
+        NextTrackId : uint32
+        SelectionDuration : uint32
     }
 
     type Tkhd= {
@@ -86,7 +106,7 @@ module Mp4DataTypes =
         ModificationTime : DateTime
         TrackId: uint32
         Duration: uint32
-        Layer: uint32
+        Layer: uint16
         AlternateGroup: uint16
         Volume: uint16
         Height: uint32

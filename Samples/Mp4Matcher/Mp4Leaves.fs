@@ -43,7 +43,14 @@ module Mp4Leaves =
         bp.uint32                   >>= fun duration ->
         bp.uint32                   >>= fun rate ->
         bp.uint16                   >>= fun volume ->
-        bp.skip 70                  >>= fun _ -> 
+        bp.skip 10                  >>= fun reserved ->
+        matrix                      >>= fun matrix -> 
+        bp.uint32                   >>= fun previewTime ->
+        bp.uint32                   >>= fun previewDuration ->
+        bp.uint32                   >>= fun posterTime ->
+        bp.uint32                   >>= fun selectionTime ->
+        bp.uint32                   >>= fun selectionDuration ->
+        bp.uint32                   >>= fun currentTime ->        
         bp.uint32                   >>= fun nextTrackId ->
         freeOpt >>. preturn {
             Atom = id
@@ -51,6 +58,14 @@ module Mp4Leaves =
             CreationTime = creationTime
             ModificationTime = modificationTime
             TimeScale = timeScale
+            Matrix = matrix
+            PreviewTime = previewTime
+            PreviewDuration = previewDuration
+            PosterTime = posterTime
+            SelectionTime = selectionTime
+            CurrentTime = currentTime
+            NextTrackId = nextTrackId
+            SelectionDuration = selectionDuration
         } |>> MVHD
 
 
@@ -60,20 +75,21 @@ module Mp4Leaves =
         freeOpt >>. preturn id |>> IODS
 
     let tkhd : VideoParser<_> = 
-        atom "tkhd" >>= fun id ->
+        atom "tkhd"     >>= fun id ->
         versionAndFlags >>= fun vFlags ->
-        date >>= fun creationTime ->
-        date >>= fun modificationTime ->
-        bp.uint32 >>= fun trackId ->
-        bp.uint32 >>= fun reserved ->
-        bp.uint32 >>= fun duration ->        
-        bp.uint32 >>= fun layer ->
-        bp.uint16 >>= fun alteranteGroup ->
-        bp.uint16 >>= fun volume ->
-        bp.byteN 8 >>= fun reserved ->
-        manyN 9 bp.floatP >>= fun matrix ->
-        bp.uint32 >>.. bp.shiftR 16 >>= fun width ->
-        bp.uint32  >>.. bp.shiftR 16 >>= fun height ->
+        date        >>= fun creationTime ->
+        date        >>= fun modificationTime ->
+        bp.uint32   >>= fun trackId ->
+        bp.uint32   >>= fun reserved ->
+        bp.uint32   >>= fun duration ->    
+        bp.skip 8   >>= fun reserved2 ->    
+        bp.uint16   >>= fun layer ->
+        bp.uint16   >>= fun alteranteGroup ->
+        bp.uint16   >>= fun volume ->
+        bp.uint16   >>= fun reserved3 ->
+        matrix      >>= fun matrix ->
+        bp.uint32   >>.. bp.shiftR 16 >>= fun width ->
+        bp.uint32   >>.. bp.shiftR 16 >>= fun height ->
         freeOpt >>. preturn {
             Atom  = id
             VersionAndFlags = vFlags

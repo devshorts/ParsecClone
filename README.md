@@ -301,6 +301,14 @@ Takes a bookend parser and the target parser, and applies the bookend parser twi
 ----------
 
 ```fsharp
+val eof: Parser<unit>
+```
+
+Parser succeeds if the stream has nothing left to consume.  Fails otherwise.
+
+----------
+
+```fsharp
 val manySatisfy: ('a -> bool) -> Parser<'a> -> Parser<'a list>
 ```
 
@@ -309,10 +317,18 @@ Alias for `takeWhile`
 ----------
 
 ```fsharp
-val satisfy : ('a -> bool) -> Parser<'a>
+val satisfy : ('a -> bool) -> Parser<'a> -> Paser<'a>
 ```
 
 Takes a predicate and a parser, applies the parser once and if the return result passes the predicate returns the result, otherwise backtracks.
+
+----------
+
+```fsharp
+val satisfyUserState : ('UserState -> bool) -> Parser<'a,_,_'UserState> -> Paser<'a>
+```
+
+Takes a predicate and a parser. It applies the parser and then calls the predicate with the new userstate. If the predicate succeeds, returns the result of the parser, otherwise it backtracks.
 
 ----------
 
@@ -339,7 +355,11 @@ val reproc elevator seed parser : ('result -> 'userState -> State<'newStateType,
 									 Parser<'b, 'originalStateType, 'consumeType, 'userSTate>
 ```
 
-This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). The elevators signature is `'a -> IStreamP` where `'a` is the result type of the seed.   The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed.
+This functions lets you apply a parser to a buffered set of data. The buffered set of data acts as its own parser state. The seed is a parser on the original state and is used to create a new parse state (by the elevator). 
+
+The second parser argument is the parser that will be applied to the new state.  The original state is advanced by the amount that the seed consumed. 
+
+The return result is the return from the elevated parser, but the returned parser type continues to work on the underlying state.
 
 ----------
 
@@ -1133,107 +1153,9 @@ This is some text! whoo ha, ""words"", This is some text! whoo ha, ""words"", Th
 
 ## Binary Parser Example
 
-As another example, this time of the binary parser, I wrote a small [mp4 video file header parser](https://github.com/devshorts/ParsecClone/blob/master/Samples/Mp4Matcher/Mp4Sample.fs).  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.
+As another example, this time of the binary parser, I wrote a small [mp4 video file header parser](https://github.com/devshorts/ParsecClone/blob/master/Samples/Mp4Matcher/Mp4Sample.fs).  MP4 can be pretty complicated, so I didn't do the entire full spec, but you should be able to get the idea of how to use the binary parser.  
 
-One limitation is there isn't a way to do bit level parsing, since the stream gives you things byte by byte. 
-
-The high level overview looks like this:
-
-```fsharp
-namespace Mp4Matcher
-
-open Combinator
-open BinaryCombinator
-open System.Text
-open System
-
-[<AutoOpen>]
-module Mp4P = 
-    
-    let stbl<'a> = 
-        basicAtom "stbl" >>= fun id ->        
-        many (stts <|> stsd <|> stsz <|> stsc <|> stco <|> stss) |>> STBL
-
-    let vOrSmhd<'a> = vmhd <|> smhd
-
-    let minf<'a> = 
-        basicAtom "minf" >>= fun id ->       
-        many (vOrSmhd <|> dinf <|> stbl) |>> MINF
-
-    let mdia<'a> = 
-        basicAtom "mdia" >>= fun id ->        
-        many (mdhd <|> hdlr <|> minf) |>> MDIA
-
-    let trak<'a> = 
-        basicAtom "trak" >>= fun id ->        
-        many (tkhd <|> mdia) |>> TRAK
-
-    let mdat<'a> = 
-        basicAtom "mdat" >>= fun id ->
-        if (int)id.Size = 0 then 
-            bp.skipToEnd  >>. preturn id |>> MDAT
-        else
-            bp.skip ((int)id.Size-8) >>= fun _ ->
-            preturn id |>> MDAT
-
-    let moov<'a> = basicAtom "moov" >>. many (mvhd <|> iods <|> trak) |>> MOOV
-    
-    let video<'a> = many (choice[attempt ftyp; moov; mdat]) .>> eof
-                        
-```
-
-Where leaf nodes look sometihng like this:
-
-```fsharp
-let mvhd<'a> = 
-    basicAtom "mvhd"            >>= fun id -> 
-    versionAndFlags             >>= fun vFlags ->
-    date                        >>= fun creationTime ->
-    date                        >>= fun modificationTime ->
-    bp.uint32                   >>= fun timeScale ->
-    bp.uint32                   >>= fun duration ->
-    bp.uint32                   >>= fun rate ->
-    bp.uint16                   >>= fun volume ->
-    bp.skip 70                  >>= fun _ -> 
-    bp.uint32                   >>= fun nextTrackId ->
-    preturn {
-        Atom = id
-        VersionAndFlags = vFlags
-        CreationTime = creationTime
-        ModificationTime = modificationTime
-        TimeScale = timeScale
-    } |>> MVHD
-
-
-let tkhd<'a> = 
-    basicAtom "tkhd" >>= fun id ->
-    versionAndFlags >>= fun vFlags ->
-    date >>= fun creationTime ->
-    date >>= fun modificationTime ->
-    bp.uint32 >>= fun trackId ->
-    bp.uint32 >>= fun reserved ->
-    bp.uint32 >>= fun duration ->        
-    bp.uint32 >>= fun layer ->
-    bp.uint16 >>= fun alteranteGroup ->
-    bp.uint16 >>= fun volume ->
-    bp.byteN 8 >>= fun reserved ->
-    manyN 9 bp.floatP >>= fun matrix ->
-    bp.uint32 >>.. bp.shiftR 16 >>= fun width ->
-    bp.uint32  >>.. bp.shiftR 16 >>= fun height ->
-    preturn {
-        Atom  = id
-        VersionAndFlags = vFlags
-        CreationTime  = creationTime
-        ModificationTime  = modificationTime
-        TrackId = trackId
-        Duration = duration
-        Layer = layer
-        AlternateGroup = alteranteGroup
-        Volume = volume
-        Height = width
-        Width = height
-    } |>> TKHD
-```
+For a detailed explanation and walkthrough check the [sample readme](https://github.com/devshorts/ParsecClone/blob/master/Samples/Mp4Matcher/Readme.MD)
 
 [[Top]](#table-of-contents)
 

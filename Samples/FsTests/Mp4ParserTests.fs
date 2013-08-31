@@ -7,7 +7,7 @@ open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
 
-let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; StateStart = (int64)0})
+let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
 
 [<Test>]
 let moovFtypTest() = 
