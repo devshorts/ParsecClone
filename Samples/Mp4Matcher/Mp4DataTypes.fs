@@ -2,6 +2,7 @@
 
 open System
 open ParsecClone.CombinatorBase
+open ParsecClone.BinaryCombinator
 
 [<AutoOpen>]
 module Mp4DataTypes = 
@@ -22,6 +23,8 @@ module Mp4DataTypes =
     type VideoState = { IsAudio: bool; CurrentStatePosition: int64 }
 
     type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], VideoState>
+
+    let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
 
     let knownAtoms = [  "free";
                         "esds";

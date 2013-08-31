@@ -7,7 +7,7 @@ open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
 
-let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
+
 
 [<Test>]
 let moovFtypTest() = 
@@ -197,12 +197,11 @@ let findStts() =
 
 
 [<Test>]
-[<Ignore>]
 let bigVidTest() = 
     
     let now = System.DateTime.Now
 
-    use f = new FileStream(@"c:\temp\bigVid1.m4v", FileMode.Open)
+    use f = new FileStream(@"c:\temp\DirectShowVideoCapture_1_08-30-2013-01-50-09.mp4", FileMode.Open)
 
     use buff = new BufferedStream(f)
 

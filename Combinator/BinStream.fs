@@ -41,7 +41,7 @@ module BinStreams =
             
             member x.position () = startPos
         
-        member x.initBytes size = Array.init size (fun i -> byte(0))
+        member x.initBytes size = Array.create size <| byte(0)
 
         member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 

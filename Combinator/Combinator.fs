@@ -36,12 +36,12 @@ module Combinator =
             | (None, state : State<_,_,_>)  when state.equals inputState -> second inputState            
             | (None, state) ->  failwith "No match found and underlying state was modified"
 
-    let getBacktrackReply current next input =
+    let getBacktrackReply current (next:OptimizedClosures.FSharpFunc<_,_,_>) input =
         let match1 = current input
         match match1 with 
             | (Some(result), (state:State<_,_,_>)) -> 
                 try
-                    state |> next result                              
+                    next.Invoke(result, state)
                 with
                     | e -> 
                         state.backtrack()
@@ -49,24 +49,22 @@ module Combinator =
             | (None, state) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)      
 
-    let getReply current next (input:State<_,_,_>) =       
+    let getReply current (next:OptimizedClosures.FSharpFunc<_,_,_>) (input:State<_,_,_>) =       
         let match1 = current input
         match match1 with 
-            | (Some(result), state) -> next result state
+            | (Some(result), state) -> next.Invoke(result, state)
             | (None, state : State<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
             | (None, state) -> (None, state)
 
-    let (>>=) (current) (next)  = getReply current next                                   
+    let inline private adapt x = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(x)
 
-    let (>>=?) (current) (next) = getBacktrackReply current next       
+    let (>>=) (current) (next)  = getReply current (adapt next)
+
+    let (>>=?) (current) (next) = getBacktrackReply current (adapt next)
         
-    let (|>>) parser targetType = 
-        parser >>= fun value -> 
-        preturn (targetType value)
+    let (|>>) parser targetType = parser >>= fun value -> preturn (targetType value)
 
-    let (|>>%) parser targetType = 
-        parser >>= fun _ -> 
-        preturn targetType
+    let (|>>%) parser targetType = parser >>= fun _ -> preturn targetType
 
     let (>>.)  parser1 parser2 = 
         parser1 >>= fun first -> 
@@ -113,15 +111,14 @@ module Combinator =
                     | _ -> (None, currentState)
                
         fun state ->
-            let rec many' parser (returnList, currentState:State<_,_,_>) =              
-                let returnValue() = didFind returnList currentState
+            let rec many' parser (resultList, currentState:State<_,_,_>) =              
+                let returnValue() = didFind resultList currentState
 
                 match currentState.hasMore() with
                     | false -> returnValue()
                     | true ->
                         match parser currentState with
-                            | Some(m), nextState when predicate m |> not -> many' parser (m::returnList, nextState)
-
+                            | Some(result), nextState when not <| predicate result  -> many' parser (result::resultList, nextState)
                             | Some(_), _ ->  currentState.backtrack(); returnValue()
                             | _ ->  returnValue()
                                   
@@ -136,7 +133,7 @@ module Combinator =
         validate that how much was taken matches the minCount and returns a list of results 
     *)
     let private manyTillWithCount minCount parser endParser = 
-        fun state ->
+        fun state ->            
             let ifHasMore apply (state:State<_,_,_>) acc = 
                 match state.hasMore() with 
                     | true -> apply state acc
