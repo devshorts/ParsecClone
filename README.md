@@ -42,7 +42,7 @@ ParsecClone comes as one DLL that contains all three libraries.
 
 ## Target Audience 
 
-The documentation below is intended for people who are familiar with combinator libraries. If you are not familiar with [FParsec style combinators](http://www.quanttec.com/fparsec/) and notation, you may want to run through their tutorials and explanations first.  For beginners, I highly recommend running through their [tutorial](http://www.quanttec.com/fparsec/tutorial.html).
+The documentation below is intended for people who are familiar with combinator libraries. If you are not familiar with [FParsec style combinators](http://www.quanttec.com/fparsec/) and notation, you may want to run through their [tutorials](http://www.quanttec.com/fparsec/tutorial.html) and explanations first.   
 
 While the following documentation is not as robust as theirs, ParsecClone operators are very similar. Once you are familiar with FParsec operator and operator styles the following documentation should be enough to get you on your way.
 
@@ -91,14 +91,14 @@ If other type information is needed in the signature I'll use the full parser ty
 Included operators are
 
 ```fsharp
-val (>>=) : Parser -> (Reply option -> Parser) -> Parser
+val (>>=) : Parser<'a> -> ('a -> Parser<'b>) -> Parser<'b>
 ```
 Combiner with function callback
 
 ----------
 
 ```fsharp
-val (>>=?) : Parser<'a> -> ('a option -> Parser<'b>) -> Parser<'b>
+val (>>=?) : Parser<'a> -> ('a -> Parser<'b>) -> Parser<'b>
 ```
 Combiner with function callback and backtracking
 
