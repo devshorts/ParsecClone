@@ -7,7 +7,7 @@ The goal of this combinator is write a parser that can parse the header of a val
 ## Table of Contents
 
 - [Atoms](#atoms)
-- [Defining Types](#defining-type)
+- [Defining Types](#defining-types)
 - [Building up!](#building-up)
 - [Parsing 'mvhd'](#parsing-mvhd)
 - [Parsing 'tkhd'](#parsing-tkhd)
@@ -30,6 +30,8 @@ Here is an overview of what the main movie atom looks like
 Some atoms are optional, and unknown atoms (i.e user defined ones) should be skipped.  
 
 For more detailed information on what each atom does, check the [quicktime MP4 specification](https://developer.apple.com/library/mac/documentation/QuickTime/QTFF/QTFFPreface/qtffPreface.html).
+
+[[Top]](#table-of-contents)
 
 ## Defining types
 
@@ -61,6 +63,8 @@ type AtomBase = {
     Name: string
 }
 ```
+
+[[Top]](#table-of-contents)
 
 ## Building Up
 
@@ -141,6 +145,8 @@ let private timeSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 let date : VideoParser<_> = bp.byte4 |>> (bp.toUInt32 >> Convert.ToDouble >> timeSince1904.AddSeconds)
 ```
+
+[[Top]](#table-of-contents)
 
 ## Parsing "mvhd"
 
@@ -225,6 +231,8 @@ let matrix : VideoParser<_> =
     }
 ```
 
+[[Top]](#table-of-contents)
+
 ## Parsing "tkhd"
 
 Another example is of the `tkhd` atom
@@ -264,6 +272,8 @@ let tkhd : VideoParser<_> =
         Width = height
     } |>> TKHD
 ```
+
+[[Top]](#table-of-contents)
 
 ## Defining outer atoms
 
@@ -372,6 +382,8 @@ let trak =
 
 Hopefully you can see that the `unknown` parser will act as a *catch-all* for any unknown types, but it won't consume *past* the end of the container atom.
 
+[[Top]](#table-of-contents)
+
 ## Putting it all together
 
 In the end the main `video` parser entry point looks like this
@@ -383,3 +395,4 @@ let video : VideoParser<_> = many (choice[  attempt ftyp;
                                             free;]) .>> eof
 ```
 
+[[Top]](#table-of-contents)
