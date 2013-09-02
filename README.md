@@ -21,6 +21,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 - [A CSV parser example (string)](#a-csv-parser)
 - [An MP4 parser example (binary)](#binary-parser-example)
 - [Bit parsing example](#binary-bit-parsing)
+- [Improving binary performance](#improving-binary-performance)
 
 ## Installation
 
@@ -213,7 +214,7 @@ Generic match on predicate and executes state modifier to return result
 ----------
 
 ```fsharp
-val anyOf: ('a -> Parser<'a>) -> 'a list -> Parser<'b> 
+val anyOf: ('a -> Parser<'a>) -> 'a list -> Parser<'a> 
 ```
 
 Takes a function that maps the list into a bunch of parsers and or's each result together with the `<|>` combinator. For example: `anyOf matchStr ["f";"o";"i";"g";"h";"t";"e";"r";"s";" "]`
@@ -856,6 +857,23 @@ val toInt64 : byte[] -> int64
 
 Takes a 8 byte array, applies endianess converter, and converts to int 64
 
+----------
+
+```fsharp
+val parseStruct<'T, 'UserState>: int -> BinParser<'UserState> -> Parser<'T list>
+```
+
+This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace. `'T` should be the struct type you want to parse.  Internally this will read `sizeof 'T * numEntries` bytes and marshal the bytes directly into the struct. This can be significantly faster than parsing each entry independently. 
+
+----------
+
+```fsharp
+val defineStructParser<'T>: int -> BinParser<unit> -> Parser<'T list>
+```
+
+This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace.  Helper function to define a struct parser with no required user state.
+ 
+----------
 [[Top]](#table-of-contents)
 
 ## Bit Parsers
@@ -1253,5 +1271,74 @@ let testApplyManyBits() =
 
     result |> should equal target 
 ```
+
+[[Top]](#table-of-contents)
+
+## Improving Binary Performance
+
+One easy win is to wrap your input stream with a `BufferedStream`. Check the included unit tests for an example.
+
+
+The other big bottleneck in combinator parsing is when you need to parse the same item many times (maybe thousands, or hundreds of thousands of times). If you have to parse the same type many times in a row you should consider using a struct to hold your data type and leveraging the struct parsing functionality of ParsecClone.
+
+Using the struct parsing requires a little bit of setup.  Let me demonstrate using the sample mp4 parser.
+
+Due to use of generics, we need to pin the `UserState` for the struct parser.
+
+```fsharp
+/// <summary>
+/// Creates a network order binary parser
+/// </summary>
+let bp = new BinParser<_>(Array.rev)
+
+let pStructs<'T> bytes : VideoParser<_> = parseStruct<'T, VideoState> bytes bp
+```
+
+The `parseStruct` function comes defined in the `BinParsers` module which is auto included with `ParsecClone.BinaryCombinator`.  The function takes a generic type `'T` which should be the struct type you want to parse, a byte array representing the entire byte chunk to read, and a reference to the binary parser instance.  
+
+As an example, let's say we have the following struct:
+
+```fsharp
+[<Struct>]
+type TimeToSampleEntry = 
+    struct
+        val SampleCount: uint32; 
+        val SampleDuration: uint32 
+    end
+```
+
+Which is contained in the following record:
+
+```fsharp
+type Stts = {
+    Atom: AtomBase
+    VersionAndFlags: VersionAndFlags
+    NumberOfEntries: uint32
+    SampleTimes: TimeToSampleEntry list
+}
+```
+
+There could potentially be hundreds of thousands of the `TimeToSampleEntry` elements, so it's good for us to batch this processing instead of reading 8 bytes at a time.
+
+To parse the struct you can do something like the following:
+
+```fsharp
+let stts : VideoParser<_> = 
+    atom "stts" >>= fun id ->
+    versionAndFlags     >>= fun vFlags ->
+    bp.uint32           >>= fun numEntries ->
+    pStructs<TimeToSampleEntry> (int numEntries) >>= fun samples ->
+    preturn {
+        Atom = id
+        VersionAndFlags = vFlags
+        NumberOfEntries = numEntries
+        SampleTimes = samples
+    } |>> STTS
+```
+
+Notice how `pStructs` takes the type of the struct as a generic as well as the number of structs to create.  Internally the struct parser will read `sizeof typeof('T) * count` bytes and marshal the raw byte array into the structure.  
+
+In general, don't optimize prematurely.  The nice thing about records and structs is that it's trivial to change a record to a struct. Updating your parser requires only a line change (instead of a `manyN (int numEntries) parser` you replace it with the `pStructs` parser).
+
 
 [[Top]](#table-of-contents)

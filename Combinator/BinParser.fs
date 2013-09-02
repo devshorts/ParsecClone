@@ -106,9 +106,9 @@ module BinParsers =
         member x.bit7 = x.bitN 7
         member x.bit8 = x.bitN 8     
 
-    let parseStruct<'T, 'UserState> n (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
+    let parseStruct<'T, 'UserState> numEntries (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
             let size = sizeofType typeof<'T>
-            let requiredBytes = size * n
+            let requiredBytes = size * numEntries
 
             bp.byteN requiredBytes >>= fun bytes ->
             preturn (byteArrayToObjects<'T> (Array.rev bytes))
