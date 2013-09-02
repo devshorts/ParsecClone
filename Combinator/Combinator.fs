@@ -305,6 +305,27 @@ module Combinator =
         fun (state:State<_,_,_>) -> 
             (Some(state.position()), state)
 
+    // ------------------------------
+    // Computation expression syntax
+    // ------------------------------
+    [<Sealed>]
+    type ParserCombinator() =
+        member t.Delay getParser = fun (stream:State<_,_,_>) -> getParser() <| stream
+        member t.Return(x) = preturn x
+        member t.Bind(parser, next) = parser >>= next
+        member t.Zero() = pzero
+        member t.ReturnFrom p = p
+        
+        member t.TryWith parser (customFail: exn -> Parser<_,_,_,_>) =
+            fun stream ->
+                try parser stream with exn -> (customFail exn) stream
+
+        member t.TryFinally parser finalBlock =
+            fun stream ->
+                try parser stream finally finalBlock()
+
+    let parse = ParserCombinator()
+
     let test (input:State<_,_,'UserState>) (parser:Parser<_,_,_,'UserState>) = 
         match parser input with
             | (Some(m), s) -> m

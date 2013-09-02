@@ -14,6 +14,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 - [Binary operators](#binary-operators)
 - [Bit parsers](#bit-parsers)
 - [Bit parsing order](#bit-parsing-ordering)
+- [Computation Expression Syntax](#computation-expression-syntax)
 - [A note on FParsec vs ParsecClone regarding strings](#a-note-on-fparsec-vs-parsecclone-regarding-strings)
 - [Instantiating user states](#instantiating-user-states)
 - [Dealing with value restrictions](#value-restrictions)
@@ -390,6 +391,16 @@ val statePosition: unit -> Parser<int64>
 ```
 
 Returns the position of the state. Does not modify the stream.
+
+----------
+
+```fsharp
+val parse: ParserCombinator
+```
+
+An instance of the `ParserCombinator` workflow builder, which allows you to do workflow based combinators (basically a direct port of FParsecs combinator).
+
+-----------
 
 [[Top]](#table-of-contents)
 
@@ -980,6 +991,30 @@ Bit parsing works left to right and doesn't get run through the endianness conve
 ```
 
 If you need to extend the bit parsing, there is a `BitStream` class that handles the bit handling from a byte array
+
+[[Top]](#table-of-contents)
+
+## Computation Expression Syntax
+
+Just like in FParsec, ParsecClone supports workflow syntax:
+
+```fsharp
+[<Test>]
+let testExpression() = 
+    let state = makeStringStream "this is a test"
+
+    let parser = parse {
+        let! _ = matchStr "this"
+        let! _ = ws
+        let! _ = matchStr "is a"
+        let! _ = ws
+        return! matchStr "test"
+    }
+
+    let result = test state parser
+
+    result |> should equal "test"
+```
 
 [[Top]](#table-of-contents)
 

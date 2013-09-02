@@ -49,6 +49,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="CompExpressionTests.fs" />
     <Compile Include="UserStateTests.fs" />
     <Compile Include="FooStringUnitTest.fs" />
     <Compile Include="BinaryUnitTests.fs" />
