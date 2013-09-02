@@ -189,6 +189,13 @@ Takes a parser and a processor function.  Applies the processor function to the 
 ----------
 
 ```fsharp
+val (>>|.): Parser<'a> -> ('a -> 'b) -> Parser<'b>
+```
+
+Takes a parser and a transformer, applies the result of the parser to the transformer and returns a new parser that returns the transformed result.
+
+----------
+```fsharp
 val many: Parser<'a> -> Parser<'a list>
 ```
 

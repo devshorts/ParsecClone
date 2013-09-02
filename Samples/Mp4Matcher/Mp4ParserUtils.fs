@@ -145,24 +145,16 @@ module Mp4ParserUtils =
         bp.uint32 >>= fun i ->
         preturn <| i / uint32(pown 2 30)
 
-    let matrix : VideoParser<_> = 
-        ``16.16``   >>= fun a ->
-        ``16.16``   >>= fun b ->
-        ``2.10``    >>= fun u ->
-        ``16.16``   >>= fun c ->
-        ``16.16``   >>= fun d ->
-        ``2.10``    >>= fun v ->
-        ``16.16``   >>= fun x ->
-        ``16.16``   >>= fun y ->
-        ``2.10``    >>= fun w ->
+    let matrixRow = 
+        ``16.16``   >>= fun x1 ->
+        ``16.16``   >>= fun x2 ->
+        ``2.10``    >>= fun x3 ->
+        preturn [|x1; x2; x3|]
 
-        let matrix = 
-            [|
-                [|a;b;u|]; 
-                [|c;d;v|];
-                [|x;y;w|]
-            |] 
-        preturn <| Array2D.init 3 3 (fun i j -> matrix.[i].[j])
+    let matrix : VideoParser<_> = 
+        manyN 3 matrixRow >>|. List.toArray >>= fun rows ->
+
+        preturn <| Array2D.init 3 3 (fun i j -> rows.[i].[j])
 
 
                         
