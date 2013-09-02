@@ -201,7 +201,7 @@ let bigVidTest() =
     
     let now = System.DateTime.Now
 
-    use f = new FileStream(@"c:\temp\DirectShowVideoCapture_1_08-30-2013-01-50-09.mp4", FileMode.Open)
+    use f = new FileStream(@"z:\data\video\2013-06-24--13-25-20--Encounter--R.12-C.0.m4v", FileMode.Open)
 
     use buff = new BufferedStream(f)
 

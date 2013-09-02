@@ -44,21 +44,11 @@ module Mp4StblElements =
         } |>> STSZ
 
 
-    let sampleToChunkEntry = 
-        bp.uint32 >>= fun firstChunk ->
-        bp.uint32 >>= fun samplesPerChunk ->
-        bp.uint32 >>= fun sampleDescriptionId ->
-        preturn {
-            FirstChunk = firstChunk
-            SamplesPerChunk = samplesPerChunk
-            SampleDescriptionID = sampleDescriptionId
-        }
-
     let stsc : VideoParser<_> = 
         atom "stsc" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        exactly (int numEntries) sampleToChunkEntry >>= fun samples ->
+        pStructs<SampleToChunkEntry> (int numEntries) >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags

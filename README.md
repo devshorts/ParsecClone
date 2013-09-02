@@ -51,7 +51,7 @@ While the following documentation is not as robust as theirs, ParsecClone operat
 
 ## When to use and known limitations
 
-ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.
+ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.  
 
 ParseClone can also parse strings, but doesn't work on string streams. One of the reasons is that to use regular expressions you need to have unlimited lookahead to your stream. With a stream you'd end up having to read the whole stream in anyways!  Since FParsec works on streams, I chose to not duplicate that functionality. 
 
@@ -1340,5 +1340,8 @@ Notice how `pStructs` takes the type of the struct as a generic as well as the n
 
 In general, don't optimize prematurely.  The nice thing about records and structs is that it's trivial to change a record to a struct. Updating your parser requires only a line change (instead of a `manyN (int numEntries) parser` you replace it with the `pStructs` parser).
 
+-----
 
+In the end, if you need a high performant parser please remember that ParsecClone runs on .NET and will be slower than a C++ generated parser (or hand rolled). I tested my MP4 parser against a comparable C++ parser and the F# parser for a 4 hour video ran in 1 second, whereas the c++ parser ran in 160 milliseconds.  This is for parsing hundreds of thousands of small elements in a 25MB chunk.  On the other hand, 1 second still isn't that bad.
+  
 [[Top]](#table-of-contents)

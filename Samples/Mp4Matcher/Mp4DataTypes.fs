@@ -126,7 +126,13 @@ module Mp4DataTypes =
             val SampleSize : uint32 
         end
 
-    type SampleToChunkEntry = { FirstChunk: uint32; SamplesPerChunk: uint32; SampleDescriptionID: uint32 }
+    [<Struct>]
+    type SampleToChunkEntry = 
+        struct
+            val FirstChunk: uint32
+            val SamplesPerChunk: uint32
+            val SampleDescriptionID: uint32 
+        end
 
     type ChunkOffsetEntry = { ChunkOffset: uint32 }
 

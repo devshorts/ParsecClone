@@ -110,7 +110,7 @@ module BinParsers =
             let size = sizeofType typeof<'T>
             let requiredBytes = size * numEntries
 
-            bp.byteN requiredBytes >>= fun bytes ->
+            bp.byteN requiredBytes >>= fun bytes ->            
             preturn (byteArrayToObjects<'T> (Array.rev bytes))
 
     let defineStructParser<'T> = parseStruct<'T, unit>
