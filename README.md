@@ -255,7 +255,7 @@ Takes a predicate and a parser and consumes until the predicate is false. Then b
 val manyN: int -> Parser<'a> -> Parser<'a list>
 ```
 
-Takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail
+Takes a number and tries to consume N parsers. If it doesn't consume exactly N it will fail. Aliased by `exactly`.
 
 ----------
 

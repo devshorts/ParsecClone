@@ -214,7 +214,7 @@ let matrixRow =
     preturn [|x1; x2; x3|]
 
 let matrix : VideoParser<_> = 
-    manyN 3 matrixRow >>|. List.toArray >>= fun rows ->
+    exactly 3 matrixRow >>|. List.toArray >>= fun rows ->
 
     preturn <| Array2D.init 3 3 (fun i j -> rows.[i].[j])
 

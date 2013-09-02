@@ -19,7 +19,7 @@ module Mp4StblElements =
         atom "stts" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        manyN ((int)numEntries) timeToSample >>= fun samples ->
+        exactly (int numEntries) timeToSample >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -45,7 +45,7 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun sampleSize ->
         bp.uint32           >>= fun numEntries ->
-        manyN ((int)numEntries) sampleSizeEntry >>= fun samples ->
+        exactly (int numEntries) sampleSizeEntry >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -68,7 +68,7 @@ module Mp4StblElements =
         atom "stsc" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        manyN ((int)numEntries) sampleToChunkEntry >>= fun samples ->
+        exactly (int numEntries) sampleToChunkEntry >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -82,7 +82,7 @@ module Mp4StblElements =
         atom "stco"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        manyN ((int)numEntries) chunkOffSet >>= fun offsets ->
+        exactly (int numEntries) chunkOffSet >>= fun offsets ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -96,7 +96,7 @@ module Mp4StblElements =
         atom "stss" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        manyN ((int)numEntries) sampleNumber >>= fun syncSamples ->
+        exactly (int numEntries) sampleNumber >>= fun syncSamples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags

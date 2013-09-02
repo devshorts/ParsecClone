@@ -177,6 +177,8 @@ module Combinator =
 
             preturn result          
     
+    let exactly = manyN
+        
     let eof = 
         fun (state:State<_,_,_>) -> 
             if state.hasMore() then
