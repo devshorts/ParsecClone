@@ -23,6 +23,13 @@ module Mp4DataTypes =
     type VideoState = { IsAudio: bool; CurrentStatePosition: int64 }
 
     type VideoParser<'Return> = Parser<'Return, System.IO.Stream, byte[], VideoState>
+    
+    /// <summary>
+    /// Creates a network order binary parser
+    /// </summary>
+    let bp = new BinParser<_>(Array.rev)
+
+    let pStructs<'T> entries : VideoParser<_> = parseStruct<'T, VideoState> entries bp
 
     let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
 
@@ -106,15 +113,28 @@ module Mp4DataTypes =
         Width: uint32
     }
 
-    type TimeToSampleEntry = { SampleCount: uint32; SampleDuration: uint32 }
+    [<Struct>]
+    type TimeToSampleEntry = 
+        struct
+            val SampleCount: uint32; 
+            val SampleDuration: uint32 
+        end
 
-    type SampleSizeEntry = { SampleSize : uint32 }
+    [<Struct>]
+    type SampleSizeEntry = 
+        struct 
+            val SampleSize : uint32 
+        end
 
     type SampleToChunkEntry = { FirstChunk: uint32; SamplesPerChunk: uint32; SampleDescriptionID: uint32 }
 
     type ChunkOffsetEntry = { ChunkOffset: uint32 }
 
-    type SyncSampleEntry = { SampleNumber: uint32 }
+    [<Struct>]
+    type SyncSampleEntry = 
+        struct
+            val SampleNumber: uint32 
+        end
 
     type Stts = {
         Atom: AtomBase

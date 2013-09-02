@@ -80,8 +80,8 @@ module BinParsers =
         member x.shiftR n = fun (b : uint32) -> preturn (b >>> n)
 
         member x.floatP = x.byteN 4 >>= fun b -> 
-                          preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))
-
+                          preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))       
+                       
         (* Bit parsing *)
 
         member x.bitsN = bitMatch
@@ -104,6 +104,13 @@ module BinParsers =
         member x.bit5 = x.bitN 5
         member x.bit6 = x.bitN 6
         member x.bit7 = x.bitN 7
-        member x.bit8 = x.bitN 8
+        member x.bit8 = x.bitN 8     
 
-       
+    let parseStruct<'T, 'UserState> n (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
+            let size = sizeofType typeof<'T>
+            let requiredBytes = size * n
+
+            bp.byteN requiredBytes >>= fun bytes ->
+            preturn (byteArrayToObjects<'T> (Array.rev bytes))
+
+    let defineStructParser<'T> = parseStruct<'T, unit>

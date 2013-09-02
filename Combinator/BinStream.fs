@@ -5,6 +5,7 @@ open ParsecClone.CombinatorBase
 
 [<AutoOpen>]
 module BinStreams = 
+
     type BinStream<'UserState> (state:Stream, userState:'UserState) =   
         let mutable userState = userState
         

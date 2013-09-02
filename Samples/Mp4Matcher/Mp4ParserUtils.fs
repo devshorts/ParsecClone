@@ -8,11 +8,6 @@ open System.Text
 [<AutoOpen>]
 module Mp4ParserUtils = 
 
-    /// <summary>
-    /// Creates a network order binary parser
-    /// </summary>
-    let bp = new BinParser<_>(Array.rev)
-
     let private timeSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     let date : VideoParser<_> = bp.byte4 |>> (bp.toUInt32 >> Convert.ToDouble >> timeSince1904.AddSeconds)

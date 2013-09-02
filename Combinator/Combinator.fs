@@ -22,39 +22,33 @@ module Combinator =
     
     let opt current =
         fun s ->
-            let match1 = current s
-            match match1 with 
-                | (Some(result), state) -> (Some(Some(result)), state)
-                | (None, state) -> (Some(None), state)
+            let (result, state) = current s
+            match result with 
+                | Some(m) -> (Some(Some(m)), state)
+                | None -> (Some(None), state)
 
     let getAltReply first second inputState  =
-        let match1 = first inputState
+        let (result, state:State<_,_,_>) as reply = first inputState
 
         // if the first one matches, stop
-        match match1 with 
-            | (Some(m), _) -> match1 
-            | (None, state : State<_,_,_>)  when state.equals inputState -> second inputState            
-            | (None, state) ->  failwith "No match found and underlying state was modified"
+        match result with 
+            | Some(_) -> reply 
+            | None  when state.equals inputState -> second inputState            
+            | None ->  failwith "No match found and underlying state was modified"
 
     let getBacktrackReply current (next:OptimizedClosures.FSharpFunc<_,_,_>) input =
-        let match1 = current input
-        match match1 with 
-            | (Some(result), (state:State<_,_,_>)) -> 
-                try
-                    next.Invoke(result, state)
-                with
-                    | e -> 
-                        state.backtrack()
-                        match1
-            | (None, state) when not (state.equals input) -> failwith "No match found and underlying state was modified"
-            | (None, state) -> (None, state)      
+        let (result, state:State<_,_,_>) as reply = current input
+        match result with 
+            | Some(r) ->  try next.Invoke(r, state) with | e -> state.backtrack(); reply
+            | None when not (state.equals input) -> failwith "No match found and underlying state was modified"
+            | None -> (None, state)      
 
     let getReply current (next:OptimizedClosures.FSharpFunc<_,_,_>) (input:State<_,_,_>) =       
-        let match1 = current input
-        match match1 with 
-            | (Some(result), state) -> next.Invoke(result, state)
-            | (None, state : State<_,_,_>) when not (state.equals input) -> failwith "No match found and underlying state was modified"
-            | (None, state) -> (None, state)
+        let (result, state:State<_,_,_>) = current input
+        match result with 
+            | Some(r) -> next.Invoke(r, state)
+            | None when not (state.equals input) -> failwith "No match found and underlying state was modified"
+            | None -> (None, state)
 
     let inline private adapt x = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(x)
 
@@ -88,15 +82,17 @@ module Combinator =
 
     let (<|>) parser1 parser2 = getAltReply parser1 parser2        
 
-    let matcher eval target =         
-        fun currentState -> 
-            match eval (currentState:State<_,_,_>) target with
+    let matcher eval target =  
+        let evalOpt = adapt eval       
+        fun (currentState: State<_,_,_>) -> 
+            match evalOpt.Invoke(currentState, target) with
                 | Some(amount) -> currentState.consume amount                        
                 | None         -> (None, currentState)
       
-    let skipper eval target =         
-        fun currentState -> 
-            match eval (currentState:State<_,_,_>) target with
+    let skipper eval target =   
+        let evalOpt = adapt eval      
+        fun (currentState: State<_,_,_>) -> 
+            match evalOpt.Invoke(currentState, target) with
                 | Some(amount) -> currentState.skip amount                        
                 | None         -> (None, currentState)      
    
@@ -135,30 +131,26 @@ module Combinator =
         validate that how much was taken matches the minCount and returns a list of results 
     *)
     let private manyTillWithCount minCount parser endParser = 
-        fun state ->            
-            let ifHasMore apply (state:State<_,_,_>) acc = 
-                match state.hasMore() with 
-                    | true -> apply state acc
-                    | false -> None, state
+        fun state ->    
+            let rec many' (currentState:State<_,_,_>) acc =         
+                if not <| currentState.hasMore() then
+                    (None, currentState)
+                else               
+                    let (result, nextState) as reply = parser currentState
+                    match result with 
+                        | Some(m) ->                                                                             
+                            match succeed endParser nextState with 
+                                | false, _ -> many' nextState (m::acc)
+                                | true, consumedEndParserState -> (Some(m::acc), consumedEndParserState)
 
-            let rec testStream state acc = ifHasMore takeParser state acc    
-                                
-            and takeParser currentState acc = 
-                match parser currentState with 
-                    | Some(m), consumedParserState ->                                                                             
-                        match succeed endParser consumedParserState with 
-                            | false, _ -> testStream consumedParserState (m::acc)
-                            | true, consumedEndParserState -> (Some(m::acc), consumedEndParserState)
-
-                    | (None, newState) -> 
-                        match List.length acc with
-                            | x when x < minCount -> (None, newState)
-                            | x when x > 0 -> (Some(acc), newState)
-                            | _ -> (None, newState)
+                        | None -> 
+                            match List.length acc with
+                                | x when x >= minCount -> (Some(acc), nextState)                                
+                                | _ -> (None, nextState)
     
             
-            testStream state []
-
+            many' state []
+    
     let manyTill p pEnd = manyTillWithCount 0 p pEnd
 
     let manyTill1 p pEnd = manyTillWithCount 1 p pEnd

@@ -1,8 +1,21 @@
-﻿// Learn more about F# at http://fsharp.net. See the 'F# Tutorial' project
-// for more guidance on F# programming.
+﻿open System.Runtime.InteropServices
+open System
 
-#load "Library1.fs"
-open Mp4Matcher
+let byteArrToObj (byteArray : byte[]) objType = 
+    let handle = GCHandle.Alloc(byteArray, GCHandleType.Pinned);
+    let structure = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), objType)
+    handle.Free();
+    Convert.ChangeType(structure, objType)        
 
-// Define your library scripting code here
+let byteArrayToObjArry (byteArray: byte[]) objType = 
+    let size = Marshal.SizeOf(objType)
+    
+    let numObjects = byteArray.Length / size
 
+    let byteRangetoObj count = 
+        let start = count * size
+        let endS = start + size - 1
+        byteArrToObj (byteArray.[start..endS]) objType
+
+    [0..numObjects - 1]
+        |> List.fold(fun acc objNum -> (byteRangetoObj objNum)::acc) []

@@ -5,21 +5,13 @@ open ParsecClone.CombinatorBase
 open System
 
 [<AutoOpen>]
-module Mp4StblElements =
-    
-    let timeToSample = 
-        bp.uint32       >>= fun sampleCount ->
-        bp.uint32       >>= fun sampleDuration ->
-        preturn {
-            SampleCount = sampleCount
-            SampleDuration = sampleDuration
-        }
-
+module Mp4StblElements =   
+  
     let stts : VideoParser<_> = 
         atom "stts" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        exactly (int numEntries) timeToSample >>= fun samples ->
+        pStructs<TimeToSampleEntry> (int numEntries) >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -37,15 +29,13 @@ module Mp4StblElements =
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
         freeOpt >>. sampleDescription  |>> STSD
-
-    let sampleSizeEntry = bp.uint32 >>= fun i -> preturn { SampleSize = i }
-
+    
     let stsz : VideoParser<_> = 
         atom "stsz"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun sampleSize ->
         bp.uint32           >>= fun numEntries ->
-        exactly (int numEntries) sampleSizeEntry >>= fun samples ->
+        pStructs<SampleSizeEntry> (int numEntries) >>= fun samples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
@@ -90,13 +80,12 @@ module Mp4StblElements =
             ChunkOffsets = offsets
         } |>> STCO
 
-    let sampleNumber = bp.uint32 >>= fun i -> preturn { SampleNumber = i }
 
     let stss : VideoParser<_> = 
         atom "stss" >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        exactly (int numEntries) sampleNumber >>= fun syncSamples ->
+        pStructs<SyncSampleEntry> (int numEntries) >>= fun syncSamples ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags
