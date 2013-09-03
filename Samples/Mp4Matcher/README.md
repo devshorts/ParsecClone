@@ -154,7 +154,7 @@ At this point we can parse a simple atom. For example, this is the `mvhd` (movie
 
 ![https://developer.apple.com/library/mac/documentation/quicktime/qtff/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCGFGJG](mvhd.gif)
 
-And the matrix is parsed by where `a, b, c, d, tx, ty` are packed `16.16` fixed point numbers, and `u, v, w` are packed `2.10` fixed point numbers.
+And the matrix is parsed by where `a, b, c, d, tx, ty` are packed `16.16` fixed point numbers, and `u, v, w` are packed `2.30` fixed point numbers.
 
 ![https://developer.apple.com/library/mac/documentation/quicktime/qtff/QTFFChap4/qtff4.html#//apple_ref/doc/uid/TP40000939-CH206-18737](matrix.gif)
 
@@ -203,14 +203,14 @@ let ``16.16`` =
     bp.uint32 >>= fun i ->
     preturn <| i / uint32(pown 2 16)
 
-let ``2.10`` = 
+let ``2.30`` = 
     bp.uint32 >>= fun i ->
     preturn <| i / uint32(pown 2 30)
 
 let matrixRow = 
     ``16.16``   >>= fun x1 ->
     ``16.16``   >>= fun x2 ->
-    ``2.10``    >>= fun x3 ->
+    ``2.30``    >>= fun x3 ->
     preturn [|x1; x2; x3|]
 
 let matrix : VideoParser<_> = 
