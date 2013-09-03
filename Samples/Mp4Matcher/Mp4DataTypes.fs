@@ -1,6 +1,7 @@
 ﻿namespace Mp4Matcher
 
 open System
+open System.Runtime.InteropServices
 open ParsecClone.CombinatorBase
 open ParsecClone.BinaryCombinator
 
@@ -125,12 +126,13 @@ module Mp4DataTypes =
         struct 
             val SampleSize : uint32 
         end
+    
 
-    [<Struct>]
+    [<Struct>]      
     type SampleToChunkEntry = 
-        struct
-            val SampleDescriptionID: uint32 
-            val SamplesPerChunk: uint32
+        struct                    
+            val SampleDescriptionID: uint32           
+            val SamplesPerChunk: uint32                     
             val FirstChunk: uint32
         end
 

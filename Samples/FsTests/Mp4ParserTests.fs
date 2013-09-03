@@ -7,6 +7,27 @@ open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
 
+let audioStts result = 
+        let getAudioMetadata src = maybe {
+            let extractAudio (trak:Trak) = maybe {
+                let! mdia = trak.Mdia
+                let! minf = mdia.Minf
+                let! header =  minf.MediaTypeHeader
+                let! audio = header.Audio
+                let! stbl = minf.Stbl
+                let! stts = stbl.Stts
+                return stts
+            }
+
+            let! mov = src.Mov
+            let tracks = mov.Traks
+
+            return List.map extractAudio tracks |> List.filter Option.isSome |> List.map Option.get                           
+        }
+
+        match getAudioMetadata result with
+            | Some(stts::_) -> stts
+            | _ -> failwith "shouldn't have gotten here"
 
 
 [<Test>]
@@ -105,9 +126,10 @@ let testMessedUpFreeAtoms() =
 
     let parserStream = mp4Stream (new BufferedStream(f))
 
-    let result = test parserStream video
-    
+    let result = test parserStream video        
+
     result.Length |> should equal 3
+
 
 [<Test>]
 let sampleFromAppl1() = 
@@ -164,27 +186,8 @@ let findStts() =
         let parserStream = mp4Stream buff
 
         let result = test parserStream video |> rootListToRecord   
-
-        let getAudioMetadata src = maybe {
-            let extractAudio (trak:Trak) = maybe {
-                let! mdia = trak.Mdia
-                let! minf = mdia.Minf
-                let! header =  minf.MediaTypeHeader
-                let! audio = header.Audio
-                let! stbl = minf.Stbl
-                let! stts = stbl.Stts
-                return stts
-            }
-
-            let! mov = src.Mov
-            let tracks = mov.Traks
-
-            return List.map extractAudio tracks |> List.filter Option.isSome |> List.map Option.get                           
-        }
-
-        let audioStts = match getAudioMetadata result with
-                            | Some(stts::_) -> stts
-                            | _ -> failwith "shouldn't have gotten here"
+        
+        let audioStts = audioStts result
 
         let fuckedUp = List.zip audioStts.SampleTimes [0..(int)audioStts.NumberOfEntries - 1]
                             |> List.filter (fun (i, b) -> (int)i.SampleDuration > 2000) 

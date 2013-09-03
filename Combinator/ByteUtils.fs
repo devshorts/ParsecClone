@@ -43,7 +43,7 @@ module ByteUtils =
                             | Zero -> acc
                             | One -> acc + (pown 2 index)) 0 positions
 
-    let inline byteArrToObj<'T> (byteArray : byte[]) : 'T = 
+    let byteArrToObj<'T> (byteArray : byte[]) : 'T = 
         let handle = GCHandle.Alloc(byteArray, GCHandleType.Pinned);
         let structure = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof<'T>)
         handle.Free();
@@ -51,7 +51,7 @@ module ByteUtils =
 
     let sizeofType objType = Marshal.SizeOf objType
 
-    let inline byteArrayToObjects<'T> (byteArray: byte[]) = 
+    let byteArrayToObjects<'T> (byteArray: byte[]) = 
         let size = sizeofType typeof<'T>
     
         let numObjects = byteArray.Length / size
