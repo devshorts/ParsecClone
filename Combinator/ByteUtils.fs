@@ -2,10 +2,12 @@
 
 open System.Runtime.InteropServices
 open System
+open CombinatorNative
 
 [<AutoOpen>]
 module ByteUtils = 
   
+    
     type Bit = 
         | One
         | Zero
@@ -43,23 +45,18 @@ module ByteUtils =
                             | Zero -> acc
                             | One -> acc + (pown 2 index)) 0 positions
 
-    let byteArrToObj<'T> (byteArray : byte[]) : 'T = 
-        let handle = GCHandle.Alloc(byteArray, GCHandleType.Pinned);
-        let structure = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof<'T>)
-        handle.Free();
-        Convert.ChangeType(structure, typeof<'T>) :?> 'T
+    let byteArrToObj<'T> (byteArray : byte[]) : 'T  = StructReader.Read<'T>(byteArray)
 
     let sizeofType objType = Marshal.SizeOf objType
+
+    let inline byteArrayForInstance (byteArray:byte[]) size count = 
+            let start = count * size
+            let endS = start + size - 1
+            byteArray.[start..endS]
 
     let byteArrayToObjects<'T> (byteArray: byte[]) = 
         let size = sizeofType typeof<'T>
     
         let numObjects = byteArray.Length / size
 
-        let byteRangetoObj count = 
-            let start = count * size
-            let endS = start + size - 1
-            byteArrToObj<'T> (byteArray.[start..endS])
-
-        [0..numObjects - 1]
-            |> List.fold(fun acc objNum -> (byteRangetoObj objNum)::acc) []        
+        StructReader.Read<'T>(byteArray, size)

@@ -148,21 +148,21 @@ module Mp4DataTypes =
         Atom: AtomBase
         VersionAndFlags: VersionAndFlags
         NumberOfEntries: uint32
-        SampleTimes: TimeToSampleEntry list
+        SampleTimes: TimeToSampleEntry []
     }
 
     type Stsz = {
         Atom: AtomBase
         VersionAndFlags: VersionAndFlags
         NumberOfEntries: uint32
-        SampleSizes: SampleSizeEntry list
+        SampleSizes: SampleSizeEntry []
     }
 
     type Stsc = {
         Atom: AtomBase
         VersionAndFlags: VersionAndFlags
         NumberOfEntries: uint32
-        SampleChunks: SampleToChunkEntry list
+        SampleChunks: SampleToChunkEntry []
     }
 
     type Stco = {
@@ -176,7 +176,7 @@ module Mp4DataTypes =
         Atom: AtomBase
         VersionAndFlags: VersionAndFlags
         NumberOfEntries: uint32
-        SyncSamples: SyncSampleEntry list
+        SyncSamples: SyncSampleEntry []
     }
     
     (* A tree for use with parsing *)

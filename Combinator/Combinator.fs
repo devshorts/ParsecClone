@@ -225,7 +225,7 @@ module Combinator =
         None, state   
 
     let satisfyUserState predicate parser = 
-        fun (state : State<_,_,'UserState>) ->  
+        fun (state : State<_,_,'UserState>) ->              
             let (r, nextState:State<_,_,_>) as result = parser state
 
             match r with 

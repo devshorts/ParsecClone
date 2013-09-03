@@ -94,6 +94,11 @@ let matchFtypAndMoov() =
     let result = test parserStream video
     
     result.Length |> should equal 3
+    
+    let audioStts = audioStts (result |> rootListToRecord)
+    
+    audioStts.SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
+
 
 [<Test>]
 let convertToRecordTest1() = 
@@ -119,6 +124,12 @@ let matchOptFtypAndMoov() =
     
     result.Length |> should equal 2
 
+    let audioStts = audioStts (result |> rootListToRecord)
+
+    audioStts.SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
+
+    audioStts.SampleTimes.[1].SampleDuration |> should equal (uint32 661)
+
 [<Test>]
 let testMessedUpFreeAtoms() = 
     
@@ -129,6 +140,7 @@ let testMessedUpFreeAtoms() =
     let result = test parserStream video        
 
     result.Length |> should equal 3
+
 
 
 [<Test>]
@@ -189,7 +201,7 @@ let findStts() =
         
         let audioStts = audioStts result
 
-        let fuckedUp = List.zip audioStts.SampleTimes [0..(int)audioStts.NumberOfEntries - 1]
+        let fuckedUp = List.zip (Array.toList audioStts.SampleTimes) [0..(int)audioStts.NumberOfEntries - 1]
                             |> List.filter (fun (i, b) -> (int)i.SampleDuration > 2000) 
                             |> List.map (fun (i, b) -> System.String.Format("{0}: {1}", b, i.SampleDuration))
 
@@ -209,9 +221,9 @@ let bigVidTest() =
     use buff = new BufferedStream(f)
 
     let parserStream = mp4Stream buff
-
-    let result = test parserStream video |> rootListToRecord
-        
+    
+    let result = test parserStream video 
+    
     printfn "took %s" ((System.DateTime.Now - now).ToString())
 
     () |> should equal ()

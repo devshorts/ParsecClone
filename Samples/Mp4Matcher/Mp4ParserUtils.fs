@@ -149,7 +149,4 @@ module Mp4ParserUtils =
     let matrix : VideoParser<_> = 
         exactly 3 matrixRow >>|. List.toArray >>= fun rows ->
 
-        preturn <| Array2D.init 3 3 (fun i j -> rows.[i].[j])
-
-
-                        
+        preturn <| Array2D.init 3 3 (fun i j -> rows.[i].[j])                        
