@@ -10,6 +10,9 @@ module BinStreams =
 
     type BinStream<'UserState> (state:Stream, userState:'UserState) =   
 
+        do
+            bootstrap_combinator()
+
         let mutable userState = userState
         
         let startPos = state.Position

@@ -15,4 +15,4 @@ module Bootstrapper =
         else
             null
 
-    let bootstrap_combinator () = AppDomain.CurrentDomain.add_AssemblyResolve(new ResolveEventHandler(resolver))
+    let bootstrap_combinator() = AppDomain.CurrentDomain.add_AssemblyResolve(new ResolveEventHandler(resolver))

@@ -9,8 +9,6 @@ open System.IO
 open System.Reflection
 open System
 
-bootstrap_combinator()
-
 let audioStts result = 
         let getAudioMetadata src = maybe {
             let extractAudio (trak:Trak) = maybe {

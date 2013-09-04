@@ -5,8 +5,8 @@ open System.IO
 open System.Reflection
 
 [<AutoOpen>]
-module Combinator =   
-    
+module Combinator =      
+
     exception Error of string          
 
     type State<'StateType, 'ConsumeType, 'UserState> = IStreamP<'StateType, 'ConsumeType, 'UserState>
@@ -14,7 +14,7 @@ module Combinator =
     type Reply<'Return, 'StateType, 'ConsumeType, 'UserState> = 'Return option * State<'StateType, 'ConsumeType, 'UserState>
 
     type Parser<'Return, 'StateType, 'ConsumeType, 'UserState> = State<'StateType, 'ConsumeType, 'UserState> -> Reply<'Return, 'StateType, 'ConsumeType, 'UserState>  
-    
+        
     let preturn value = fun stream -> (Some(value), stream)
         
     let pzero = fun stream -> (None, stream)

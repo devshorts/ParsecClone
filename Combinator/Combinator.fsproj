@@ -42,6 +42,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bootstrapper.fs" />
     <Compile Include="ByteUtils.fs" />
     <Compile Include="IStreamP.fs" />
     <Compile Include="Combinator.fs" />
@@ -50,7 +51,6 @@
     <Compile Include="BinStream.fs" />
     <Compile Include="StringP.fs" />
     <Compile Include="BinParser.fs" />
-    <Compile Include="Bootstrapper.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StructReader\StructReader.vcxproj">
