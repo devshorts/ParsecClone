@@ -31,6 +31,8 @@ Install ParsecClone v0.3.0 via [NuGet](https://www.nuget.org/packages/ParsecClon
 Install-Package ParsecClone
 ```
 
+This will install the ParsecClone F# library.  If you want to use the binary combinator you will also need to copy the `ParsecClone.StructReader.x86.dll` and the `ParsecClone.StructReader.x64.dll` to your output directory.  The F# library is compiled as `AnyCPU` and is smart enough to load the correct dll at runtime. The `StructReader` is a native optimized byte array to structure mapper, which can greatly improve binary parsing performance.
+
 The general operators are in `ParsecClone.CombinatorBase`.
 
 String handling is in `ParsecClone.StringCombinator`.
@@ -38,6 +40,7 @@ String handling is in `ParsecClone.StringCombinator`.
 Binary handling is in `ParsecClone.BinaryCombinator`.
 
 ParsecClone comes as one DLL that contains all three libraries.
+
 
 [[Top]](#table-of-contents) 
 
@@ -1278,7 +1281,6 @@ let testApplyManyBits() =
 
 One easy win is to wrap your input stream with a `BufferedStream`. Check the included unit tests for an example.
 
-
 The other big bottleneck in combinator parsing is when you need to parse the same item many times (maybe thousands, or hundreds of thousands of times). If you have to parse the same type many times in a row you should consider using a struct to hold your data type and leveraging the struct parsing functionality of ParsecClone.
 
 Using the struct parsing requires a little bit of setup.  Let me demonstrate using the sample mp4 parser.
@@ -1291,10 +1293,12 @@ Due to use of generics, we need to pin the `UserState` for the struct parser.
 /// </summary>
 let bp = new BinParser<_>(Array.rev)
 
-let pStructs<'T> bytes : VideoParser<_> = parseStruct<'T, VideoState> bytes bp
+let pStructs<'T> bytes : VideoParser<_> = parseStruct<'T, VideoState> true bytes bp
 ```
 
-The `parseStruct` function comes defined in the `BinParsers` module which is auto included with `ParsecClone.BinaryCombinator`.  The function takes a generic type `'T` which should be the struct type you want to parse, a byte array representing the entire byte chunk to read, and a reference to the binary parser instance.  
+The `parseStruct` function comes defined in the `BinParsers` module which is auto included with `ParsecClone.BinaryCombinator`.  The function takes a generic type `'T` which should be the struct type you want to parse, a boolean representing whether the bytes it reads are in network order (big endian) or not.  This is important because for some binary structures, the files are written big endian vs the .NET normal of little endian.  For big endian files, the bulk array is reversed, and read *backwards* during struct parsing. This means you should order your structures backwards as well, and then everything will map.
+
+The other arguments to the struct parser include a byte array representing the entire byte chunk to read, and a reference to the binary parser instance.  
 
 As an example, let's say we have the following struct:
 
@@ -1342,6 +1346,20 @@ In general, don't optimize prematurely.  The nice thing about records and struct
 
 -----
 
-In the end, if you need a high performant parser please remember that ParsecClone runs on .NET and will be slower than a C++ generated parser (or hand rolled). I tested my MP4 parser against a comparable C++ parser and the F# parser for a 4 hour video ran in 1 second, whereas the c++ parser ran in 160 milliseconds.  This is for parsing hundreds of thousands of small elements in a 25MB chunk.  On the other hand, 1 second still isn't that bad.
+I've compared my mp4 parser to a production level C++ parser and the resulting times are very similar. For the same 25MB header representing 4 hours of video, the C++ parser it would run in around 140ms-160ms, and on average the F# parser ran also in 140-160ms. 
+
+The only caveat is the dynamic loading of the struct parser native assembly. The first time the assembly has to be loaded there is a 300ms delay.  Notice the result here where I am using the same parser in a loop 5 times:
+
+```
+>Profile.exe
+took 00:00:00.4450445
+took 00:00:00.1370137
+took 00:00:00.1370137
+took 00:00:00.1340134
+took 00:00:00.1540154
+took 00:00:00.1580158
+```
+
+It's clear the hit the dynamic loading cost, but after that everything is constant.
   
 [[Top]](#table-of-contents)
