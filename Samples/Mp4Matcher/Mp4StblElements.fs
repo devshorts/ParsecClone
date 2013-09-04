@@ -56,13 +56,11 @@ module Mp4StblElements =
             SampleChunks = samples
         } |>> STSC
 
-    let chunkOffSet = bp.uint32 >>= fun i -> preturn { ChunkOffset = i }
-
     let stco : VideoParser<_> = 
         atom "stco"    >>= fun id ->
         versionAndFlags     >>= fun vFlags ->
         bp.uint32           >>= fun numEntries ->
-        exactly (int numEntries) chunkOffSet >>= fun offsets ->
+        pStructs<ChunkOffsetEntry> (int numEntries) >>= fun offsets ->
         freeOpt >>. preturn {
             Atom = id
             VersionAndFlags = vFlags

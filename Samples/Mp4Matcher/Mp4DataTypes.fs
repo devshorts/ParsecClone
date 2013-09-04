@@ -30,7 +30,7 @@ module Mp4DataTypes =
     /// </summary>
     let bp = new BinParser<_>(Array.rev)
 
-    let pStructs<'T> entries : VideoParser<_> = parseStruct<'T, VideoState> entries bp
+    let pStructs<'T> entries : VideoParser<_> = parseStruct<'T, VideoState> true entries bp
 
     let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
 
@@ -114,21 +114,25 @@ module Mp4DataTypes =
         Width: uint32
     }
 
-    [<Struct>]
+    /// <summary>
+    /// The order is reversed since the file is read network order.  The bytes will be 
+    /// mapped into this structure backwards as well so everything will match up
+    /// </summary>
     type TimeToSampleEntry = 
         struct
             val SampleDuration: uint32 
             val SampleCount: uint32;             
         end
 
-    [<Struct>]
     type SampleSizeEntry = 
         struct 
             val SampleSize : uint32 
         end
     
-
-    [<Struct>]      
+    /// <summary>
+    /// The order is reversed since the file is read network order.  The bytes will be 
+    /// mapped into this structure backwards as well so everything will match up
+    /// </summary>
     type SampleToChunkEntry = 
         struct                    
             val SampleDescriptionID: uint32           
@@ -136,9 +140,11 @@ module Mp4DataTypes =
             val FirstChunk: uint32
         end
 
-    type ChunkOffsetEntry = { ChunkOffset: uint32 }
-
-    [<Struct>]
+    type ChunkOffsetEntry = 
+        struct
+            val ChunkOffset: uint32 
+        end
+    
     type SyncSampleEntry = 
         struct
             val SampleNumber: uint32 
@@ -169,7 +175,7 @@ module Mp4DataTypes =
         Atom: AtomBase
         VersionAndFlags: VersionAndFlags
         NumberOfEntries: uint32
-        ChunkOffsets: ChunkOffsetEntry list
+        ChunkOffsets: ChunkOffsetEntry []
     }
 
     type Stss = {

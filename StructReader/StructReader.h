@@ -37,7 +37,7 @@ namespace CombinatorNative {
 			return resultList;
 		}
 
-		generic <typename T> static array<T>^ Read(array<System::Byte>^ data, int objectSize)
+		generic <typename T> static array<T>^ Read(array<System::Byte>^ data, int objectSize, bool networkOrder)
 		{
 			int numObjects = data->Length / objectSize;
 
@@ -45,14 +45,26 @@ namespace CombinatorNative {
 
 			pin_ptr<System::Byte> src = &data[0];
 			
-			int count = 0;
-			for(int i = numObjects - 1; i >= 0 ; i--){
-				T value;
-				pin_ptr<T> dst = &value;
+			if(networkOrder){
+				int count = 0;
+				for(int i = numObjects - 1; i >= 0 ; i--){
+					T value;
+					pin_ptr<T> dst = &value;
 
-				memcpy((void*)dst, (void*)(src + (objectSize * i)), sizeof(T));
+					memcpy((void*)dst, (void*)(src + (objectSize * i)), sizeof(T));
 
-				resultList[count++] = value;
+					resultList[count++] = value;
+				}
+			}
+			else{
+				for(int i = 0; i < numObjects; i++){
+					T value;
+					pin_ptr<T> dst = &value;
+
+					memcpy((void*)dst, (void*)(src + (objectSize * i)), sizeof(T));
+
+					resultList[i] = value;
+				}
 			}
 
 			return resultList;

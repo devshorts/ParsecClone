@@ -49,14 +49,9 @@ module ByteUtils =
 
     let sizeofType objType = Marshal.SizeOf objType
 
-    let inline byteArrayForInstance (byteArray:byte[]) size count = 
-            let start = count * size
-            let endS = start + size - 1
-            byteArray.[start..endS]
-
-    let byteArrayToObjects<'T> (byteArray: byte[]) = 
+    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder = 
         let size = sizeofType typeof<'T>
     
         let numObjects = byteArray.Length / size
 
-        StructReader.Read<'T>(byteArray, size)
+        StructReader.Read<'T>(byteArray, size, networkOrder)

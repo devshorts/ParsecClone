@@ -27,6 +27,8 @@ module BinParsers =
 
         member x.matchBytes = binMatchExact
 
+        member x.endianessConverter = endianNessConverter
+
         member x.byteToInt (b:byte) = System.Convert.ToInt32(b)
         member x.toInt16 v = System.BitConverter.ToInt16(endianNessConverter v, 0)
         member x.toInt24 v = System.BitConverter.ToInt32(endianNessConverter (Array.append [|byte(0)|] v), 0)
@@ -105,12 +107,16 @@ module BinParsers =
         member x.bit6 = x.bitN 6
         member x.bit7 = x.bitN 7
         member x.bit8 = x.bitN 8     
-
-    let parseStruct<'T, 'UserState> numEntries (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
+    
+    let parseStruct<'T, 'UserState> networkOrder numEntries (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
             let size = sizeofType typeof<'T>
             let requiredBytes = size * numEntries
 
-            bp.byteN requiredBytes >>= fun bytes ->            
-            preturn (byteArrayToObjects<'T> (Array.rev bytes))
+            let converter = if networkOrder then Array.rev else id
 
-    let defineStructParser<'T> = parseStruct<'T, unit>
+            bp.byteN requiredBytes >>= fun bytes ->
+                        
+            preturn (byteArrayToObjects<'T> (converter bytes) networkOrder)
+
+    let defineStructParser<'T> = parseStruct<'T, unit> false
+
