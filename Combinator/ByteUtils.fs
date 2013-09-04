@@ -1,13 +1,13 @@
 ﻿namespace ParsecClone.BinaryCombinator
 
+open System.Reflection
+open System.IO
 open System.Runtime.InteropServices
 open System
-open CombinatorNative
 
 [<AutoOpen>]
 module ByteUtils = 
-  
-    
+   
     type Bit = 
         | One
         | Zero
@@ -24,7 +24,7 @@ module ByteUtils =
                             |> Seq.take 8
                             |> Seq.toList
                             |> List.rev
-    
+
     let byteToBitArray b = 
             List.map (fun (bitMask, bitPosition) -> 
                         if (b &&& bitMask) >>> bitPosition = byte(0) then Zero
@@ -45,13 +45,11 @@ module ByteUtils =
                             | Zero -> acc
                             | One -> acc + (pown 2 index)) 0 positions
 
-    let byteArrToObj<'T> (byteArray : byte[]) : 'T  = StructReader.Read<'T>(byteArray)
-
     let sizeofType objType = Marshal.SizeOf objType
 
-    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder = 
+    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder : 'T [] = 
         let size = sizeofType typeof<'T>
     
         let numObjects = byteArray.Length / size
 
-        StructReader.Read<'T>(byteArray, size, networkOrder)
+        ParserClone.Native.StructReader.Read<'T>(byteArray, size, networkOrder)

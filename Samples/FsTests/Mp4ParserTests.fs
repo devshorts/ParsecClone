@@ -6,6 +6,10 @@ open Mp4Matcher
 open ParsecClone.BinaryCombinator
 open ParsecClone.CombinatorBase
 open System.IO
+open System.Reflection
+open System
+
+bootstrap_combinator()
 
 let audioStts result = 
         let getAudioMetadata src = maybe {
@@ -28,8 +32,7 @@ let audioStts result =
         match getAudioMetadata result with
             | Some(stts::_) -> stts
             | _ -> failwith "shouldn't have gotten here"
-
-
+        
 [<Test>]
 let moovFtypTest() = 
     

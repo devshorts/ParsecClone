@@ -1,12 +1,15 @@
 ﻿namespace ParsecClone.BinaryCombinator 
 
 open System.IO
+open System.Reflection
+open System
 open ParsecClone.CombinatorBase
 
 [<AutoOpen>]
-module BinStreams = 
+module BinStreams =     
 
     type BinStream<'UserState> (state:Stream, userState:'UserState) =   
+
         let mutable userState = userState
         
         let startPos = state.Position

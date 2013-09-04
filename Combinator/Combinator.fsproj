@@ -50,6 +50,7 @@
     <Compile Include="BinStream.fs" />
     <Compile Include="StringP.fs" />
     <Compile Include="BinParser.fs" />
+    <Compile Include="Bootstrapper.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StructReader\StructReader.vcxproj">
@@ -104,6 +105,18 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>del /Q $(SolutionDir)Combinator\bin\$(Configuration)\ParsecClone.StructReader.temp64*
+del /Q $(SolutionDir)Combinator\bin\$(Configuration)\ParsecClone.StructReader.temp32*
+
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp64.dll $(TargetDir)ParsecClone.StructReader.x64.dll
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp64.pdb $(TargetDir)ParsecClone.StructReader.x64.pdb
+
+
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.dll $(TargetDir)ParsecClone.StructReader.x32.dll
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.pdb $(TargetDir)ParsecClone.StructReader.x32.pdb
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
