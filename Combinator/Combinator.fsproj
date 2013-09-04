@@ -113,8 +113,8 @@ ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.Struct
 ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp64.pdb $(TargetDir)ParsecClone.StructReader.x64.pdb
 
 
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.dll $(TargetDir)ParsecClone.StructReader.x32.dll
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.pdb $(TargetDir)ParsecClone.StructReader.x32.pdb
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.dll $(TargetDir)ParsecClone.StructReader.x86.dll
+ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.pdb $(TargetDir)ParsecClone.StructReader.x86.pdb
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

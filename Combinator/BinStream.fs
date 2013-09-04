@@ -8,10 +8,15 @@ open ParsecClone.CombinatorBase
 [<AutoOpen>]
 module BinStreams =     
 
-    type BinStream<'UserState> (state:Stream, userState:'UserState) =   
-
-        do
+    type SetupBootstrapper private () = 
+        static do
             bootstrap_combinator()
+
+        static member val forceCreation  = true
+
+    type BinStream<'UserState> (state:Stream, userState:'UserState) =   
+        do
+            SetupBootstrapper.forceCreation |> ignore
 
         let mutable userState = userState
         
@@ -20,7 +25,7 @@ module BinStreams =
         interface IStreamP<Stream, byte[],'UserState>  with       
             member x.state = state     
 
-            member x.consume (count) = 
+            member x.consume (count) =                 
                 let bytes = x.initBytes count
 
                 state.Read(bytes, 0, count) |> ignore                           
