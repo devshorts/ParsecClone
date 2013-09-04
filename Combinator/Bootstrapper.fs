@@ -6,7 +6,7 @@ open System.Reflection
 
 [<AutoOpen>]
 module Bootstrapper = 
-    let private resolver o (e:ResolveEventArgs) = 
+    let private resolver o (e:ResolveEventArgs) =         
         let name = "ParsecClone.StructReader"
         if e.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase) then     
             let assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)     

@@ -10,7 +10,7 @@ module BinStreams =
 
     type SetupBootstrapper private () = 
         static do
-            bootstrap_combinator()
+            bootstrap_combinator()            
 
         static member val forceCreation  = true
 
@@ -53,7 +53,7 @@ module BinStreams =
             
             member x.position () = startPos
         
-        member x.initBytes size = Array.create size <| byte(0)
+        member inline x.initBytes size = Array.create size <| byte(0)
 
         member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 

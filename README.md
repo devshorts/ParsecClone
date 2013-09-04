@@ -863,18 +863,26 @@ Takes a 8 byte array, applies endianess converter, and converts to int 64
 ----------
 
 ```fsharp
-val parseStruct<'T, 'UserState>: int -> BinParser<'UserState> -> Parser<'T list>
+val parseStruct<'T, 'UserState>: bool -> int -> BinParser<'UserState> -> Parser<'T list>
 ```
 
-This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace. `'T` should be the struct type you want to parse.  Internally this will read `sizeof 'T * numEntries` bytes and marshal the bytes directly into the struct. This can be significantly faster than parsing each entry independently. 
+This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace. `'T` should be the struct type you want to parse.  Internally this will read `sizeof 'T * numEntries` bytes and marshal the bytes directly into the struct. This can be significantly faster than parsing each entry independently.  The bool, if true, says to use network order (big endian). In this case it will read the bytes from end to begin. Your struct should be ordered backwards for this to work properly (so first field last, last field first).  If the bool is false, it will be little endian.  The int parameter says the number of structs to parse. 
 
 ----------
 
 ```fsharp
-val defineStructParser<'T>: int -> BinParser<unit> -> Parser<'T list>
+val defineStructParserLE<'T>: int -> BinParser<unit> -> Parser<'T list>
 ```
 
-This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace.  Helper function to define a struct parser with no required user state.
+Defines a little endian struct parser. This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace.  Helper function to define a struct parser with no required user state. 
+
+----------
+
+```fsharp
+val defineStructParserBE<'T>: int -> BinParser<unit> -> Parser<'T list>
+```
+
+Defines a big endian struct parser. This method is not defined on the `BinParser` object, but is auto included with the `BinaryCombinator` namespace.  Helper function to define a struct parser with no required user state.  
  
 ----------
 [[Top]](#table-of-contents)
@@ -1346,20 +1354,6 @@ In general, don't optimize prematurely.  The nice thing about records and struct
 
 -----
 
-I've compared my mp4 parser to a production level C++ parser and the resulting times are very similar. For the same 25MB header representing 4 hours of video, the C++ parser it would run in around 140ms-160ms, and on average the F# parser ran also in 140-160ms. 
+I've compared my mp4 parser to a production level C++ parser and the F# parser is about 2.5 times slower.  It runs equivalent if you run the parser more than once (but this is because .NET is reusing the same memory allocations).
 
-The only caveat is the dynamic loading of the struct parser native assembly. The first time the assembly has to be loaded there is a 300ms delay.  Notice the result here where I am using the same parser in a loop 5 times:
-
-```
->Profile.exe
-took 00:00:00.4450445
-took 00:00:00.1370137
-took 00:00:00.1370137
-took 00:00:00.1340134
-took 00:00:00.1540154
-took 00:00:00.1580158
-```
-
-It's clear the hit the dynamic loading cost, but after that everything is constant.
-  
 [[Top]](#table-of-contents)

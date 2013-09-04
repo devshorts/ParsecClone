@@ -118,5 +118,7 @@ module BinParsers =
                         
             preturn (byteArrayToObjects<'T> (converter bytes) networkOrder)
 
-    let defineStructParser<'T> = parseStruct<'T, unit> false
+    let defineStructParserLE<'T> = parseStruct<'T, unit> false
+
+    let defineStructParserBE<'T> = parseStruct<'T, unit> true
 
