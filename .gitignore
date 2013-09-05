@@ -21,6 +21,7 @@ obj/
 *.opensdf
 !WinPCap/Lib/*
 TestResults/
-nuget/
+nuget/lib
+nuget/*nupkg
 ValidateStts/
 Profile/

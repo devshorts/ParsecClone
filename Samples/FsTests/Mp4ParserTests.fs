@@ -237,16 +237,14 @@ let bigVidTest() =
     use f = new FileStream(@"z:\data\video\2013-06-24--13-25-20--Encounter--R.12-C.0.m4v", FileMode.Open)
 
     use buff = new BufferedStream(f)
-
-   // buff.Seek(int64 0x3B1, SeekOrigin.Begin) |> ignore
-
+   
     let parserStream = mp4Stream buff
     
-    time "parsing video" (fun () -> test parserStream video) |> ignore
+    MiscUtils.time "parsing video" (fun () -> test parserStream video) |> ignore
 
     buff.Seek(int64 0, SeekOrigin.Begin) |> ignore
 
-    time "parsing video" (fun () -> test parserStream video) |> ignore
+    MiscUtils.time "parsing video" (fun () -> test parserStream video) |> ignore
     
     () |> should equal ()
 

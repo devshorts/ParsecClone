@@ -1,6 +1,5 @@
 ﻿namespace ParsecClone.CombinatorBase
 
-[<AutoOpen>]
 module MiscUtils = 
     let time s f =         
         let n = System.DateTime.Now
