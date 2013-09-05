@@ -31,15 +31,14 @@ Install ParsecClone v0.3.0 via [NuGet](https://www.nuget.org/packages/ParsecClon
 Install-Package ParsecClone
 ```
 
-This will install the ParsecClone F# library.  If you want to use the binary combinator you will also need to copy the `ParsecClone.StructReader.x86.dll` and the `ParsecClone.StructReader.x64.dll` to your output directory.  The F# library is compiled as `AnyCPU` and is smart enough to load the correct dll at runtime. The `StructReader` is a native optimized byte array to structure mapper, which can greatly improve binary parsing performance.
+This will install the ParsecClone F# library.  Also included is `ParsecClone.CombinatorCS` which contains an optimized byte array to structure mapper, which can greatly improve binary parsing performance.  It is recommended to reference both dll's even if you don't use structs.
 
-The general operators are in `ParsecClone.CombinatorBase`.
+Included in the main `ParsecClone.Combinator` dll are:
 
-String handling is in `ParsecClone.StringCombinator`.
+- The general operators are in `ParsecClone.CombinatorBase`
+- The string handling in `ParsecClone.StringCombinator`
+- And the binary operators in `ParsecClone.BinaryCombinator`
 
-Binary handling is in `ParsecClone.BinaryCombinator`.
-
-ParsecClone comes as one DLL that contains all three libraries.
 
 
 [[Top]](#table-of-contents) 
@@ -54,13 +53,13 @@ While the following documentation is not as robust as theirs, ParsecClone operat
 
 ## When to use and known limitations
 
-ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.  
+ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.  Performance of parsecClone is close to native. In my tests it was only 2x times slower than hand written c++.  Performance even exceeded C++ if you ran the parser multiple times (since memory was preloaded)!
 
 ParseClone can also parse strings, but doesn't work on string streams. One of the reasons is that to use regular expressions you need to have unlimited lookahead to your stream. With a stream you'd end up having to read the whole stream in anyways!  Since FParsec works on streams, I chose to not duplicate that functionality. 
 
 If you have strings you can buffer into memory, ParsecClone will work great (so smaller files that you can read all in one go). 
 
-More importantly, ParsecClone is great for adding new stream sources to extend its capabilities. Granted this requires a rebuild of the project, but its almost trivial to add in new consumable streams.  If you have a request for a stream source please open an issue for me to track.
+More importantly, ParsecClone is great for adding new stream sources to extend its capabilities. To do so just implement the `IStreamP` interface and hook into the `matcher` function in the base combinator library.
 
 A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
 
@@ -1352,8 +1351,5 @@ Notice how `pStructs` takes the type of the struct as a generic as well as the n
 
 In general, don't optimize prematurely.  The nice thing about records and structs is that it's trivial to change a record to a struct. Updating your parser requires only a line change (instead of a `manyN (int numEntries) parser` you replace it with the `pStructs` parser).
 
------
-
-I've compared my mp4 parser to a production level C++ parser and the F# parser is about 2.5 times slower.  It runs equivalent if you run the parser more than once (but this is because .NET is reusing the same memory allocations).
 
 [[Top]](#table-of-contents)
