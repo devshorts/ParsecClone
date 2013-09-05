@@ -8,18 +8,17 @@ open System
 [<AutoOpen>]
 module Mp4P = 
     
-    
-    let stbl = 
-        fullConsume "stbl" 
-            (fun id ->        
-                    stts <|> 
-                    stsd <|> 
-                    stsz <|> 
-                    stsc <|> 
-                    stco <|> 
-                    stss <|> 
-                    ctts <|>
-                    (unknown |>> StblTypes.UNKNOWN) ) |>> STBL
+    let stblInsides = 
+                    (stts >>-- injector "stts") <|> 
+                    (stsd >>-- injector "stsd")  <|> 
+                    (stsz >>-- injector "stsz")  <|> 
+                    stsc >>-- injector "stsc" <|> 
+                    stco >>-- injector "stco" <|> 
+                    stss >>-- injector "stss" <|> 
+                    ctts >>-- injector "ctts" <|>
+                    (unknown |>> StblTypes.UNKNOWN) >>-- injector "unknown" 
+
+    let stbl = fullConsume "stbl" (fun id ->  stblInsides) >>-- injector "stbl" |>> STBL
 
     let vOrSmhd = vmhd <|> smhd
 
@@ -30,7 +29,7 @@ module Mp4P =
                 vOrSmhd <|> 
                 dinf <|> 
                 stbl <|>
-                (unknown |>> MinfTypes.UNKNOWN)) |>> MINF
+                (unknown |>> MinfTypes.UNKNOWN)) >>-- injector "minf" |>> MINF
 
     let mdia = 
         freeOpt >>.
@@ -40,7 +39,7 @@ module Mp4P =
                 hdlr <|> 
                 minf <|>
                 (unknown |>> MdiaTypes.UNKNOWN)
-            ) |>> MDIA
+            ) >>-- injector "mdia" |>> MDIA
 
     let trak = 
         freeOpt >>.
@@ -50,7 +49,7 @@ module Mp4P =
                 mdia <|> 
                 edts <|>
                 (unknown |>> TrakTypes.UNKNOWN)
-            ) |>> TRAK
+            ) >>-- injector "trak" |>> TRAK
 
     let mdat = 
         atom "mdat" >>= fun id ->
@@ -67,7 +66,7 @@ module Mp4P =
                 iods <|> 
                 trak <|>
                 (unknown |>> MoovTypes.UNKNOWN)
-            ) |>> MOOV   
+            ) >>-- injector "moov" |>> MOOV   
 
     let video : VideoParser<_> = many (choice[  attempt ftyp; 
                                                 moov; 

@@ -9,6 +9,10 @@ module Combinator =
 
     exception Error of string          
 
+    type ParserMetadata = {
+        IsChoice:bool
+    }
+
     type State<'StateType, 'ConsumeType, 'UserState> = IStreamP<'StateType, 'ConsumeType, 'UserState>
 
     type Reply<'Return, 'StateType, 'ConsumeType, 'UserState> = 'Return option * State<'StateType, 'ConsumeType, 'UserState>
@@ -63,6 +67,10 @@ module Combinator =
     let (|>>) parser targetType = parser >>= fun value -> preturn (targetType value)
 
     let (|>>%) parser targetType = parser >>= fun _ -> preturn targetType
+
+    let (>>--) parser wrapper = 
+        fun state -> 
+            wrapper (fun () -> parser state)
 
     let (>>.)  parser1 parser2 = 
         parser1 >>= fun first -> 
@@ -229,7 +237,8 @@ module Combinator =
         None, state   
 
     let satisfyUserState predicate parser = 
-        fun (state : State<_,_,'UserState>) ->              
+        fun (state : State<_,_,'UserState>) ->     
+            //printfn "executing user state parser"         
             let (r, nextState:State<_,_,_>) as result = parser state
 
             match r with 

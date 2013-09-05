@@ -8,6 +8,8 @@ open System.Text
 [<AutoOpen>]
 module Mp4ParserUtils = 
 
+    let injector name f = f()
+
     let private timeSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     let date : VideoParser<_> = bp.byte4 |>> (bp.toUInt32 >> Convert.ToDouble >> timeSince1904.AddSeconds)
@@ -27,8 +29,8 @@ module Mp4ParserUtils =
 
     let skipRemaining (start : uint32) consumed : VideoParser<_> = 
         let skipAmount = ((int)start - consumed)
-        if skipAmount > 0 then bp.byteN skipAmount
-        else preturn [||]
+        if skipAmount > 0 then bp.skip skipAmount
+        else preturn false
          
     /// <summary>
     /// Parser that sets the user state with the current stream position
@@ -54,7 +56,7 @@ module Mp4ParserUtils =
                     Size = size
                     Name = name
                 }
-        )
+        ) >>-- injector "attempt"
 
 
     /// <summary>
@@ -104,8 +106,8 @@ module Mp4ParserUtils =
         let shouldConsume = fun (s:VideoState) -> 
                                     let consumed = s.CurrentStatePosition - (int64)start
                                     consumed < (int64)expectedSize
-                                
-        satisfyUserState shouldConsume parser
+                                        
+        satisfyUserState shouldConsume parser >>-- injector "satisfyUserrState"
         
     /// <summary>
     /// runs the parser many times until the 
@@ -119,7 +121,7 @@ module Mp4ParserUtils =
 
         let parser = getParser id
 
-        takeIfAtomNotConsumed state.CurrentStatePosition id.Size parser |> many
+        takeIfAtomNotConsumed state.CurrentStatePosition id.Size parser |> many  >>-- injector "fullConsume"
 
     
     let versionAndFlags : VideoParser<_> = 

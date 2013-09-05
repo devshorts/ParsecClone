@@ -42,7 +42,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bootstrapper.fs" />
+    <Compile Include="MiscUtils.fs" />
     <Compile Include="ByteUtils.fs" />
     <Compile Include="IStreamP.fs" />
     <Compile Include="Combinator.fs" />
@@ -53,9 +53,9 @@
     <Compile Include="BinParser.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StructReader\StructReader.vcxproj">
-      <Name>StructReader</Name>
-      <Project>{40255f9d-310b-42e1-816a-b369015fad56}</Project>
+    <ProjectReference Include="..\CombinatorCS\CombinatorCS.csproj">
+      <Name>CombinatorCS</Name>
+      <Project>{cbb4a868-83ac-4990-8015-f1eda3e5da44}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
@@ -106,16 +106,8 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <PropertyGroup>
-    <PostBuildEvent>del /Q $(SolutionDir)Combinator\bin\$(Configuration)\ParsecClone.StructReader.temp64*
-del /Q $(SolutionDir)Combinator\bin\$(Configuration)\ParsecClone.StructReader.temp32*
-
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp64.dll $(TargetDir)ParsecClone.StructReader.x64.dll
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp64.pdb $(TargetDir)ParsecClone.StructReader.x64.pdb
-
-
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.dll $(TargetDir)ParsecClone.StructReader.x86.dll
-ECHO F | xcopy /F /Y /C $(SolutionDir)Native\$(Configuration)\ParsecClone.StructReader.temp32.pdb $(TargetDir)ParsecClone.StructReader.x86.pdb
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

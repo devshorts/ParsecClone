@@ -3,7 +3,9 @@
 open System.Reflection
 open System.IO
 open System.Runtime.InteropServices
+open ParsecClone.CombinatorCS
 open System
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ByteUtils = 
@@ -47,9 +49,22 @@ module ByteUtils =
 
     let sizeofType objType = Marshal.SizeOf objType
 
-    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder : 'T [] = 
+    let blit<'T>  (byteArray: byte[]) : 'T [] = 
         let size = sizeofType typeof<'T>
-    
-        let numObjects = byteArray.Length / size
 
-        ParserClone.Native.StructReader.Read<'T>(byteArray, size, networkOrder)
+        let count = byteArray.Length / size
+        let offset = 0 
+        let length = byteArray.Length
+
+        let args = (byteArray, count, offset, length)
+
+        let func = OptimizedBlit<'T>.MakeUnsafeArrayBlitParser()
+
+        func.Invoke args
+
+
+    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder : 'T [] =         
+        blit byteArray |> (if networkOrder then Array.rev else id)
+
+
+    

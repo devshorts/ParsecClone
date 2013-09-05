@@ -115,8 +115,8 @@ module BinParsers =
             let converter = if networkOrder then Array.rev else id
 
             bp.byteN requiredBytes >>= fun bytes ->
-                        
-            preturn (byteArrayToObjects<'T> (converter bytes) networkOrder)
+                     
+            preturn <| byteArrayToObjects<'T> (converter bytes) networkOrder
 
     let defineStructParserLE<'T> = parseStruct<'T, unit> false
 

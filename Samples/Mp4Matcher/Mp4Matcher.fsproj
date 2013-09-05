@@ -50,6 +50,11 @@
     <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CombinatorCS\CombinatorCS.csproj">
+      <Name>CombinatorCS</Name>
+      <Project>{cbb4a868-83ac-4990-8015-f1eda3e5da44}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\Combinator\Combinator.fsproj">
       <Name>Combinator (Combinator\Combinator)</Name>
       <Project>{709656e5-34b4-40ee-a3de-ebe4fcffbd90}</Project>

@@ -7,6 +7,13 @@ open ParsecClone.StringCombinator
 open ParsecClone.CombinatorBase
 open StringMatchers.FooSample
 
+[<Test>]
+let shortCircuitOr () = 
+    let target = makeStringStream "fab"
+
+    let band = test target (matchStr "f" <|> matchStr "a" <|> matchStr "b")
+        
+    () |> should equal ()
 
 [<Test>]
 let preturnTest () = 
@@ -18,8 +25,7 @@ let preturnTest () =
         | FooFighter -> Assert.IsTrue true        
 
 [<Test>]
-let manyTest () = 
-        
+let manyTest () =         
     let manyFooStr = test (makeStringStream "foofoofoofoofob") manyFoo
 
     Assert.IsTrue (List.length manyFooStr = 4)

@@ -7,17 +7,8 @@ open ParsecClone.CombinatorBase
 
 [<AutoOpen>]
 module BinStreams =     
-
-    type SetupBootstrapper private () = 
-        static do
-            bootstrap_combinator()            
-
-        static member val forceCreation  = true
-
-    type BinStream<'UserState> (state:Stream, userState:'UserState) =   
-        do
-            SetupBootstrapper.forceCreation |> ignore
-
+    
+    type BinStream<'UserState> (state:Stream, userState:'UserState) =           
         let mutable userState = userState
         
         let startPos = state.Position
@@ -37,7 +28,7 @@ module BinStreams =
 
                 (Some(true),  new BinStream<'UserState>(state, userState) :> IStreamP<Stream, byte[], 'UserState> )
 
-            member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore
+            member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore          
 
             member x.hasMore () = state.Position <> state.Length
 

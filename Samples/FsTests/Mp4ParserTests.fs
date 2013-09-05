@@ -221,11 +221,15 @@ let bigVidTest() =
 
     use buff = new BufferedStream(f)
 
+   // buff.Seek(int64 0x3B1, SeekOrigin.Begin) |> ignore
+
     let parserStream = mp4Stream buff
     
-    let result = test parserStream video 
-    
-    printfn "took %s" ((System.DateTime.Now - now).ToString())
+    time "parsing video" (fun () -> test parserStream video) |> ignore
 
+    buff.Seek(int64 0, SeekOrigin.Begin) |> ignore
+
+    time "parsing video" (fun () -> test parserStream video) |> ignore
+    
     () |> should equal ()
 
