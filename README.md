@@ -185,10 +185,32 @@ If the first parser fails, this parser fails.
 ----------
 
 ```fsharp
-val >>..) : Parser<'a> -> ('a -> Parser<'b>) -> Parser<'b>
+val (>>--): Parser<'a> -> (unit -> 'a) -> Parser<'a>
 ```
 
-Takes a parser and a processor function.  Applies the processor function to the result of the the parser. Alias for `parser1 >>= fun first -> applier first `. The applier should use preturn. An example applier is used in the binary parser to shift bits: `shiftL n = fun (b : uint32)  -> preturn (b <<< n)`. See the mp4 example below to see how it can be used in conjunction with a regular parser.
+This operator lets you capture the actual invocation result of a parser.  For example, say you want to time how long a parser takes. You can create a time function like this:
+
+```fsharp
+let time identifier func =
+	let start = System.DateTime.Now
+    let value = func()
+    printfn "%s Took %s" s ((System.DateTime.Now - start).ToString())
+	value
+```
+
+And time an operator like
+
+```fsharp
+let newParser = parserImpl >>-- time "parserImpl"
+```
+
+Internally the right hand function is delayed and not executed till we actually call the parser:
+
+```fsharp
+let (>>--) parser wrapper = 
+        fun state -> 
+            wrapper (fun () -> parser state)
+```     
 
 ----------
 

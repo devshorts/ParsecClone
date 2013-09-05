@@ -4,6 +4,6 @@
 module MiscUtils = 
     let time s f =         
         let n = System.DateTime.Now
-        let x = f()
+        let value = f()
         printfn "%s Took %s" s ((System.DateTime.Now - n).ToString())
-        x
+        value

@@ -88,8 +88,8 @@ module Mp4Leaves =
         bp.uint16   >>= fun volume ->
         bp.uint16   >>= fun reserved3 ->
         matrix      >>= fun matrix ->
-        bp.uint32   >>.. bp.shiftR 16 >>= fun width ->
-        bp.uint32   >>.. bp.shiftR 16 >>= fun height ->
+        bp.uint32   >>|. bp.shiftR 16 >>= fun width ->
+        bp.uint32   >>|. bp.shiftR 16 >>= fun height ->
         freeOpt >>. preturn {
             Atom  = id
             VersionAndFlags = vFlags

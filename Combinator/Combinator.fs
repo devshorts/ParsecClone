@@ -80,10 +80,7 @@ module Combinator =
     let (.>>)  parser1 parser2 = 
         parser1 >>= fun first -> 
         parser2 >>= fun second -> 
-        preturn first
-
-    let (>>..)  parser1 applier = 
-        parser1 >>= fun first -> applier first  
+        preturn first    
         
     let (>>|.) parser1 transformer = parser1  >>= fun result -> preturn (transformer result)      
 

@@ -77,9 +77,9 @@ module BinParsers =
 
         member x.uintB = x.byte1 |>> x.byteToUInt
 
-        member x.shiftL n = fun (b : uint32)  -> preturn (b <<< n)
+        member x.shiftL n = fun (b : uint32)  -> b <<< n
 
-        member x.shiftR n = fun (b : uint32) -> preturn (b >>> n)
+        member x.shiftR n = fun (b : uint32) -> b >>> n
 
         member x.floatP = x.byteN 4 >>= fun b -> 
                           preturn (System.BitConverter.ToSingle(endianNessConverter b, 0))       
