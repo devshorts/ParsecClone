@@ -28,8 +28,8 @@ let audioStts result =
         }
 
         match getAudioMetadata result with
-            | Some(stts::_) -> stts
-            | _ -> failwith "shouldn't have gotten here"
+            | Some(stts::_) -> Some(stts)
+            | _ -> None
         
 [<Test>]
 let moovFtypTest() = 
@@ -98,7 +98,7 @@ let matchFtypAndMoov() =
     
     let audioStts = audioStts (result |> rootListToRecord)
     
-    audioStts.SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
+    (Option.get audioStts).SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
 
 
 [<Test>]
@@ -127,9 +127,9 @@ let matchOptFtypAndMoov() =
 
     let audioStts = audioStts (result |> rootListToRecord)
 
-    audioStts.SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
+    (Option.get audioStts).SampleTimes.[0].SampleDuration |> should equal (uint32 1025)
 
-    audioStts.SampleTimes.[1].SampleDuration |> should equal (uint32 661)
+    (Option.get audioStts).SampleTimes.[1].SampleDuration |> should equal (uint32 661)
 
 [<Test>]
 let testMessedUpFreeAtoms() = 
@@ -188,27 +188,44 @@ let madeByFfmpeg() =
 
 [<Test>]
 let findStts() = 
-    for file in Directory.EnumerateFiles(@"C:\temp\errs\test2") do 
-        printfn "---"
-        printfn "%s" file
+    let now = DateTime.Now
+    let mutable count = 0
+    for file in Directory.EnumerateFiles(@"Z:\data\video") do 
+        try            
+            let xNow = DateTime.Now
+            let duration() = (DateTime.Now - xNow).ToString()
 
-        use f = new FileStream(file, FileMode.Open)
+            count <- count + 1
+            printf "%s" file
 
-        use buff = new BufferedStream(f)
+            use f = new FileStream(file, FileMode.Open)
 
-        let parserStream = mp4Stream buff
+            use buff = new BufferedStream(f)
 
-        let result = test parserStream video |> rootListToRecord   
+            let parserStream = mp4Stream buff
+
+            let result = test parserStream video |> rootListToRecord   
         
-        let audioStts = audioStts result
+            let atts = audioStts result
 
-        let fuckedUp = List.zip (Array.toList audioStts.SampleTimes) [0..(int)audioStts.NumberOfEntries - 1]
-                            |> List.filter (fun (i, b) -> (int)i.SampleDuration > 2000) 
-                            |> List.map (fun (i, b) -> System.String.Format("{0}: {1}", b, i.SampleDuration))
+            if Option.isNone atts then printfn "..No audio %s" <| duration()
+            else 
+                let audioStts = Option.get atts
+                let fuckedUp = List.zip (Array.toList audioStts.SampleTimes) [0..(int)audioStts.NumberOfEntries - 1]
+                                    |> List.filter (fun (i, b) -> (int)i.SampleDuration > 5000) 
+                                    |> List.map (fun (i, b) -> System.String.Format("{0}: {1}", b, i.SampleDuration))
 
-        List.map (printfn "%s") fuckedUp |> ignore
+                //List.map (printfn "%s") fuckedUp |> ignore
 
-        () |> should equal ()
+                printfn "...%s %s" (if List.length fuckedUp > 0 then "has abnormal stts" else "OK") <| duration()
+
+            () |> should equal ()
+
+
+        with
+            exn -> printfn "...error"
+
+    printfn "%d files took %s" count ((DateTime.Now - now).ToString())
 
 
 

@@ -6,6 +6,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7AB31D80-B8DE-418D-9B09-01600F0DEDB9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Combinator", "Combinator", "{E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}"
+	ProjectSection(SolutionItems) = preProject
+		combinator.msbuild.proj = combinator.msbuild.proj
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{AC12E917-DB4B-47FA-BF0B-1A899A8941EA}"
 EndProject
