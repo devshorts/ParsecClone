@@ -35,7 +35,8 @@ module Combinator =
                 | Some(m) -> (Some(Some(m)), state)
                 | None -> (Some(None), state)
 
-    let getAltReply first second inputState  =
+    let getAltReply first second inputState =       
+
         let (result, state:State<_,_,_>) as reply = first inputState
 
         // if the first one matches, stop
@@ -123,15 +124,16 @@ module Combinator =
 
                 match currentState.hasMore() with
                     | false -> returnValue()
-                    | true ->
+                    | true ->                        
                         match parser currentState with
-                            | Some(result), nextState when not <| predicate result  -> many' parser (result::resultList, nextState)
+                            | Some(result), nextState when not <| predicate (result::resultList)  -> many' parser (result::resultList, nextState)
                             | Some(_), _ ->  currentState.backtrack(); returnValue()
                             | _ ->  returnValue()
+                        
                                   
             many' parser ([], state)
 
-    let takeTill predicate (parser) = takeTillWithCount 0 predicate parser           
+    let takeTill predicate (parser) = takeTillWithCount 0 (fun i -> predicate <| List.head i) parser           
 
     let takeWhile predicate (parser) = takeTill (predicate >> not) parser
    
@@ -164,15 +166,8 @@ module Combinator =
 
     let manyTill1 p pEnd = manyTillWithCount 1 p pEnd
         
-    let manyN num (parser) =                      
-        let count = ref 0
-
-        let countReached _ = 
-            count := 1 + !count
-            !count > num
-
-            
-        takeWhile (countReached >> not) parser >>= fun result -> 
+    let manyN num (parser) =                              
+        takeTillWithCount 0 (fun i -> List.length i > num) parser    >>= fun result -> 
             if result.Length <> num then
                 failwith ("Error, attempted to match " + num.ToString() + " but only got " + result.Length.ToString())
 
@@ -202,7 +197,7 @@ module Combinator =
     let anyOf comb = List.fold (fun acc value -> acc <|> comb value) pzero
      
     let choice parsers = 
-        parsers |> List.fold (fun acc value -> acc <|> value) pzero
+        List.foldBack (fun acc value -> acc <|> value) parsers pzero
 
     let between ``open`` parser close = ``open`` >>. parser .>> close
 

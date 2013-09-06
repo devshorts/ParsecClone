@@ -8,7 +8,7 @@ open System.Text
 [<AutoOpen>]
 module Mp4ParserUtils = 
 
-    let injector name f = f()
+    let injector name f = f()//MiscUtils.time name f
 
     let private timeSince1904 = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -56,7 +56,7 @@ module Mp4ParserUtils =
                     Size = size
                     Name = name
                 }
-        ) >>-- injector "attempt"
+        ) //>>-- injector "attempt"
 
 
     /// <summary>
@@ -107,7 +107,7 @@ module Mp4ParserUtils =
                                     let consumed = s.CurrentStatePosition - (int64)start
                                     consumed < (int64)expectedSize
                                         
-        satisfyUserState shouldConsume parser >>-- injector "satisfyUserrState"
+        satisfyUserState shouldConsume parser // >>-- injector "satisfyUserrState"
         
     /// <summary>
     /// runs the parser many times until the 
@@ -138,14 +138,14 @@ module Mp4ParserUtils =
         bp.uint32 >>= fun i ->
         preturn <| i / uint32(pown 2 16)
 
-    let ``2.10`` = 
+    let ``2.30`` = 
         bp.uint32 >>= fun i ->
         preturn <| i / uint32(pown 2 30)
 
     let matrixRow = 
         ``16.16``   >>= fun x1 ->
         ``16.16``   >>= fun x2 ->
-        ``2.10``    >>= fun x3 ->
+        ``2.30``    >>= fun x3 ->
         preturn [|x1; x2; x3|]
 
     let matrix : VideoParser<_> = 

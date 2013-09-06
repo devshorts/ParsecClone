@@ -232,19 +232,16 @@ let findStts() =
 [<Test>]
 let bigVidTest() = 
     
-    let now = System.DateTime.Now
+    for i in [0..1] do
+        let now = System.DateTime.Now
 
-    use f = new FileStream(@"z:\data\video\2013-06-24--13-25-20--Encounter--R.12-C.0.m4v", FileMode.Open)
+        use f = new FileStream(@"z:\data\video\2013-06-24--13-25-20--Encounter--R.12-C.0.m4v", FileMode.Open)
 
-    use buff = new BufferedStream(f)
-   
-    let parserStream = mp4Stream buff
+        use buff = new BufferedStream(f)
+
+        let parserStream = mp4Stream buff
     
-    MiscUtils.time "parsing video" (fun () -> test parserStream video) |> ignore
+        MiscUtils.time "parsing video" (fun () -> test parserStream video) |> ignore
 
-    buff.Seek(int64 0, SeekOrigin.Begin) |> ignore
-
-    MiscUtils.time "parsing video" (fun () -> test parserStream video) |> ignore
-    
-    () |> should equal ()
+        () |> should equal ()
 

@@ -9,14 +9,16 @@ open System
 module Mp4P = 
     
     let stblInsides = 
-                    (stts >>-- injector "stts") <|> 
-                    (stsd >>-- injector "stsd")  <|> 
-                    (stsz >>-- injector "stsz")  <|> 
-                    stsc >>-- injector "stsc" <|> 
-                    stco >>-- injector "stco" <|> 
-                    stss >>-- injector "stss" <|> 
-                    ctts >>-- injector "ctts" <|>
-                    (unknown |>> StblTypes.UNKNOWN) >>-- injector "unknown" 
+                    choice[
+                        (stts >>-- injector "stts"); 
+                        (stsd >>-- injector "stsd"); 
+                        (stsz >>-- injector "stsz"); 
+                        (stsc >>-- injector "stsc"); 
+                        (stco >>-- injector "stco"); 
+                        (stss >>-- injector "stss"); 
+                        (ctts >>-- injector "ctts");
+                        ((unknown |>> StblTypes.UNKNOWN) >>-- injector "unknown" )
+                    ]
 
     let stbl = fullConsume "stbl" (fun id ->  stblInsides) >>-- injector "stbl" |>> STBL
 
@@ -26,29 +28,35 @@ module Mp4P =
         freeOpt >>.
         fullConsume "minf" 
             (fun id -> 
-                vOrSmhd <|> 
-                dinf <|> 
-                stbl <|>
-                (unknown |>> MinfTypes.UNKNOWN)) >>-- injector "minf" |>> MINF
+                choice[
+                        vOrSmhd;
+                        dinf;
+                        stbl;
+                        (unknown |>> MinfTypes.UNKNOWN)
+                    ]) >>-- injector "minf" |>> MINF
 
     let mdia = 
         freeOpt >>.
         fullConsume "mdia"
             (fun id ->        
-                mdhd <|> 
-                hdlr <|> 
-                minf <|>
-                (unknown |>> MdiaTypes.UNKNOWN)
+                choice[
+                    mdhd; 
+                    hdlr; 
+                    minf; 
+                    (unknown |>> MdiaTypes.UNKNOWN)
+                ]
             ) >>-- injector "mdia" |>> MDIA
 
     let trak = 
         freeOpt >>.
         fullConsume "trak" 
             (fun id ->        
-                tkhd <|> 
-                mdia <|> 
-                edts <|>
-                (unknown |>> TrakTypes.UNKNOWN)
+                choice[
+                    tkhd;
+                    mdia;
+                    edts;
+                    (unknown |>> TrakTypes.UNKNOWN)
+                ]
             ) >>-- injector "trak" |>> TRAK
 
     let mdat = 
@@ -62,10 +70,12 @@ module Mp4P =
     let moov =         
         fullConsume "moov" 
             (fun id ->
-                mvhd <|> 
-                iods <|> 
-                trak <|>
-                (unknown |>> MoovTypes.UNKNOWN)
+                choice[
+                    mvhd;
+                    iods;
+                    trak;
+                    (unknown |>> MoovTypes.UNKNOWN)
+                ]
             ) >>-- injector "moov" |>> MOOV   
 
     let video : VideoParser<_> = many (choice[  attempt ftyp; 

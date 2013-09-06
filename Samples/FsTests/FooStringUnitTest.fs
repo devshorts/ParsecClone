@@ -11,7 +11,9 @@ open StringMatchers.FooSample
 let shortCircuitOr () = 
     let target = makeStringStream "fab"
 
-    let band = test target (matchStr "f" <|> matchStr "a" <|> matchStr "b")
+    let x = choice[matchStr "f"; matchStr "a"; matchStr "b"]
+
+    let band = test target x
         
     () |> should equal ()
 

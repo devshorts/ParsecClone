@@ -81,7 +81,7 @@ module Mp4StsdElements =
             pzero 
         else        
             videoDescription      >>= fun vDesc ->
-            many1 (avcC <|> btrt <|> pasp <|> colr <|> uuid <|> esds) >>= fun inner ->
+            many1 <| choice [avcC; btrt; pasp; colr; uuid; esds] >>= fun inner ->
             freeOpt >>. preturn () |>> STSD_VIDEO
 
     let audioStsd : VideoParser<_> = 

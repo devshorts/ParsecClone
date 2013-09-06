@@ -18,6 +18,7 @@ let int16 = bp.int16
 let intB = bp.intB
 let uint16 = bp.uint16
 
+
 [<Test>]
 let binTest1() = 
     let bytes = [|0;1;2;3;4;5;6;7;8|] |> Array.map byte
