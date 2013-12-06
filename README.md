@@ -53,7 +53,7 @@ While the following documentation is not as robust as theirs, ParsecClone operat
 
 ## When to use and known limitations
 
-ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.  Performance of parsecClone is close to native. In my tests it was only 2x times slower than hand written c++.  Performance even exceeded C++ if you ran the parser multiple times (since memory was preloaded)!
+ParsecClone is well suited for binary parsing which works on stream sources (memory streams, file streams, etc). Not only can you do byte level parsing, but also bit level parsing.  Performance of parsecClone is close to native. In my tests it was only 2x times slower than hand written c++.  Performance even exceeded C++ if you ran the parser multiple times (since the JIT had already run)!
 
 ParseClone can also parse strings, but doesn't work on string streams. One of the reasons is that to use regular expressions you need to have unlimited lookahead to your stream. With a stream you'd end up having to read the whole stream in anyways!  Since FParsec works on streams, I chose to not duplicate that functionality. 
 
