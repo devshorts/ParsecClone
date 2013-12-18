@@ -11,6 +11,7 @@ Release/
 obj/
 *.suo
 *.ReSharper.user
+.userprefs
 .swf
 *.idea*
 *.lib
