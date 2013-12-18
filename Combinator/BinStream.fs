@@ -14,7 +14,7 @@ module BinStreams =
         // value = list of byte arrays that could have been read from that position (it would've been more space efficient
         //          to track deltas or munge things, but realistically there should only be one element here
 
-        cache: Dictionary<int64, byte[] list>
+        cache: Dictionary<int64, byte[] list> option
     }
 
     let inline initBytes size = Array.create size <| byte(0)
@@ -28,8 +28,9 @@ module BinStreams =
 
             b
 
-    let createCache() = { cache = new Dictionary<int64, byte[] list>() }
+    let createCache() = { cache = Some (new Dictionary<int64, byte[] list>()) }
 
+    let toInterface binstream = binstream :> IStreamP<Stream, byte[], unit>
 
     type BinStream<'UserState> (state:Stream, userState:'UserState, args: BinArgs) =           
         let mutable userState = userState
@@ -109,27 +110,36 @@ module BinStreams =
                 result
                                             
           member x.testCache startPosition length = 
-                let (found, list) = args.cache.TryGetValue(startPosition)
+                match args.cache with 
+                    | None -> None
+                    | Some(cache) ->
+                        let (found, list) = cache.TryGetValue(startPosition)
 
-                if not found then None
-                else 
-                    List.tryFind (Array.length >> (=) length) list
+                        if not found then None
+                        else 
+                            List.tryFind (Array.length >> (=) length) list
 
           member x.updateCache startPosition bytes = 
-                let (found, list) = args.cache.TryGetValue(startPosition)
+                match args.cache with 
+                    | None -> ()
+                    | Some(cache) -> 
+                        let (found, list) = cache.TryGetValue(startPosition)
 
-                if not found then                    
-                    args.cache.[startPosition] <- [bytes]                  
-                else                     
-                    let sameBytes = List.tryFind (Array.length >> (=) (Array.length bytes)) list
-                    match sameBytes with
-                        | Some(_) -> () // do nothing, already read that much!
-                        | None -> args.cache.[startPosition] <- bytes::list
-
+                        if not found then                    
+                            cache.[startPosition] <- [bytes]                  
+                        else                     
+                            let sameBytes = List.tryFind (Array.length >> (=) (Array.length bytes)) list
+                            match sameBytes with
+                                | Some(_) -> () // do nothing, already read that much!
+                                | None -> cache.[startPosition] <- bytes::list
 
     let makeBinStream stream = new BinStream<unit>(stream, (), createCache())
 
-    let toInterface binstream = binstream :> IStreamP<Stream, byte[], unit>
 
 
 
+
+
+
+
+       
