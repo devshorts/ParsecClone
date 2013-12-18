@@ -10,6 +10,10 @@ open ParsecClone.CombinatorBase
 module BinStreams =     
    
     type BinArgs = {
+        // key = stream start position
+        // value = list of byte arrays that could have been read from that position (it would've been more space efficient
+        //          to track deltas or munge things, but realistically there should only be one element here
+
         cache: Dictionary<int64, byte[] list>
     }
 
