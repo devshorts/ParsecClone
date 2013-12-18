@@ -32,7 +32,7 @@ module Mp4DataTypes =
 
     let pStructs<'T> entries : VideoParser<_> = parseStruct<'T, VideoState> true entries bp
 
-    let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0})
+    let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0}, BinStreams.createCache())
 
     let knownAtoms = [  "free";
                         "esds";

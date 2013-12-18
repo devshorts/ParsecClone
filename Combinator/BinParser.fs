@@ -17,7 +17,7 @@ module BinParsers =
         let streamCanBeConsumed (state : ParseState<'UserState>) count  = state.canConsume count
         let bitStreamCanBeConsumed (state : BitState<'UserState>) count  = state.canConsume count
     
-        let streamStartsWith (state:ParseState<'UserState>) bytes  = (state |> getBinStream).streamStartsWith state bytes            
+        let streamStartsWith (state:ParseState<'UserState>) bytes  = (state |> getBinStream).streamStartsWith bytes            
 
         let binMatch (num:int) : Parser<_,_,_,'UserState> = matcher streamCanBeConsumed num    
 
@@ -47,7 +47,11 @@ module BinParsers =
             fun (state:IStreamP<_,_,_>) ->
                 (state |> getBinStream).seekToEnd()
 
-                (Some(true),  new BinStream<_>(state.state, state.getUserState()) :> IStreamP<Stream, byte[], _> )
+                (Some(true),  
+                    new BinStream<_>(
+                        state.state, 
+                        state.getUserState(),
+                        BinStreams.createCache()) :> IStreamP<Stream, byte[], _>)
 
         member x.byteN : int -> Parser<_,_,_,_> = binMatch         
 

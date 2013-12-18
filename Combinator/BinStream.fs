@@ -1,32 +1,57 @@
 ﻿namespace ParsecClone.BinaryCombinator 
 
 open System.IO
+open System.Collections.Generic
 open System.Reflection
 open System
 open ParsecClone.CombinatorBase
 
 [<AutoOpen>]
 module BinStreams =     
-    
-    type BinStream<'UserState> (state:Stream, userState:'UserState) =           
+   
+    type BinArgs = {
+        cache: Dictionary<int64, byte[] list>
+    }
+
+    let inline initBytes size = Array.create size <| byte(0)
+
+    let private seekTo  (stream:Stream) location = stream.Seek(location, SeekOrigin.Begin) |> ignore
+
+    let private readFromStream count (stream:Stream) = 
+            let b = initBytes count
+
+            stream.Read(b, 0, count) |> ignore
+
+            b
+
+    let createCache() = { cache = new Dictionary<int64, byte[] list>() }
+
+
+    type BinStream<'UserState> (state:Stream, userState:'UserState, args: BinArgs) =           
         let mutable userState = userState
-        
+
         let startPos = state.Position
-    
-        interface IStreamP<Stream, byte[],'UserState>  with       
+
+        interface IStreamP<Stream, byte[],'UserState>  with     
+              
             member x.state = state     
 
-            member x.consume (count) =                 
-                let bytes = x.initBytes count
+            member x.consume (count) =           
+                // make sure to advance the underlying stream position
+                // if we pulled data back from the cache
+                      
+                let result = 
+                    Option.bind (fun (fromCache, bytes) -> 
+                        if fromCache then
+                            seekTo state (startPos + (int64)(Array.length bytes))
+                        Some(bytes)) (x.consumeOrGet count)
 
-                state.Read(bytes, 0, count) |> ignore                           
-
-                (Some(bytes), new BinStream<'UserState>(state, userState) :> IStreamP<Stream, byte[], 'UserState> )
+                (result, new BinStream<'UserState>(state, userState, args) :> IStreamP<Stream, byte[], 'UserState> )
 
             member x.skip count = 
                 state.Seek((int64)count, SeekOrigin.Current) |> ignore
 
-                (Some(true),  new BinStream<'UserState>(state, userState) :> IStreamP<Stream, byte[], 'UserState> )
+                (Some(true),  new BinStream<'UserState>(state, userState, args) :> IStreamP<Stream, byte[], 'UserState> )
 
             member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore          
 
@@ -43,31 +68,64 @@ module BinStreams =
             member x.setUserState s = userState <- s
             
             member x.position () = startPos
-        
-        member inline x.initBytes size = Array.create size <| byte(0)
 
         member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 
-        member x.streamStartsWith (input:IStreamP<Stream, byte[], _> ) bytes =                 
-            if (int)input.state.Position + (Array.length bytes) > (int)input.state.Length then
+        member x.consumeOrGet count = 
+
+            match x.testCache startPos count with
+                | Some(bytes) -> Some(true, bytes)
+                | None -> 
+                    state 
+                        |> readFromStream count
+                        |> fun(bytes) ->     
+                                                
+                            x.updateCache startPos bytes
+
+                            Some(false, bytes)
+
+        member x.streamStartsWith bytes =                 
+            if (int)state.Position + (Array.length bytes) > (int)state.Length then
                 None
             else 
-                let start = input.state.Position
+                let start = state.Position
 
                 let count = Array.length bytes
 
-                let b = x.initBytes count
+                let result = 
+                    match x.consumeOrGet count with
+                        | None -> None
+                        | Some(_, values) -> 
+                            if values = bytes then 
+                                Some(count) 
+                            else None
 
-                input.state.Read(b, 0, count) |> ignore
+                seekTo state start
 
-                input.state.Seek(start, SeekOrigin.Begin) |> ignore
+                result
+                                            
+          member x.testCache startPosition length = 
+                let (found, list) = args.cache.TryGetValue(startPosition)
 
-                if b = bytes then
-                    Some(count)
+                if not found then None
                 else 
-                    None
+                    List.tryFind (Array.length >> (=) length) list
 
-    let makeBinStream stream = new BinStream<unit>(stream, ())
+          member x.updateCache startPosition bytes = 
+                let (found, list) = args.cache.TryGetValue(startPosition)
+
+                if not found then                    
+                    args.cache.[startPosition] <- [bytes]                  
+                else                     
+                    let sameBytes = List.tryFind (Array.length >> (=) (Array.length bytes)) list
+                    match sameBytes with
+                        | Some(_) -> () // do nothing, already read that much!
+                        | None -> args.cache.[startPosition] <- bytes::list
+
+
+    let makeBinStream stream = new BinStream<unit>(stream, (), createCache())
 
     let toInterface binstream = binstream :> IStreamP<Stream, byte[], unit>
+
+
 
