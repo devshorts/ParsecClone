@@ -72,7 +72,7 @@ module BinStreams =
 
             member x.setUserState s = userState <- s
             
-            member x.position () = startPos
+            member x.position () = state.Position
 
         member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
 
