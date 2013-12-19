@@ -235,8 +235,10 @@ module Combinator =
 
             match r with 
                 | Some(m) when predicate (state.getUserState()) -> result 
-                | Some(_) -> backtrackNone state                                                                     
-                | _ -> None, nextState
+                | Some(_) -> backtrackNone state        
+                | None when not <| predicate(state.getUserState()) -> 
+                        backtrackNone state
+                | None -> None, state
 
     let satisfy predicate parser = 
         fun (state : State<_,_,_>) ->  
