@@ -230,15 +230,12 @@ module Combinator =
 
     let satisfyUserState predicate parser = 
         fun (state : State<_,_,'UserState>) ->     
-            //printfn "executing user state parser"         
-            let (r, nextState:State<_,_,_>) as result = parser state
+            //printfn "executing user state parser"    
+            if predicate (state.getUserState()) then
+                parser state
+            else
+                None, state
 
-            match r with 
-                | Some(m) when predicate (state.getUserState()) -> result 
-                | Some(_) -> backtrackNone state        
-                | None when not <| predicate(state.getUserState()) -> 
-                        backtrackNone state
-                | None -> None, state
 
     let satisfy predicate parser = 
         fun (state : State<_,_,_>) ->  
