@@ -25,7 +25,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 ## Installation
 
-Install ParsecClone v1.0.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/1.0.0)
+Install ParsecClone v1.1.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/1.1.0)
 
 ```
 Install-Package ParsecClone
@@ -61,7 +61,7 @@ If you have strings you can buffer into memory, ParsecClone will work great (so 
 
 More importantly, ParsecClone is great for adding new stream sources to extend its capabilities. To do so just implement the `IStreamP` interface and hook into the `matcher` function in the base combinator library.
 
-A few other caveats.  Currently ParsecClone doesn't do any memoization, so you are stuck reparsing data.  
+A few other caveats.  Currently ParsecClone's string parsing doesn't do any memoization, so you are stuck reparsing data.  However, by default the binary parser does memoize using a custom cache. You can disable this by passing in a `None` to the cache instantiator.
 
 [[Top]](#table-of-contents)
 
@@ -1113,10 +1113,10 @@ One thing that can happen is you need to track context sensitive information dur
 type VideoState = { IsAudio: bool; StateStart: int64 }
 
 let makeBinStreamState (stream:Stream) =
-	new BinStream<VideoState>(stream, { IsAudio = false; StateStart = (int64)0 })
+	new BinStream<VideoState>(stream, { IsAudio = false; StateStart = (int64)0 }, BinStreams.createCache())
 ```
 
-In this scenario I am creating a user state of the record `VideoState` and seeding the `BinStream` with a default value. The user state is mutable, so you can pass it whatever you want.
+In this scenario I am creating a user state of the record `VideoState` and seeding the `BinStream` with a default value. The user state is mutable, so you can pass it whatever you want.  I'm also creating the default binary cache to use for memoization.  If you don't want to use memoization (maybe your data source is huge and you would rather seek around in the stream), then pass in `None`. The cache is an option type.
 
 [[Top]](#table-of-contents)
 
