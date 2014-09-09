@@ -23,19 +23,16 @@ module ByteUtils =
                         | Zero -> byte(0)
 
     let bitMasks = 
-        let maskArr:(byte*int)[] = Array.zeroCreate 8
-        maskArr 
-            |> Array.iteri 
-                ( fun i elm -> maskArr.[i] <- (byte(pown 2 i), i))   
-        maskArr 
+        Array.zeroCreate 8        
+            |> Array.mapi ( fun i _ -> byte(pown 2 i), i )   
             |> Array.rev
 
-    let byteToBitArray b = 
-        Array.map 
-            ( fun (bitMask, bitPosition) -> 
-                        if   (b &&& bitMask) >>> bitPosition = byte(0) 
-                        then Zero
-                        else One) bitMasks
+    let private mask inputByte (bitMask, bitPosition) = 
+        if   (inputByte &&& bitMask) >>> bitPosition = byte(0) then Zero
+        else One 
+
+    let byteToBitArray inputByte  = 
+        bitMasks |> Array.map (mask inputByte)                 
 
     let bytesToBits (bytes:byte[]) =        
         bytes |> Array.collect byteToBitArray

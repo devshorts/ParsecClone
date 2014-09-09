@@ -132,6 +132,7 @@ let matchOptFtypAndMoov() =
     (Option.get audioStts).SampleTimes.[1].SampleDuration |> should equal (uint32 661)
 
 [<Test>]
+[<Ignore>]
 let testMessedUpFreeAtoms() = 
     
     use f = new FileStream(@"z:\data\video\Local_130814_1633_C105_f199e2f2d960428bb448fd2ccd172b7b.m4v", FileMode.Open)
@@ -187,6 +188,7 @@ let madeByFfmpeg() =
 
 
 [<Test>]
+[<Ignore>]
 let findStts() = 
     let now = DateTime.Now
     let mutable count = 0
@@ -228,8 +230,8 @@ let findStts() =
     printfn "%d files took %s" count ((DateTime.Now - now).ToString())
 
 
-
 [<Test>]
+[<Ignore>]
 let bigVidTest() = 
     
     for i in [0..1] do
