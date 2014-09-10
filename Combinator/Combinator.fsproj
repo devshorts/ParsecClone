@@ -52,12 +52,6 @@
     <Compile Include="StringP.fs" />
     <Compile Include="BinParser.fs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CombinatorCS\CombinatorCS.csproj">
-      <Name>CombinatorCS</Name>
-      <Project>{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>

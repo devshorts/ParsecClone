@@ -6,8 +6,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Combinator", "Combinator", 
 		combinator.msbuild.proj = combinator.msbuild.proj
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombinatorCS", "CombinatorCS\CombinatorCS.csproj", "{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{AC12E917-DB4B-47FA-BF0B-1A899A8941EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7AB31D80-B8DE-418D-9B09-01600F0DEDB9}"
@@ -36,20 +34,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|Win32.ActiveCfg = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|x64.ActiveCfg = Release|Any CPU
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44}.Release|x86.ActiveCfg = Release|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F3EDE6E-7D84-45BD-9B0C-00198760A714}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
@@ -135,7 +119,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{CBB4A868-83AC-4990-8015-F1EDA3E5DA44} = {E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}
 		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90} = {E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}
 		{7AB31D80-B8DE-418D-9B09-01600F0DEDB9} = {AC12E917-DB4B-47FA-BF0B-1A899A8941EA}
 		{BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A} = {AC12E917-DB4B-47FA-BF0B-1A899A8941EA}
