@@ -30,7 +30,7 @@ module Mp4DataTypes =
     /// </summary>
     let bp = new BinParser<_>(Array.rev)
 
-    let pStructs<'T> entries : VideoParser<_> = parseStruct<'T, VideoState> true entries bp
+    let pStructs<'T when 'T: unmanaged> entries : VideoParser<_> = parseStruct<'T, VideoState> true entries bp
 
     let mp4Stream f = new BinStream<VideoState>(f, { IsAudio = false; CurrentStatePosition = (int64)0}, BinStreams.createCache())
 
