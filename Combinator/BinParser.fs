@@ -112,7 +112,7 @@ module BinParsers =
         member x.bit7 = x.bitN 7
         member x.bit8 = x.bitN 8     
     
-    let parseStruct<'T, 'UserState> networkOrder numEntries (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
+    let parseStruct<'T , 'UserState when 'T: unmanaged > networkOrder numEntries (bp:BinParser<'UserState>) : Parser<_,_,_,'UserState> = 
             let size = sizeofType typeof<'T>
             let requiredBytes = size * numEntries
 
@@ -122,7 +122,7 @@ module BinParsers =
                      
             preturn <| byteArrayToObjects<'T> (converter bytes) networkOrder
 
-    let defineStructParserLE<'T> = parseStruct<'T, unit> false
+    let defineStructParserLE<'T when 'T: unmanaged > = parseStruct<'T, unit> false
 
-    let defineStructParserBE<'T> = parseStruct<'T, unit> true
+    let defineStructParserBE<'T when 'T: unmanaged > = parseStruct<'T, unit> true
 

@@ -1,9 +1,9 @@
 ﻿namespace ParsecClone.BinaryCombinator
 
 open System.Reflection
+open System.Reflection.Emit
 open System.IO
 open System.Runtime.InteropServices
-open ParsecClone.CombinatorCS
 open System
 open System.Collections.Generic
 
@@ -50,7 +50,53 @@ module ByteUtils =
 
     let sizeofType objType = Marshal.SizeOf objType
 
-    let blit<'T>  (byteArray: byte[]) : 'T [] = 
+    type BlitParser<'T> =  delegate of byte[] * int * int * int -> 'T[]
+ 
+    let MakeUnsafeArrayBlitParser<'T when 'T: unmanaged> () : BlitParser<'T> =
+        
+        let d = new DynamicMethod ( "BlitParseArray" + ( typeof<'T> |> string )                 ,
+                                    typeof<'T[]>                                                ,
+                                    [| typeof<byte[]>; typeof<int>; typeof<int>; typeof<int> |] ,
+                                    Assembly.GetExecutingAssembly().ManifestModule              )
+
+        // ___( byte[] array, int count, int offset, int length )
+        let gen = d.GetILGenerator()
+
+        // T[] result
+        gen.DeclareLocal( typeof<'T[]> ) |> ignore
+
+        // IntPtr resultPtr
+        gen.DeclareLocal( typeof<IntPtr>, true ) |> ignore
+        
+        // result = new T[count]
+        gen.Emit( OpCodes.Ldarg_1 )
+        gen.Emit( OpCodes.Newarr, typeof<'T> )
+        gen.Emit( OpCodes.Stloc_0 )
+
+        // fixed ( IntPtr resultPtr = result )
+        gen.Emit( OpCodes.Ldloc_0  )
+        gen.Emit( OpCodes.Ldc_I4_0 )
+        gen.Emit( OpCodes.Ldelema, typeof<'T> )
+        gen.Emit( OpCodes.Stloc_1  )
+
+        // Marshal.Copy( array, offset, (IntPtr)resultPtr, length )
+        gen.Emit( OpCodes.Ldarg_0 )
+        gen.Emit( OpCodes.Ldarg_2 )
+        gen.Emit( OpCodes.Ldloc_1 )
+        gen.Emit( OpCodes.Conv_I  )
+
+        gen.Emit( OpCodes.Ldarg_3 )
+        let marshalCopy = typeof<Marshal>.GetMethod( "Copy", [| typeof<byte[]>; typeof<int>; typeof<IntPtr>; typeof<int> |])
+        gen.EmitCall( OpCodes.Call, marshalCopy, null)                                                      
+
+        // return result
+        gen.Emit( OpCodes.Ldloc_0 )
+        gen.Emit( OpCodes.Ret     )
+
+        d.CreateDelegate( typeof<BlitParser<'T>> ) :?> BlitParser<'T>
+
+
+    let blit<'T when 'T: unmanaged >  (byteArray: byte[]) : 'T [] = 
         let size = sizeofType typeof<'T>
 
         let count = byteArray.Length / size
@@ -59,12 +105,12 @@ module ByteUtils =
 
         let args = (byteArray, count, offset, length)
 
-        let func = OptimizedBlit<'T>.MakeUnsafeArrayBlitParser()
+        let func = MakeUnsafeArrayBlitParser()
 
         func.Invoke args
 
 
-    let byteArrayToObjects<'T> (byteArray: byte[]) networkOrder : 'T [] =         
+    let byteArrayToObjects<'T when 'T: unmanaged > (byteArray: byte[]) networkOrder : 'T [] =         
         blit byteArray |> (if networkOrder then Array.rev else id)
 
 
