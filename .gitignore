@@ -8,6 +8,7 @@ bin/
 _Resharper*
 Debug/
 Release/
+packages/
 obj/
 *.suo
 *.ReSharper.user
