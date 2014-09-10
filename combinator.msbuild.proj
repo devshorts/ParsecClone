@@ -8,13 +8,5 @@
       Properties="Configuration=Release;OutputPath=..\nuget\lib\net40\;IntermediateOutputPath=obj\Release\net40\;TargetFrameworkVersion=v4.0" />
     <MSBuild Projects="Combinator\Combinator.fsproj"
       Properties="Configuration=Release;OutputPath=..\nuget\lib\net35\;IntermediateOutputPath=obj\Release\net35\;TargetFrameworkVersion=v3.5" />
-
-
-    <MSBuild Projects="CombinatorCS\CombinatorCS.csproj"
-          Properties="Configuration=Release;OutputPath=..\nuget\lib\net45\;IntermediateOutputPath=obj\Release\net45\;TargetFrameworkVersion=v4.5" />
-    <MSBuild Projects="CombinatorCS\CombinatorCS.csproj"
-          Properties="Configuration=Release;OutputPath=..\nuget\lib\net40\;IntermediateOutputPath=obj\Release\net40\;TargetFrameworkVersion=v4.0" />
-    <MSBuild Projects="CombinatorCS\CombinatorCS.csproj"
-        Properties="Configuration=Release;OutputPath=..\nuget\lib\net35\;IntermediateOutputPath=obj\Release\net35\;TargetFrameworkVersion=v3.5" />
   </Target>
 </Project>

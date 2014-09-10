@@ -25,7 +25,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 ## Installation
 
-Install ParsecClone v1.1.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/1.1.0)
+Install ParsecClone v1.1.1 via [NuGet](https://www.nuget.org/packages/ParsecClone/1.1.0)
 
 ```
 Install-Package ParsecClone

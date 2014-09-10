@@ -2,19 +2,18 @@
 <package >
   <metadata>
     <id>ParsecClone</id>
-    <version>1.1.0</version>
+    <version>1.1.2</version>
     <authors>Anton Kropp</authors>
     <owners>Anton Kropp</owners>
     <licenseUrl>http://onoffswitch.net/onoff-license/</licenseUrl>
     <projectUrl>https://github.com/devshorts/ParsecClone</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A generalized parser combinator based off of fparsec. ParsecClone works on strings as well as binary files (with bit level parsing)</description>
-    <releaseNotes>Fixing satisfy user state improperly failing, fixing state position getter returning improperly cached stream position, adding optional binary memoization to the binary stream</releaseNotes>
+    <releaseNotes>Removing the c# dll</releaseNotes>
     <copyright>Copyright 2013 Anton Kropp</copyright>
     <tags>Parsing Combinator F# fsharp c# csharp</tags>    
     <references>
-      <reference file="ParsecClone.Combinator.dll" />      
-      <reference file="ParsecClone.CombinatorCS.dll" />   
+      <reference file="ParsecClone.Combinator.dll" />     
     </references>
   </metadata>
 </package>

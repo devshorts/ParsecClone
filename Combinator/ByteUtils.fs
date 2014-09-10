@@ -2,10 +2,8 @@
 
 open System.Reflection
 open System.Reflection.Emit
-open System.IO
 open System.Runtime.InteropServices
 open System
-open System.Collections.Generic
 
 [<AutoOpen>]
 module ByteUtils = 
@@ -49,7 +47,7 @@ module ByteUtils =
 
     type BlitParser<'T> =  delegate of byte[] * int * int * int -> 'T[]
  
-    let MakeUnsafeArrayBlitParser<'T when 'T: unmanaged> () : BlitParser<'T> =
+    let makeUnsafeArrayBlitParser<'T when 'T: unmanaged> () : BlitParser<'T> =
         
         let d = new DynamicMethod ( "BlitParseArray" + ( typeof<'T> |> string )                 ,
                                     typeof<'T[]>                                                ,
@@ -102,7 +100,7 @@ module ByteUtils =
 
         let args = (byteArray, count, offset, length)
 
-        let func = MakeUnsafeArrayBlitParser()
+        let func = makeUnsafeArrayBlitParser()
 
         func.Invoke args
 
