@@ -746,6 +746,14 @@ val skip: int -> Parser<bool>
 
 Skips N bytes in the stream by seeking. Returns true if succeeded.
 
+----------
+
+```fsharp
+val seekTo: int -> Parser<bool>
+```
+
+Seeks to the position in the stream starting from origin.  Returns true if succeeded.
+
 
 ----------
 

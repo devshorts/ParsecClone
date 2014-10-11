@@ -37,6 +37,8 @@ module BinStreams =
 
         let startPos = state.Position
 
+        member x.clone () = new BinStream<'UserState>(state, userState, args) :> IStreamP<Stream, byte[], 'UserState> 
+            
         interface IStreamP<Stream, byte[],'UserState>  with     
               
             member x.state = state     
@@ -51,7 +53,7 @@ module BinStreams =
                             seekTo state (startPos + (int64)(Array.length bytes))
                         Some(bytes)) (x.consumeOrGet count)
 
-                (result, new BinStream<'UserState>(state, userState, args) :> IStreamP<Stream, byte[], 'UserState> )
+                (result, x.clone())
 
             member x.skip count = 
                 state.Seek((int64)count, SeekOrigin.Current) |> ignore
@@ -75,6 +77,8 @@ module BinStreams =
             member x.position () = state.Position
 
         member x.seekToEnd() = state.Seek((int64)0, SeekOrigin.End) |> ignore
+
+        member x.seekTo n = state.Seek(n, SeekOrigin.Begin) |> ignore
 
         member x.consumeOrGet count = 
 

@@ -1,5 +1,6 @@
 ﻿module BinaryUnitTests
 
+open System
 open NUnit.Framework
 open FsUnit
 open System.IO
@@ -272,3 +273,85 @@ let testApplyManyBits() =
     let target = [0..Array.length bytes - 1] |> List.map (fun _ -> bytesToBits <| bytes.[0..0]) 
 
     result |> should equal target 
+
+
+[<Test>]
+let lookaheadAndSeek () = 
+    let writeTestFile name =
+        use f = File.OpenWrite(name)
+        use bw = new BinaryWriter(f)
+
+        let value = 55
+        let offset = 32
+
+        bw.BaseStream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+
+        bw.Write(BitConverter.GetBytes(value))
+
+        bw.BaseStream.Seek(int64 60, SeekOrigin.Begin) |> ignore
+        bw.Write(BitConverter.GetBytes(offset))
+
+        name
+
+    let bp = new BinParser<_>(id)
+
+    let testFile = "test.bin"
+
+    let fs = File.OpenRead(writeTestFile testFile)
+
+    let binstream = makeBinStream fs
+
+    let findOffset = bp.skip 60 >>. bp.int32
+    let parser = 
+        lookahead findOffset >>= fun offset ->
+        bp.skip offset >>. 
+        bp.int32
+
+    let result = parser |> test binstream 
+
+    result |> should equal 55
+
+    fs.Dispose()
+
+    File.Delete testFile 
+
+
+[<Test>]
+let lookaheadAndSeekRaw () = 
+    let writeTestFile name =
+        use f = File.OpenWrite(name)
+        use bw = new BinaryWriter(f)
+
+        let value = 55
+        let offset = 32
+
+        bw.BaseStream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+
+        bw.Write(BitConverter.GetBytes(value))
+
+        bw.BaseStream.Seek(int64 60, SeekOrigin.Begin) |> ignore
+        bw.Write(BitConverter.GetBytes(offset))
+
+        name
+
+    let bp = new BinParser<_>(id)
+
+    let testFile = "test.bin"
+
+    let fs = File.OpenRead(writeTestFile testFile)
+
+    let binstream = makeBinStream fs
+
+    let findOffset = bp.skip 60 >>. bp.int32
+    let parser = 
+        findOffset >>= fun offset ->
+        bp.seekTo offset >>. 
+        bp.int32
+
+    let result = parser |> test binstream 
+
+    result |> should equal 55
+
+    fs.Dispose()
+
+    File.Delete testFile 

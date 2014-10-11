@@ -45,14 +45,20 @@ module BinParsers =
 
         member x.skipToEnd = 
             fun (state:IStreamP<_,_,_>) ->
-                (state |> getBinStream).seekToEnd()
+                let binstream = state |> getBinStream
+                
+                binstream.seekToEnd()
 
-                (Some(true),  
-                    new BinStream<_>(
-                        state.state, 
-                        state.getUserState(),
-                        BinStreams.createCache()) :> IStreamP<Stream, byte[], _>)
+                (Some(true), binstream.clone())
 
+        member x.seekTo n = 
+             fun (state:IStreamP<_,_,_>) ->                
+                let binstream = state |> getBinStream
+                
+                binstream.seekTo (int64 n)
+
+                (Some(true), binstream.clone())
+            
         member x.byteN : int -> Parser<_,_,_,_> = binMatch         
 
         member x.byte1 = x.byteN 1 >>= fun b1 -> preturn b1.[0]  
