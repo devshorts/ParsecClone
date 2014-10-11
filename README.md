@@ -25,13 +25,13 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 ## Installation
 
-Install ParsecClone v1.1.1 via [NuGet](https://www.nuget.org/packages/ParsecClone/1.1.0)
+Install ParsecClone v2.0.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/2.0.0)
 
 ```
 Install-Package ParsecClone
 ```
 
-This will install the ParsecClone F# library.  Also included is `ParsecClone.CombinatorCS` which contains an optimized byte array to structure mapper, which can greatly improve binary parsing performance.  It is recommended to reference both dll's even if you don't use structs.
+This will install the ParsecClone F# library.  
 
 Included in the main `ParsecClone.Combinator` dll are:
 
