@@ -104,13 +104,17 @@ module StringP =
                         | false,_ -> pzero)
 
         matcher s
-    let stringLiteral s = 
-        let inQuotesChars  = function                                 
-                                | "\"" -> false
-                                | _ -> true
 
-        let escapedQuote = matchStr "\\\""
+    let stringLiteral delim escapeString =
+        fun s -> 
+            let unescape = function | c -> escapeString + c
 
-        let quotedStrings = (many (satisfy (inQuotesChars) (escapedQuote <|> any))) >>= foldStrings
+            let notDelimMatched a = a <> delim
 
-        quotedStrings s
+            let escaped = matchStr escapeString >>. any |>> unescape
+
+            let literal = (many (satisfy (notDelimMatched) (escaped <|> any))) >>= foldStrings
+
+            literal s
+    
+    let quotedStringLiteral s = stringLiteral "\"" "\\" s 

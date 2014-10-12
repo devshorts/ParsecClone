@@ -238,9 +238,36 @@ let stringLiteralTest() =
 
     let target = sprintf "\"%s\"" source |> makeStringStream
 
-    let result = test target (stringLiteral |> between2 (matchStr "\""))
+    let result = test target (quotedStringLiteral |> between2 (matchStr "\""))
 
     result |> should equal source
+
+[<Test>]
+let stringLiteralExTest() = 
+    
+    let source = "a\,b\\n\r\\t,notmatched" |> makeStringStream
+
+    let delim = ","
+
+    let p = stringLiteral delim "\\"
+     
+    let result = test source (many (p |> sepBy <| (matchStr delim)))
+
+    result |> should equal ["a\,b\\n\r\\t"; "notmatched"]
+
+    
+[<Test>]
+let stringLiteralExTest2() = 
+    
+    let source = "\t" |> makeStringStream
+
+    let delim = ","
+
+    let p = stringLiteral delim "\\" 
+     
+    let result = test source (many (p |> sepBy <| (matchStr delim)))
+
+    result |> should equal ["\t"]
 
 [<Test>]
 let testFloat() = 

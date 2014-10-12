@@ -17,6 +17,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 - [Computation Expression Syntax](#computation-expression-syntax)
 - [A note on FParsec vs ParsecClone regarding strings](#a-note-on-fparsec-vs-parsecclone-regarding-strings)
 - [Instantiating user states](#instantiating-user-states)
+- [Debugging](#debugging)
 - [Dealing with value restrictions](#value-restrictions)
 - [A CSV parser example (string)](#a-csv-parser)
 - [An MP4 parser example (binary)](#binary-parser-example)
@@ -25,7 +26,7 @@ This a fparsec subset clone that works on generalized stream classes. This means
 
 ## Installation
 
-Install ParsecClone v2.0.0 via [NuGet](https://www.nuget.org/packages/ParsecClone/2.0.0)
+Install ParsecClone v2.0.1 via [NuGet](https://www.nuget.org/packages/ParsecClone/2.0.1)
 
 ```
 Install-Package ParsecClone
@@ -575,7 +576,7 @@ Parses the regex `\t+` from the stream.
 val ws: Parser<string>
 ```
 
-optional whitespace parser. Always succeeds, if it consumes actual whitespace the resulting string will not be an empty string. If it fails, it will return an empty string.
+optional whitespace parser. Always succeeds, if it consumes actual whitespace the resulting string will not be an empty string. If it fails, it will return an empty string.  Does not include newlines.
 
 
 ----------
@@ -599,6 +600,56 @@ val isNewLine : String -> bool
 ```
 
 Returns true if the string is `\r\n`, `\n`, or `\r`.
+
+
+----------
+```fsharp
+val allWhiteSpace : String -> bool
+```
+
+The same as `ws` except includes newlines as well
+
+----------
+```fsharp
+val stringLiteral  : (delim : String) -> (escapeString : String) -> Parser<string>
+```
+
+Parses a literal escaped using passed in parameters. The delim field is the field indicating how to segment an escaped string. For example, maybe you only want to escape a string between `,` or (as with JSON) you want to delimit inside of `"`.  
+
+The escape string lets you specify what is the prefix escape string.  Commonly this is `\\` (which is the escaped version of `\`).  
+
+For example:
+
+```fsharp
+let source = "a\,b\\n\r\\t,notmatched" |> makeStringStream
+
+let delim = ","
+
+let p = stringLiteral delim "\\"
+ 
+let result = test source (many (p |> sepBy <| (matchStr delim)))
+
+result |> should equal ["a\,b\\n\r\\t"; "notmatched"]
+```
+
+The first element in the result set is:
+
+```
+a\,b\n
+\t
+```
+
+Notice how the non-escaped "r" was evaluated as a literal but the other characters maintained their delimiters
+
+
+
+----------
+```fsharp
+val quotedStringLiteral : String -> Parser<String>
+```
+
+Parses a quoted string literal leveraging the `\` character to quote values.  Stops when a non-escaped quote (`"`) is encountered.
+
 
 [[Top]](#table-of-contents)
 
@@ -1149,6 +1200,22 @@ let video : VideoParser<_> = many (choice[  attempt ftyp;
 ```
 
 The other parsers don't need to be marked as `VideoParser` since they all get used from `video`.  If you have errors, pin the types. 
+
+[[Top]](#table-of-contents)
+
+## Debugging
+
+Debugging a combinator is hard.  Right now ParsecClone supports only the most minimal debugging by printing when values are consumed and backtracked, and the current state at these steps. Debugging this way can be overwhelming, and it's recommended to leverage this only for inspection while building strong (tested) combinbators in small batches.
+
+To enable debugging use set the debugging flag. 
+
+
+```fsharp
+Combinator.enableDebug <- true
+```
+
+
+[[Top]](#table-of-contents)
 
 ## A CSV Parser
 
