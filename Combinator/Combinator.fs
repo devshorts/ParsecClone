@@ -23,6 +23,8 @@ module Combinator =
         
     let pzero = fun stream -> (None, stream)
 
+    let mutable enableDebug = false
+
     let succeed parser state = 
         match parser state with
             | (None, _) -> (false, state)
