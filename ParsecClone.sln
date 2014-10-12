@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Combinator", "Combinator", "{E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}"
 	ProjectSection(SolutionItems) = preProject
 		combinator.msbuild.proj = combinator.msbuild.proj
@@ -10,15 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{AC12
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7AB31D80-B8DE-418D-9B09-01600F0DEDB9}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "Samples\FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleMatchers", "SampleMatchers", "{BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StringMatchers", "Samples\StringMatchSamples\StringMatchers.fsproj", "{6C92BE9F-549A-4526-B52B-CDC70BB92501}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Mp4Matcher", "Samples\Mp4Matcher\Mp4Matcher.fsproj", "{1A66B236-6BE3-4A5A-9B40-DDF030BD8B23}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "Combinator\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68F8791E-823A-4AD7-B7A2-F8BEA94E8ABE}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,6 +20,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68F879
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsTests", "Samples\FsTests\FsTests.fsproj", "{1F3EDE6E-7D84-45BD-9B0C-00198760A714}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StringMatchers", "Samples\StringMatchSamples\StringMatchers.fsproj", "{6C92BE9F-549A-4526-B52B-CDC70BB92501}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Mp4Matcher", "Samples\Mp4Matcher\Mp4Matcher.fsproj", "{1A66B236-6BE3-4A5A-9B40-DDF030BD8B23}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "Combinator\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

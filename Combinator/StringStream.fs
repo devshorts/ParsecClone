@@ -11,6 +11,10 @@ module StringStreamP =
            
         let currentState = state
 
+        do
+            if Combinator.enableDebug then
+                printfn "current state %s" state
+
         let (|RegexStr|_|) (pattern:string) (input:IStreamP<string, string, 'UserState>) =
             if String.IsNullOrEmpty input.state then None
             else
@@ -26,6 +30,10 @@ module StringStreamP =
             member x.state with get() = currentState    
 
             member x.consume count = 
+                
+                if Combinator.enableDebug then
+                    printfn "reading %d from current state: %s" count state
+
                 let result = state.Substring(0, count);
                 let newState = state.Remove(0, count)
                 (Some(result), new StringStreamP<'UserState>(newState, userState) :> IStreamP<string, string, 'UserState>)
@@ -35,7 +43,11 @@ module StringStreamP =
 
                 (Some(true), s)
 
-            member x.backtrack () = ()
+            member x.backtrack () =                 
+                if Combinator.enableDebug then
+                    printfn "backtracking"
+
+                ()
 
             member x.hasMore () = not (String.IsNullOrEmpty state)
 

@@ -74,3 +74,43 @@ module StringP =
                         | None -> preturn "") s
 
     let isNewLine i = isMatch "\r\n" i || isMatch "\r" i || isMatch "\n" i
+  
+    let allWhiteSpace s = 
+        let isIgnoreSpace = function 
+                | " "
+                | "\t" 
+                | "\n" 
+                | "\r"
+                | "\r\n" -> true
+                | _ -> false
+
+        (opt (many (satisfy isIgnoreSpace any)) >>= function
+                    | Some(i) -> preturn (List.reduce (+) i)
+                    | None -> preturn "") s
+
+    
+    let pfloat s =   
+        let matcher = regexStr @"-?[0-9]+(\.)?[0-9]*" >>= (fun x ->
+                        match System.Double.TryParse x with
+                        | true, x -> preturn x
+                        | false,_ -> pzero)
+
+        matcher s
+
+    let pint s =   
+        let matcher = regexStr @"-?[0-9]+" >>= (fun x ->
+                        match System.Int32.TryParse x with
+                        | true, x -> preturn x
+                        | false,_ -> pzero)
+
+        matcher s
+    let stringLiteral s = 
+        let inQuotesChars  = function                                 
+                                | "\"" -> false
+                                | _ -> true
+
+        let escapedQuote = matchStr "\\\""
+
+        let quotedStrings = (many (satisfy (inQuotesChars) (escapedQuote <|> any))) >>= foldStrings
+
+        quotedStrings s

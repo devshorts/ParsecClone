@@ -24,6 +24,9 @@ module BinStreams =
     let private readFromStream count (stream:Stream) = 
             let b = initBytes count
 
+            if Combinator.enableDebug then
+                printfn "reading %d from state position %d" count (stream.Position)
+            
             stream.Read(b, 0, count) |> ignore
 
             b
@@ -60,7 +63,11 @@ module BinStreams =
 
                 (Some(true),  new BinStream<'UserState>(state, userState, args) :> IStreamP<Stream, byte[], 'UserState> )
 
-            member x.backtrack () = state.Seek(startPos, SeekOrigin.Begin) |> ignore          
+            member x.backtrack () =
+                if Combinator.enableDebug then
+                    printfn "backtracking to position %d" startPos
+             
+                state.Seek(startPos, SeekOrigin.Begin) |> ignore          
 
             member x.hasMore () = state.Position <> state.Length
 

@@ -231,3 +231,33 @@ let reprocessTest() =
     let result = test target r
 
     result |> should equal "abcfoo"
+
+[<Test>]
+let stringLiteralTest() = 
+    let source = "Ex\\\"loremIpsum\\\" foo \\\"second string\\\" "
+
+    let target = sprintf "\"%s\"" source |> makeStringStream
+
+    let result = test target (stringLiteral |> between2 (matchStr "\""))
+
+    result |> should equal source
+
+[<Test>]
+let testFloat() = 
+    let random = new System.Random()
+
+    for i in [0..100] do
+        let randomDouble = random.NextDouble()
+        let randomInt = random.Next()
+
+        let doubleStream = randomDouble.ToString().Substring(0, 15) |> makeStringStream
+        let intStream = randomInt.ToString() |> makeStringStream
+
+        let r1 = test doubleStream pfloat
+        r1 |> should (equalWithin 0.000000000001) randomDouble
+        
+        let r2 = test intStream pfloat 
+        r2 |> should equal (System.Convert.ToDouble randomInt)        
+        
+        let r3 = test intStream pint
+        r3 |> should equal randomInt
