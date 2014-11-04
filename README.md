@@ -1,8 +1,6 @@
 ParsecClone 
 ===========
 
-[![Build status](https://ci.appveyor.com/api/projects/status/u68kt5wflwaoipy7?svg=true)](https://ci.appveyor.com/project/devshorts/parsecclone)
-
 This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. Included in the project is a sample CSV parser and a sample MP4 header binary parser. 
 
 
