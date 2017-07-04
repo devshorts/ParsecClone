@@ -1,6 +1,8 @@
 ParsecClone 
 ===========
 
+[![Build Status](https://travis-ci.org/devshorts/ParsecClone.svg?branch=master)](https://travis-ci.org/devshorts/ParsecClone)
+
 This a fparsec subset clone that works on generalized stream classes. This means you can use combinators on binary streams, strings, or any other custom stream classes you want. Included in the project is a sample CSV parser and a sample MP4 header binary parser. 
 
 
