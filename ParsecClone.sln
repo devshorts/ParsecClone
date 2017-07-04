@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Combinator", "Combinator", "{E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,6 +28,11 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Mp4Matcher", "Samples\Mp4Matcher\Mp4Matcher.fsproj", "{1A66B236-6BE3-4A5A-9B40-DDF030BD8B23}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Combinator", "Combinator\Combinator.fsproj", "{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{33481118-0065-4B7F-8AD4-1EC6D8E1DC8F}"
+	ProjectSection(SolutionItems) = preProject
+		build.bat = build.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -128,9 +133,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90} = {E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}
 		{7AB31D80-B8DE-418D-9B09-01600F0DEDB9} = {AC12E917-DB4B-47FA-BF0B-1A899A8941EA}
 		{BBD05026-5FB0-45F1-A098-CAA0DF1E9C8A} = {AC12E917-DB4B-47FA-BF0B-1A899A8941EA}
+		{709656E5-34B4-40EE-A3DE-EBE4FCFFBD90} = {E1AD16A2-3BF0-41FB-BCC3-3FE1D63BDBE5}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = CombinatorCS\CombinatorCS.csproj

@@ -9,6 +9,8 @@ _Resharper*
 Debug/
 Release/
 packages/
+testrunner/
+TestResult.xml
 obj/
 *.suo
 *.ReSharper.user

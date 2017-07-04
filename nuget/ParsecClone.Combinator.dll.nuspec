@@ -2,14 +2,14 @@
 <package >
   <metadata>
     <id>ParsecClone</id>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <authors>Anton Kropp</authors>
     <owners>Anton Kropp</owners>
     <licenseUrl>http://onoffswitch.net/onoff-license/</licenseUrl>
     <projectUrl>https://github.com/devshorts/ParsecClone</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A generalized parser combinator based off of fparsec. ParsecClone works on strings as well as binary files (with bit level parsing)</description>
-    <releaseNotes>Adding extra string parsers and enabling basic debugging</releaseNotes>
+    <releaseNotes></releaseNotes>
     <copyright>Copyright 2013 Anton Kropp</copyright>
     <tags>Parsing Combinator F# fsharp c# csharp</tags>    
     <references>
