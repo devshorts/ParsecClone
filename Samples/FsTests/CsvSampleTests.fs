@@ -119,7 +119,7 @@ let testEmpties() =
 
     let result = test csv lines
 
-    result |> should equal [[None;None;None;None]]
+    result |> should equal [[Some "";Some "";Some "";Some ""]]
 
 [<Test>]
 let testCsvWithQuotes2() = 
@@ -131,7 +131,7 @@ a,b,\\\", \"cd,fg\",,"
     let result = test csv lines |> List.toArray
 
     result.[0] |> should equal (["a";"b 1.\\";"cd,fg"] |> List.map Some)
-    result.[1] |> should equal ([Some("a");Some("b");Some("\"");Some("cd,fg");None;None])
+    result.[1] |> should equal ([Some("a");Some("b");Some("\"");Some("cd,fg");Some "";Some ""])
 
 [<Test>]
 let testCsvWithOptionalElements() = 
@@ -141,7 +141,7 @@ let testCsvWithOptionalElements() =
 
     let result = test csv lines |> List.toArray
 
-    result.[0] |> should equal ([None; None; None])    
+    result.[0] |> should equal ([Some ""; Some ""; Some ""])
 
 
 
@@ -200,7 +200,7 @@ faisal rules!"
 
     let result = test csv lines |> List.toArray
 
-    result.[0] |> should equal ([Some("foo,"); None; Some("bar"); Some("baz\"")])  
+    result.[0] |> should equal ([Some("foo,"); Some ""; Some("bar"); Some("baz\"")])
 
 [<Test>]
 let testDoubleQuotes () = 
@@ -210,7 +210,7 @@ let testDoubleQuotes () =
 
     let result = test csv lines |> List.toArray
 
-    result |> should equal [[Some(@"a b def foo"); None]]
+    result |> should equal [[Some(@"a b def foo"); Some ""]]
 
 [<Test>]
 [<ExpectedException>]

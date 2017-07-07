@@ -59,7 +59,7 @@ module StringStreamP =
 
             member x.setUserState s = userState <- s
 
-            member x.position () = (int64)0   
+            member x.position () = int64 state.Length
 
         member x.startsWith (inputStream:IStreamP<string, string, 'UserState>) target = 
             if String.IsNullOrEmpty inputStream.state then None

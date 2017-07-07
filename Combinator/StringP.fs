@@ -9,7 +9,7 @@ module StringP =
     
     type ParseState<'UserState> = IStreamP<string,string,'UserState>
 
-    let foldStrings = fun (strings : string list) -> preturn (List.reduce (+) strings)
+    let foldStrings strings = preturn (String.concat "" strings)
 
     let isMatch regex item = Regex.IsMatch(item, regex)
 
@@ -70,7 +70,7 @@ module StringP =
 
     let ws s = (opt (many (satisfy isSpace any))
                     >>= function
-                        | Some(i) -> preturn (List.reduce (+) i)
+                        | Some(i) -> preturn (String.concat "" i)
                         | None -> preturn "") s
 
     let isNewLine i = isMatch "\r\n" i || isMatch "\r" i || isMatch "\n" i
