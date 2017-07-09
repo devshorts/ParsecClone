@@ -169,14 +169,26 @@ module Combinator =
     let manyTill p pEnd = manyTillWithCount 0 p pEnd
 
     let manyTill1 p pEnd = manyTillWithCount 1 p pEnd
-        
-    let manyN num (parser) =                              
-        takeTillWithCount 0 (fun i -> List.length i > num) parser    >>= fun result -> 
-            if result.Length <> num then
-                failwith ("Error, attempted to match " + num.ToString() + " but only got " + result.Length.ToString())
 
-            preturn result          
-    
+
+
+    let manyN num parser state =
+        let didFind found currentState =
+            match List.length found with
+            | x when x > 0 -> Some (List.rev found), currentState
+            | _ -> None, currentState
+        let rec many' parser (resultList, currentState: State<_,_,_>, cnt) =
+            match currentState.hasMore() with
+            | false -> failwith ("Error, There is nothing to attempt to match")
+            | true ->
+                match parser currentState with
+                | Some result, nextState ->
+                    if cnt = num then didFind (result :: resultList) nextState
+                    elif cnt < num then many' parser (result :: resultList, nextState, cnt + 1)
+                    else Some [], currentState
+                | _ -> failwith ("Needed to consume at least " + string num + " element but did not")
+        many' parser ([], state, 1)
+
     let exactly = manyN
         
     let eof = 
