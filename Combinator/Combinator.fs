@@ -172,22 +172,20 @@ module Combinator =
 
 
 
-    let manyN num parser state =
-        let didFind found currentState =
-            match List.length found with
-            | x when x > 0 -> Some (List.rev found), currentState
-            | _ -> None, currentState
-        let rec many' parser (resultList, currentState: State<_,_,_>, cnt) =
-            match currentState.hasMore() with
-            | false -> failwith ("Error, There is nothing to attempt to match")
-            | true ->
-                match parser currentState with
-                | Some result, nextState ->
-                    if cnt = num then didFind (result :: resultList) nextState
-                    elif cnt < num then many' parser (result :: resultList, nextState, cnt + 1)
-                    else Some [], currentState
-                | _ -> failwith ("Needed to consume at least " + string num + " element but did not")
-        many' parser ([], state, 1)
+    let manyN num parser =
+        fun state ->
+            let rec many' parser (resultList, currentState: State<_,_,_>, cnt) =
+                match currentState.hasMore() with
+                | false -> failwith ("Needed to consume " + string num + "items but only found " + string cnt + "items")
+                | true ->
+                    match parser currentState with
+                    | Some result, nextState ->
+                        let cnt = cnt + 1
+                        if cnt = num then Some (result :: resultList |> List.rev), nextState
+                        elif cnt < num then many' parser (result :: resultList, nextState, cnt)
+                        else Some [], currentState
+                    | _ -> failwith ("Needed to consume at least " + string num + " element but did not")
+            many' parser ([], state, 0)
 
     let exactly = manyN
 
