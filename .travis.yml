@@ -5,4 +5,4 @@ install:
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release /p:Platform="Any CPU" ParsecClone.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console-x86.exe /framework:net-4.5 ./Samples/FsTests/bin/Release/FsTests.dll
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console-x86.exe ./Samples/FsTests/bin/Release/FsTests.dll /framework:net-4.5 
