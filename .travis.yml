@@ -1,8 +1,0 @@
-language: csharp
-solution: ParsecClone.sln
-install:
-  - nuget restore ParsecClone.sln
-  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
-script:
-  - msbuild /p:Configuration=Release /p:Platform="Any CPU" ParsecClone.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console-x86.exe "./Samples/FsTests/bin/Release/FsTests.dll /framework:net-4.5"
