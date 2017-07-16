@@ -29,7 +29,7 @@ module BinParsers =
 
         member x.endianessConverter = endianNessConverter
 
-        member x.byteToInt (b:byte) = System.Convert.ToInt32(b)
+        member x.byteToInt (b:byte) = System.Convert.ToInt32(int8 b)
         member x.toInt16 v = System.BitConverter.ToInt16(endianNessConverter v, 0)
         member x.toInt24 v = System.BitConverter.ToInt32(endianNessConverter (Array.append [|byte(0)|] v), 0)
         member x.toInt32 v = System.BitConverter.ToInt32(endianNessConverter v, 0)

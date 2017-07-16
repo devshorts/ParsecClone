@@ -378,3 +378,11 @@ let testManyZeroOrMoreMatches () =
   let result = test s parser
 
   result |> should equal (([]: byte list), [1uy])
+
+[<Test>]
+let testNegativeInts () =
+  let (bp: BinParser<unit>) = new BinParser<_> (id)
+  let bytes = [| 0xffuy; 0xffuy |]
+  let s = new MemoryStream (bytes) |> makeBinStream
+  test s bp.intB |> should equal (-1)
+  test s bp.uintB |> should equal (255u)
